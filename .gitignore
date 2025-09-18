@@ -1,25 +1,25 @@
-# Build Folders
-**/bin/
-**/obj/
+# Build directories
+bin/
+obj/
 
-# Visual Studio / Rider / IDE Files
+# User-specific files
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
-*.vs/
 
-# Build Output
-*.dll
-*.exe
-*.pdb
-*.cache
-*.json
-*.editorconfig
-
-# NuGet Packages
-*.nupkg
-packages/
-
-# Ignore database
+# Database
+*.db
 database.db
+
+# Config files (bijv. appsettings, secrets)
+*.config
+appsettings*.json
+*.xml
+
+# Logs
+*.log
+
+# VS Code / Rider / IDE files
+.vscode/
+.idea/
