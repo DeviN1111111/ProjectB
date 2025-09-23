@@ -43,20 +43,8 @@ public static Tuple<int, int> GetCategoryCoordinates(string label)
             return "this map doesnt exist g";
         }
 
-        mapString += "╔═";
-        for (int i = 0; i < mapWidth; i++)
-        {
-            mapString += "═══════";
-        }
-        mapString += "╗\n";
-
-        mapString += "║                                    ║\n";
-
         for (int i = 0; i < mapHeight; i++)
         {
-            mapString += "║ ";
-
-
             for (int j = 0; j < mapWidth; j++)
             {
                 if (i == CatogoryCoords.Item1 && j == CatogoryCoords.Item2)
@@ -65,17 +53,10 @@ public static Tuple<int, int> GetCategoryCoordinates(string label)
                 }
                 else
                 { mapString += " █████ "; }
-
             }
-            mapString += "║ \n";
-            mapString += "║                                    ║ \n";
+            mapString += "\n";
+            mapString += "\n";
         }
-        mapString += "╚═";
-        for (int i = 0; i < mapWidth; i++)
-        {
-            mapString += "═══════";
-        }
-        mapString += "╝";
         return mapString;
     }
     
