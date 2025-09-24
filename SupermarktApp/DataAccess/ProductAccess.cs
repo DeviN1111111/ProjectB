@@ -15,7 +15,8 @@ public static class ProductAccess
                 Price REAL,
                 NutritionDetails TEXT,
                 Description TEXT,
-                Category TEXT
+                Category TEXT,
+                Quantity INTEGER
             );
         ");
     }
@@ -24,8 +25,8 @@ public static class ProductAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Products 
-            (Name, Price, NutritionDetails, Description, Category)
-            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category)", product);
+            (Name, Price, NutritionDetails, Description, Category, Quantity)
+            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", product);
     }
 
     public static void InsertProducts(IEnumerable<ProductModel> products)
@@ -34,8 +35,8 @@ public static class ProductAccess
         foreach (var p in products)
         {
             db.Execute(@"INSERT INTO Products 
-                (Name, Price, NutritionDetails, Description, Category)
-                VALUES (@Name, @Price, @NutritionDetails, @Description, @Category)", p);
+                (Name, Price, NutritionDetails, Description, Category, Quantity)
+                VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", p);
         }
     }
     public static IEnumerable<ProductModel> GetAllProducts()

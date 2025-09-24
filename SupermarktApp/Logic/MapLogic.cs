@@ -49,13 +49,18 @@ public static Tuple<int, int> GetCategoryCoordinates(string label)
             {
                 if (i == CatogoryCoords.Item1 && j == CatogoryCoords.Item2)
                 {
-                    mapString += Green + " █████ " + Reset;
+                    mapString += Green + " ████ " + Reset;
                 }
                 else
-                { mapString += " █████ "; }
+                { mapString += " ████ "; }
             }
             mapString += "\n";
             mapString += "\n";
+        }
+
+        for (int j = 0; j < mapWidth; j++)
+        {
+            mapString += " ████ ";
         }
         return mapString;
     }
