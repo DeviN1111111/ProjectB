@@ -1,18 +1,14 @@
 public class LoginLogic
 {
-    public static bool Login(string email, string password)
+    public static UserModel Login(string email, string password)
     {
-        bool CheckLogin = ValidaterLogic.ValidateEmail(email);
-        bool CheckPassword = ValidaterLogic.ValidatePassword(password);
+        UserModel? Account = LoginAccess.Login(email, password);
 
-        if (CheckLogin && CheckPassword)
+        if (Account != null)
         {
-            return true;
+            return Account;
         }
-        else
-        {
-            return false;
-        }
+        return null!;
     }
 
     public static bool Register(string name, string lastName, string email, string password, string adress, int houseNumber, string zipcode, string phoneNumber, string city)

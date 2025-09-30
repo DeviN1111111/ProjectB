@@ -33,14 +33,15 @@ public static class LoginAccess
             VALUES (@ID, @Name, @LastName, @Email, @Password, @Adress, @HouseNumber, @Zipcode, @PhoneNumber, @City, @IsAdmin)", user);
     }
 
-    public static UserModel? Login(UserModel user)
+    public static UserModel? Login(string Email, string Password)
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.QueryFirstOrDefault<UserModel>(
             @"SELECT * FROM Users 
               WHERE Email = @Email 
               AND 
-              Password = @Password", user);
+              Password = @Password",
+            new { Email, Password });
     }
 
     public static void ChangeAccountDetails(UserModel user)

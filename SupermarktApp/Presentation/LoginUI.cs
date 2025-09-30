@@ -9,8 +9,8 @@ public static class LoginUI
             new TextPrompt<string>("What's your password?")
                 .Secret());
 
-        bool Account = LoginLogic.Login(email, password);
-        if (Account)
+        UserModel Account = LoginLogic.Login(email, password);
+        if (Account != null)
         {
             AnsiConsole.MarkupLine("[green]Login successful![/]");
         }
