@@ -44,10 +44,12 @@ class StartScreen
         switch (options)
         {
             case "Login":
-                System.Console.WriteLine("[Login placeholder]");
+                UserModel account = LoginUI.Login();
+                UserMenu.StartMenu(account.IsAdmin);
                 break;
             case "Register":
-                System.Console.WriteLine("[Register placeholder]");
+                LoginUI.Register();
+                Menu();
                 break;
             case "Continue as Guest":
                 System.Console.WriteLine("[Continue as Guest placeholder]");

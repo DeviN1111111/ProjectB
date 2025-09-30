@@ -8,14 +8,13 @@ class Program
     static void Main()
     {
         StartScreen screen = new StartScreen();
-        screen.Show();
-    }
-}
+
         LoginAccess.CreateTable();
-        // LoginUI.Register();
-        LoginUI.Login();
-        
-    //     ProductAccess.CreateTable();
+        screen.Show();
+        screen.Menu();
+        // LoginUI.Login();
+
+        //     ProductAccess.CreateTable();
         //     var random = new Random();
 
         //     var products = new List<ProductModel>

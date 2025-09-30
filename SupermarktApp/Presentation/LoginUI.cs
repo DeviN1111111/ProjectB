@@ -2,7 +2,7 @@ using Spectre.Console;
 
 public static class LoginUI
 {
-    public static void Login()
+    public static UserModel Login()
     {
         string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
         string password = AnsiConsole.Prompt(
@@ -14,12 +14,14 @@ public static class LoginUI
         {
             AnsiConsole.MarkupLine("[green]Login successful![/]");
             AnsiConsole.MarkupLine($"[blue]Welcome, {Account.Name} {Account.LastName}![/]");
+            return Account;
         }
         else
         {
             AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
             AnsiConsole.MarkupLine("[yellow]Hint: Email must contain '@' and '.' characters.[/]");
             AnsiConsole.MarkupLine("[yellow]Hint: Password must be at least 6 characters long and contain at least one digit.[/]");
+            return null!;
         }
     }
 

@@ -65,7 +65,10 @@ public class UserMenu
         new SelectionPrompt<string>()
             .PageSize(10)
             .AddChoices(new[] {
-                "Ongoing feature",
+                "Products","Order", "Map", "Store Information"
         }));
+        AnsiConsole.WriteLine($"This feature: {userMenuChoice} is not available yet.");
+
     }
+
 }
