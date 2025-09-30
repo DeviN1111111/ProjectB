@@ -7,8 +7,10 @@ class Program
 {
     static void Main()
     {
-
+        LoginAccess.CreateTable();
+        LoginUI.Register();
         LoginUI.Login();
+        
     //     ProductAccess.CreateTable();
         //     var random = new Random();
 
