@@ -18,7 +18,7 @@ public static class LoginAccess
                 Adress TEXT,
                 HouseNumber INTEGER,
                 Zipcode TEXT,
-                PhoneNumber TEXT,
+                PhoneNumber INTEGER,
                 City TEXT,
                 IsAdmin BOOLEAN
             );

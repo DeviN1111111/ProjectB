@@ -8,11 +8,11 @@ public class UserModel
     public string Adress { get; set; }
     public int HouseNumber { get; set; }
     public string Zipcode { get; set; }
-    public string PhoneNumber { get; set; }
+    public int PhoneNumber { get; set; }
     public string City { get; set; }
     public bool IsAdmin { get; set; }
 
-    public UserModel(string name, string lastName, string email, string password, string adress, int houseNumber, string zipcode, string phoneNumber, string city)
+    public UserModel(string name, string lastName, string email, string password, string adress, int houseNumber, string zipcode, int phoneNumber, string city)
     {
         Name = name;
         LastName = lastName;
