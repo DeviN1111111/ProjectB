@@ -26,5 +26,5 @@ public class UserModel
         IsAdmin = false;
     }
 
-    public UserModel() { }
+    //public UserModel() { }
 }
