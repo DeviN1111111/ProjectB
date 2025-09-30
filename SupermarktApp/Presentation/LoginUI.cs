@@ -13,6 +13,7 @@ public static class LoginUI
         if (Account != null)
         {
             AnsiConsole.MarkupLine("[green]Login successful![/]");
+            AnsiConsole.MarkupLine($"[blue]Welcome, {Account.Name} {Account.LastName}![/]");
         }
         else
         {

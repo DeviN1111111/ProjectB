@@ -8,7 +8,7 @@ class Program
     static void Main()
     {
         LoginAccess.CreateTable();
-        LoginUI.Register();
+        // LoginUI.Register();
         LoginUI.Login();
         
     //     ProductAccess.CreateTable();
