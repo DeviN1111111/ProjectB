@@ -12,14 +12,8 @@ public static class ValidaterLogic
         return password.Length >= 6 && password.Any(char.IsDigit);
     }
 
-    public static bool ValidateHouseNumber(int houseNumber)
+    public static bool ValidatePhoneNumber(string phoneNumber)
     {
-        return houseNumber > 0;
-    }
-
-    public static bool ValidatePhoneNumber(int phoneNumber)
-    {
-        string stringPhoneNumber = phoneNumber.ToString();
-        return stringPhoneNumber.Length == 10;
+        return phoneNumber.Length == 10;
     } 
 }

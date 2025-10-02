@@ -31,13 +31,12 @@ public static class LoginUI
         string password = AnsiConsole.Prompt(
             new TextPrompt<string>("Create a password:")
                 .Secret());
-        string Adress = AnsiConsole.Prompt(new TextPrompt<string>("What's your street name?"));
-        int HouseNumber = AnsiConsole.Prompt(new TextPrompt<int>("What's your house number?"));
+        string Address = AnsiConsole.Prompt(new TextPrompt<string>("What's your street name?"));
         string Zipcode = AnsiConsole.Prompt(new TextPrompt<string>("What's your zipcode?"));
-        int PhoneNumber = AnsiConsole.Prompt(new TextPrompt<int>("What's your phone number?"));
+        string PhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("What's your phone number?"));
         string City = AnsiConsole.Prompt(new TextPrompt<string>("What's your city?"));
 
-        bool Account = LoginLogic.Register(name, lastName, email, password, Adress, HouseNumber, Zipcode, PhoneNumber, City);
+        bool Account = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City);
         if (Account)
         {
             AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
@@ -47,7 +46,6 @@ public static class LoginUI
             AnsiConsole.MarkupLine("[red]Registration failed! Please check your email and password.[/]");
             AnsiConsole.MarkupLine("[yellow]Hint: Email must contain '@' and '.' characters.[/]");
             AnsiConsole.MarkupLine("[yellow]Hint: Password must be at least 6 characters long and contain at least one digit.[/]");
-            AnsiConsole.MarkupLine("[yellow]Hint: House number must be greater than 0.[/]");
             AnsiConsole.MarkupLine("[yellow]Hint: Phone number must be exactly 10 digits long.[/]");
         }
     }
