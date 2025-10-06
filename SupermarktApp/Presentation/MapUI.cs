@@ -1,8 +1,10 @@
+using System;
+using System.Text;
+
 public static class MapUI
 {
-    public static void DisplayMap(string label)
+    public static void DisplayMap(int box)
     {
-        string mapString = MapLogic.ReturnMapString(MapLogic.GetCategoryCoordinates(label), 5, 4);
-        Console.WriteLine(mapString);
+        Console.WriteLine(MapLogic.MapBuilder(box));
     }
 }
