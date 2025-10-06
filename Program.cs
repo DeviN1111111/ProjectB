@@ -9,7 +9,7 @@ class Program
     {
         LoginAccess.CreateTable();
         Console.Clear();
-        StartScreen.Menu();
+        StartScreen.Show();
         // LoginUI.Login();
         
     //     ProductAccess.CreateTable();

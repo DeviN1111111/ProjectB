@@ -2,7 +2,7 @@ using Spectre.Console;
 
 class StartScreen
 {
-    private readonly string _supermarketName = @"
+    private static readonly string _supermarketName = @"
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 /\                                                                                      /\
@@ -30,7 +30,7 @@ class StartScreen
     /// Displays a menu and handles user input for navigation and selection.
     /// </summary>
     /// 
-    public static UserModel user = null;
+    public static UserModel user = null!;
     public static void Menu()
     {
         bool running = true;
@@ -38,6 +38,8 @@ class StartScreen
         {
             if (user == null)
             {
+                Console.Clear();
+                Console.WriteLine($"{_supermarketName}");
                 var options = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .AddChoices(new[]{
@@ -51,16 +53,18 @@ class StartScreen
                 switch (options)
                 {
                     case "Login":
+                        Console.Clear();
                         user = LoginUI.Login();
                         break;
                     case "Register":
+                        Console.Clear();
                         LoginUI.Register();
                         break;
                     case "Continue as Guest":
                         System.Console.WriteLine("[Continue as Guest placeholder]");
                         break;
                     case "Exit":
-                        Environment.Exit(0);
+                        running = false;
                         break;
                 }
             }
@@ -80,6 +84,8 @@ class StartScreen
                     case "Order":
                         break;
                     case "Logout":
+                        Console.Clear();
+                        user = null!;
                         break;
                     case "Exit":
                         Environment.Exit(0);
@@ -116,10 +122,10 @@ class StartScreen
     /// <summary>
     /// Displays the start screen with the supermarket name and menu options.
     /// </summary>
-    public void Show()
+    public static void Show()
     {
         AnsiConsole.Clear();
-        AnsiConsole.MarkupLine($"[bold yellow]{_supermarketName}[/]");
+        // AnsiConsole.MarkupLine($"[bold yellow]{_supermarketName}[/]");
         System.Console.WriteLine();
         Menu();
     }

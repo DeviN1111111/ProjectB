@@ -10,6 +10,7 @@ public static class LoginUI
             new TextPrompt<string>("What's your password?")
                 .Secret());
 
+        Console.Clear();
         UserModel Account = LoginLogic.Login(email, password);
         if (Account != null)
         {
@@ -20,6 +21,7 @@ public static class LoginUI
         else
         {
             AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
+            Console.ReadKey();
             return null!;
         }
     }
@@ -39,6 +41,7 @@ public static class LoginUI
         if (Errors.Count == 0)
         {
             AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
+            Console.ReadKey(true);
         }
         else
         {
@@ -49,6 +52,7 @@ public static class LoginUI
                 AnsiConsole.MarkupLine($"[yellow]{errorLine}[/]");
             }
             AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
+            Console.ReadKey(true);
         }
     }
 }
