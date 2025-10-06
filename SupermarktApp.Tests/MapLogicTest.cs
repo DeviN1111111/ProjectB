@@ -1,12 +1,23 @@
-using System;
-using System.Text;
+using NUnit.Framework;
 
-public static class MapLogic
-{   
-    public static string green = "\x1b[38;2;20;110;21m";
-    public static string bold = "\x1b[1m";
-    public static string reset = "\x1b[0m";
-    public static string mapString = $@"                               
+[TestFixture]
+public class MapLogicTest
+{
+    [Test]
+    public void CheckIfTheReturnStringContainsX()
+    {
+        string mapOutput = MapLogic.MapBuilder(5);
+
+        bool result = mapOutput.Contains("X");
+
+        Assert.IsTrue(result, "The map output should contain an 'X'.");
+    }
+
+    [Test]
+    public void CheckForCorrectOutput()
+    {
+
+        string expectedOutput = @"                               
                                                            ╔═══════╦══╦══╦══╦══╦═════╗
                             ╔════════════╦════════════╗    ║       │  │  │  │  │     ║
                             ║            ║            ║    ║    ╔══╩══╩══╩══╩══╩═╗   ║
@@ -32,26 +43,8 @@ public static class MapLogic
                             ║    ░░   ░░   ░░   ░░   ░░                  ▓▓▓▓  ╔══╗  ║
                             ║    ░░   ░░   ░░   ░░   ░░                  ▓▓▓▓  ║  ║  ║
                             ╚═════════════════════════════ ENTER ══ EXIT ══════╩══╩══╝";
-    public static string MapBuilder(int box)
-    {
-        StringBuilder outputMap = new StringBuilder(mapString);
+        string actualOutput = MapLogic.MapBuilder(1);
 
-        int position = 0;
-        for (int i = 0; i < outputMap.Length; i++)
-        {
-            if (outputMap[i] == '│' && outputMap[i + 2] == '│' || outputMap[i] == '│' && outputMap[i + 3] == '│')
-            {
-                position++;
-                if (position == box)
-                {
-                    outputMap.Remove(i + 1, 1);
-                    outputMap.Insert(i + 1, green + bold + "X" + reset);
-                    break;
-                }
-            }
-
-        }
-        
-        return outputMap.ToString();
+        Assert.AreEqual(expectedOutput, actualOutput, "ERROR - The map output is not as expected.");
     }
 }
