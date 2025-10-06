@@ -7,11 +7,25 @@ class Program
 {
     static void Main()
     {
-        StartScreen screen = new StartScreen();
+        Console.Clear();
+        OrderLogic.AddToCart();
+        Order.ShowCart();
 
-        LoginAccess.CreateTable();
-        screen.Show();
-        screen.Menu();
+
+
+
+
+
+
+
+
+
+
+        // StartScreen screen = new StartScreen();
+
+        // LoginAccess.CreateTable();
+        // screen.Show();
+        // screen.Menu();
 
 
         // ProductAccess.CreateTable();
