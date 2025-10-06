@@ -29,33 +29,89 @@ class StartScreen
     /// <summary>
     /// Displays a menu and handles user input for navigation and selection.
     /// </summary>
-    public void Menu()
+    /// 
+    public static UserModel user = null;
+    public static void Menu()
     {
-        var options = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .AddChoices(new[]{
-                    "Login",
-                    "Register",
-                    "Continue as Guest",
-                    "Exit"
-                })
-        );
-
-        switch (options)
+        bool running = true;
+        while (running)
         {
-            case "Login":
-                System.Console.WriteLine("[Login placeholder]");
-                break;
-            case "Register":
-                System.Console.WriteLine("[Register placeholder]");
-                break;
-            case "Continue as Guest":
-                System.Console.WriteLine("[Continue as Guest placeholder]");
-                break;
-            case "Exit":
-                Environment.Exit(0);
-                break;
+            if (user == null)
+            {
+                var options = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .AddChoices(new[]{
+                        "Login",
+                        "Register",
+                        "Continue as Guest",
+                        "Exit"
+                    })
+                );
+
+                switch (options)
+                {
+                    case "Login":
+                        user = LoginUI.Login();
+                        break;
+                    case "Register":
+                        LoginUI.Register();
+                        break;
+                    case "Continue as Guest":
+                        System.Console.WriteLine("[Continue as Guest placeholder]");
+                        break;
+                    case "Exit":
+                        Environment.Exit(0);
+                        break;
+                }
+            }
+            else if (user.AccountStatus == "User")
+            {
+                var options = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .AddChoices(new[]{
+                        "Order",
+                        "Logout",
+                        "Exit"
+                    })
+                );
+
+                switch (options)
+                {
+                    case "Order":
+                        break;
+                    case "Logout":
+                        break;
+                    case "Exit":
+                        Environment.Exit(0);
+                        break;
+                }
+            }
         }
+        // var options = AnsiConsole.Prompt(
+        //     new SelectionPrompt<string>()
+        //         .AddChoices(new[]{
+        //             "Login",
+        //             "Register",
+        //             "Continue as Guest",
+        //             "Exit"
+        //         })
+        // );
+
+            // switch (options)
+            // {
+            //     case "Login":
+            //         LoginUI.Login();
+            //         break;
+            //     case "Register":
+            //         LoginUI.Register();
+            //         break;
+            //     case "Continue as Guest":
+            //         System.Console.WriteLine("[Continue as Guest placeholder]");
+            //         break;
+            //     case "Exit":
+            //         Environment.Exit(0);
+            //         break;
+            // }
     }
     /// <summary>
     /// Displays the start screen with the supermarket name and menu options.

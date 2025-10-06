@@ -19,7 +19,7 @@ public static class LoginAccess
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                IsAdmin BOOLEAN
+                AccountStatus TEXT
             );
         ");
     }
@@ -28,8 +28,8 @@ public static class LoginAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Users 
-            (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, IsAdmin)
-            VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @IsAdmin)", user);
+            (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus)
+            VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus)", user);
     }
 
     public static UserModel? Login(string Email, string Password)
