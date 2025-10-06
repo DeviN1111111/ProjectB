@@ -8,8 +8,9 @@ class Program
     static void Main()
     {
         LoginAccess.CreateTable();
+        Console.Clear();
         LoginUI.Register();
-        LoginUI.Login();
+        // LoginUI.Login();
         
     //     ProductAccess.CreateTable();
         //     var random = new Random();
