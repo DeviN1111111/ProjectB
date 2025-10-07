@@ -27,7 +27,6 @@ public class DatabaseFiller
 
     public static void CreateTables()
     {
-        Console.WriteLine("Creating tables...");
         using var db = new SqliteConnection(ConnectionString);
         db.Execute("PRAGMA foreign_keys = ON;");
 
@@ -43,7 +42,8 @@ public class DatabaseFiller
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                IsAdmin INTEGER NOT NULL DEFAULT 0
+                IsAdmin INTEGER NOT NULL DEFAULT 0,
+                AccountStatus TEXT NOT NULL DEFAULT 'User'
             );
         ");
 

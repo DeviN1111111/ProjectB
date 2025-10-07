@@ -9,6 +9,7 @@ public class UserModel
     public string Zipcode { get; set; }
     public string PhoneNumber { get; set; }
     public string City { get; set; }
+    public bool IsAdmin { get; set; }
     public string AccountStatus { get; set; }
 
     public UserModel(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city)
@@ -21,6 +22,7 @@ public class UserModel
         Zipcode = zipcode;
         PhoneNumber = phoneNumber;
         City = city;
+        IsAdmin = false;
         AccountStatus = "User";
     }
 
