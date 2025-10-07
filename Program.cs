@@ -7,10 +7,10 @@ class Program
 {
     static void Main()
     {
-        // // SupermarketDatabase.CreateTables();
-        // SupermarketDatabase.SeedTestOrders();
-        // SupermarketDatabase.SeedDatabase();
+        DatabaseFiller.RunDatabaseMethods();
+        Console.Clear();
+        StartScreen.Show();
+        // LoginUI.Login();
 
-        StatisticsUI.DisplayMenu();
     }
 }
