@@ -21,7 +21,7 @@ public static class ProductAccess
         ");
     }
 
-    public static void InsertProduct(ProductModel product)
+    public static void AddProduct(ProductModel product)
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Products 
@@ -29,19 +29,25 @@ public static class ProductAccess
             VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", product);
     }
 
-    public static void InsertProducts(IEnumerable<ProductModel> products)
+    public static List<ProductModel> SearchProductByName(string name)
     {
         using var db = new SqliteConnection(ConnectionString);
-        foreach (var p in products)
-        {
-            db.Execute(@"INSERT INTO Products 
-                (Name, Price, NutritionDetails, Description, Category, Quantity)
-                VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", p);
-        }
+        string pattern = name.Length == 2 ? $"{name}%" : $"%{name}%";
+        return db.Query<ProductModel>(
+            @"SELECT * FROM Products 
+            WHERE Name LIKE @Name 
+            LIMIT 10",
+            new { Name = $"{pattern}%" }).ToList();
     }
-    public static IEnumerable<ProductModel> GetAllProducts()
+
+    public static List<ProductModel> SearchProductByCategory(string category)
     {
         using var db = new SqliteConnection(ConnectionString);
-        return db.Query<ProductModel>("SELECT * FROM Products");
+        string pattern = category.Length == 2 ? $"{category}%" : $"%{category}%";
+        return db.Query<ProductModel>(
+            @"SELECT * FROM Products 
+            WHERE Category LIKE @Category 
+            LIMIT 10",
+            new { Category= $"{pattern}%" }).ToList();
     }
 }
