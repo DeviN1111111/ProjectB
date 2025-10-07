@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Spectre.Console;
 public static class StatisticsUI
 {
@@ -9,6 +10,7 @@ public static class StatisticsUI
 
     public static void DisplayMenu()
     {
+        Console.Clear();
         AnsiConsole.Write(
             new FigletText("SuperMart Analytics")
                 .Centered()
@@ -43,7 +45,7 @@ public static class StatisticsUI
                 break;
 
             case "Custom Range":
-                // doeklaterwel
+                DisplayStatistics(PromptForDate());
                 break;
 
             case "All Time":
@@ -66,15 +68,56 @@ public static class StatisticsUI
 
         if (sales != null)
         {
-            AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales));
-            AnsiConsole.WriteLine($"Total profit since {date.ToShortDateString()} is {totalProfit} euro!");
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine($"Your total turnover since {date.ToShortDateString()} is {totalProfit} euro!");
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine("Amount of sales per category:");
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Category"));
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine("Total turnover per category in €:");
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Profit"));
+
         }
 
         if (mostSold != null && count > 0)
         {
-            AnsiConsole.Write($"Most sold item: {mostSold.Name} Sold {count} times.");
+            var Table = StatisticLogic.CreateMostSoldTable(date);
+            if (Table == null)
+            {
+                AnsiConsole.MarkupLine("No data available for the selected period.");
+            }
+            else
+            {
+                AnsiConsole.WriteLine();
+                AnsiConsole.WriteLine();
+                AnsiConsole.Write($"Top 5 most sold item since {date.ToShortDateString()} were: ");
+                AnsiConsole.WriteLine();
+                AnsiConsole.Write(Table);   
+            }
+
         }
 
-        
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to return to the menu.");
+        Console.ReadLine();
+        DisplayMenu();
+    }
+    
+
+    public static DateTime PromptForDate()
+    {
+        while (true)
+        {
+            var input = AnsiConsole.Ask<string>($"Enter the [#{Text.ToHex()}] date from when you want the analytics![/] (YYYY-MM-DD):");
+            if (DateTime.TryParse(input, out DateTime date))
+            {
+                Console.Clear();
+                return date;
+            }
+            AnsiConsole.MarkupLine("[red]Invalid date format. Please try again.[/]");
+        }
     }
 }

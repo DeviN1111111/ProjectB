@@ -7,9 +7,8 @@ class Program
 {
     static void Main()
     {
-        DatabaseFiller.RunDatabaseMethods();
-        Console.Clear();
-        StartScreen.Show();
+        DatabaseFiller.RunDatabaseMethods(1000);
+        StatisticsUI.DisplayMenu();
         // LoginUI.Login();
 
     }

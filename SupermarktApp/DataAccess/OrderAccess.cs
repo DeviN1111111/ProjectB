@@ -55,6 +55,23 @@ public static class OrderAccess
         );
         return count;
     }
+    
+    public static List<(int ProductID, int SoldCount)> GetTop5MostSoldProductsUpToDate(DateTime date)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var results = db.Query<(int ProductID, int SoldCount)>(
+            @"SELECT ProductID, COUNT(*) AS SoldCount
+            FROM Orders
+            WHERE DATE(Date) >= DATE(@Date)
+            GROUP BY ProductID
+            ORDER BY SoldCount DESC
+            LIMIT 5;",
+            new { Date = date }
+        ).ToList();
+
+        return results;
+    }
+
 
     public static List<ProductSalesDto> SeedProductSalesDto(DateTime fromDate)
     {
