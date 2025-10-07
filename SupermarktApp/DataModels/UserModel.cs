@@ -24,5 +24,5 @@ public class UserModel
         AccountStatus = "User";
     }
 
-    //public UserModel() { }
+    public UserModel() { }
 }

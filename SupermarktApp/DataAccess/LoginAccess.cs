@@ -5,25 +5,6 @@ public static class LoginAccess
 {
     private const string ConnectionString = "Data Source=database.db";
 
-    public static void CreateTable()
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"
-            CREATE TABLE IF NOT EXISTS Users (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT,
-                LastName TEXT,
-                Email TEXT,
-                Password TEXT,
-                Address TEXT,
-                Zipcode TEXT,
-                PhoneNumber TEXT,
-                City TEXT,
-                AccountStatus TEXT
-            );
-        ");
-    }
-
     public static void Register(UserModel user)
     {
         using var db = new SqliteConnection(ConnectionString);
