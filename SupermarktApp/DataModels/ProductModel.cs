@@ -6,10 +6,10 @@ public class ProductModel
     public string NutritionDetails { get; set; }
     public string Description { get; set; }
     public string Category { get; set; }
-    public string Location { get; set; }
+    public int Location { get; set; }
     public int Quantity { get; set; }
 
-    public ProductModel(string name, double price, string nutritionDetails, string description, string category, string location, int quantity)
+    public ProductModel(string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
     {
         Name = name;
         Price = price;

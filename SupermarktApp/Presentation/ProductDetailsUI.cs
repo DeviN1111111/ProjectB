@@ -18,7 +18,7 @@ public static class ProductDetailsUI
         string nutrition = Markup.Escape(product.NutritionDetails ?? "");
         string description = Markup.Escape(product.Description ?? "");
         string category = Markup.Escape(product.Category ?? "");
-        string location = Markup.Escape(product.Location ?? "");
+        string location = Markup.Escape(product.Location.ToString());
         string price = product.Price.ToString("0.00");
         string qty = product.Quantity.ToString();
 

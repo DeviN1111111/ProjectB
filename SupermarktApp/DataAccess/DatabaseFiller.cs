@@ -55,7 +55,7 @@ public class DatabaseFiller
                 NutritionDetails TEXT,
                 Description TEXT,
                 Category TEXT,
-                Location TEXT,
+                Location INTEGER,
                 Quantity INTEGER NOT NULL DEFAULT 0
             );
         ");
@@ -154,7 +154,7 @@ public class DatabaseFiller
                     NutritionDetails = $"Nutrition details for {name}",
                     Description = $"Description for {name}",
                     Category = category,
-                    Location = $"Aisle {(id % 5) + 1}",
+                    Location = random.Next(1, 16),
                     Quantity = 50 + id
                 };
 
