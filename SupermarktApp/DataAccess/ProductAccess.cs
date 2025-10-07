@@ -64,4 +64,14 @@ public static class ProductAccess
             new { Id = id }
         );
     }
+
+    public static ProductModel GetProductByName(string name)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<ProductModel>(
+            @"SELECT * FROM Products 
+            WHERE Name = @Name",
+            new { Name = name }
+        );
+    }
 }

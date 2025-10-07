@@ -9,7 +9,12 @@ class Program
     {
         DatabaseFiller.RunDatabaseMethods(1000);
         StatisticsUI.DisplayMenu();
+        // DatabaseFiller.RunDatabaseMethods();
+        // Console.Clear();
+        // StartScreen.Show();
         // LoginUI.Login();
 
+        DatabaseFiller.RunDatabaseMethods();
+        ProductLogic.SearchProductByName();
     }
 }
