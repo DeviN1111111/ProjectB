@@ -43,7 +43,7 @@ public class DatabaseFiller
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                IsAdmin INTEGER NOT NULL DEFAULT 0
+                AccountStatus TEXT
             );
         ");
 
@@ -109,8 +109,10 @@ public class DatabaseFiller
     public static void InsertOrder(OrdersModel order)
     {
         using var db = new SqliteConnection(ConnectionString);
+
         string sql = @"INSERT INTO Orders (UserID, ProductID, Date) 
         VALUES (@UserID, @ProductID, @Date);";
+
         db.Execute(sql, order);
     }
 
@@ -121,7 +123,34 @@ public class DatabaseFiller
         UserModel user2 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "admin@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
 
-        var categoryProducts = new Dictionary<string, List<string>>
+        // Orders
+        List<OrdersModel> orders = new List<OrdersModel>
+        {
+            // Orders for User 1
+            new OrdersModel(1, 1),
+            new OrdersModel(1, 2),
+            new OrdersModel(1, 3),
+            new OrdersModel(1, 4),
+            new OrdersModel(1, 5),
+            new OrdersModel(1, 6),
+            new OrdersModel(1, 7),
+            new OrdersModel(1, 8),
+            new OrdersModel(1, 9),
+            new OrdersModel(1, 10),
+            new OrdersModel(1, 11),
+            new OrdersModel(1, 12),
+            new OrdersModel(1, 13),
+            new OrdersModel(1, 14),
+            new OrdersModel(1, 15),
+            new OrdersModel(1, 16),
+            new OrdersModel(1, 17),
+            new OrdersModel(1, 18),
+            new OrdersModel(1, 19),
+            new OrdersModel(1, 20),
+        };
+
+        // products
+    List <ProductModel> products = new List<ProductModel>
         {
             ["Fruits"] = new List<string> { "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango", "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime", "Nectarine", "Apricot", "Fig", "Pomegranate", "Tangerine", "Clementine", "Dragonfruit", "Passionfruit", "Guava", "Lychee" },
             ["Vegetables"] = new List<string> { "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant", "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale", "Leek", "Brussels Sprouts", "Chard", "Artichoke", "Parsnip", "Turnip", "Okra", "Fennel", "Cabbage", "Rutabaga" },
@@ -133,12 +162,11 @@ public class DatabaseFiller
             ["Frozen"] = new List<string> { "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries", "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli", "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry", "Frozen Tater Tots", "Frozen Burrito", "Frozen Ravioli", "Frozen Fish Sticks", "Frozen Spring Rolls", "Frozen Edamame", "Frozen Peaches", "Frozen Cherries", "Frozen Cauliflower" },
             ["Snacks"] = new List<string> { "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel" }
         };
-
-        List<ProductModel> products = new List<ProductModel>();
-        Random random = new Random();
-        int id = 1;
-
-        foreach (var category in categoryProducts.Keys)
+        // add users 
+            InsertUser(user);
+            InsertUser(admin);
+        // add all products to the database
+        foreach (var product in products)
         {
             foreach (var name in categoryProducts[category])
             {
@@ -162,53 +190,9 @@ public class DatabaseFiller
                 id++;
             }
         }
-
-        List<OrdersModel> orders = new List<OrdersModel>();
-        for (int i = 0; i < orderCount; i++)
+        foreach (var order in orders)
         {
-            int productIndex = random.Next(products.Count);
-            OrdersModel order = new OrdersModel
-            {
-                UserID = (i % 3) + 1,
-                ProductID = productIndex + 1,
-                Date = DateTime.Today.AddDays(-i)
-            };
-            orders.Add(order);
+            InsertOrder(order);
         }
-
-        AnsiConsole.Progress()
-            .AutoClear(true)
-            .HideCompleted(true)
-            .Columns(new ProgressColumn[]
-            {
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new RemainingTimeColumn()
-            })
-            .Start(ctx =>
-            {
-                Console.Clear();
-                var userTask = ctx.AddTask("Seeding Users", maxValue: 4);
-                var productTask = ctx.AddTask("Seeding Products", maxValue: products.Count);
-                var orderTask = ctx.AddTask("Seeding Orders", maxValue: orders.Count);
-
-                InsertUser(user); userTask.Increment(1);
-                InsertUser(user1); userTask.Increment(1);
-                InsertUser(user2); userTask.Increment(1);
-                InsertUser(admin); userTask.Increment(1);
-
-                foreach (var product in products)
-                {
-                    InsertProduct(product);
-                    productTask.Increment(1);
-                }
-
-                foreach (var order in orders)
-                {
-                    InsertOrder(order);
-                    orderTask.Increment(1);
-                }
-            });
     }
 }

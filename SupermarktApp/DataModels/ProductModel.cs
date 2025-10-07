@@ -9,15 +9,16 @@ public class ProductModel
     public string Location { get; set; }
     public int Quantity { get; set; }
 
-    public ProductModel(string name, double price, string nutritionDetails, string description, string category, int quantity)
+    public ProductModel(string name, double price, string nutritionDetails, string description, string category, string location, int quantity)
     {
         Name = name;
         Price = price;
         NutritionDetails = nutritionDetails;
         Description = description;
         Category = category;
+        Location = location;
         Quantity = quantity;
     }
-    
+
     public ProductModel() { }
 }
