@@ -30,12 +30,6 @@ public class ProductLogic
                 Console.WriteLine($"Search: {input}");
             }
 
-            // var basket = AnsiConsole.Prompt(
-            //     new SelectionPrompt<string>()
-            //         .Title("Basket")
-            //         .PageSize(10)
-            //         .MoreChoicesText("[grey](Move up and down to select)[/]")
-            //         .AddChoices(new[] { $"" }));
 
             if (input.Length != 0)
             {
@@ -53,7 +47,13 @@ public class ProductLogic
 
                 if (key.Key == ConsoleKey.Enter)
                 {
-                    return productList[0];
+                    var product = AnsiConsole.Prompt(
+                        new SelectionPrompt<ProductModel>()
+                            .Title("Select a product")
+                            .PageSize(10)
+                            .MoreChoicesText("[grey](Move up and down to select)[/]")
+                            .AddChoices(productList));
+                    return product;
                 }
             }
         }

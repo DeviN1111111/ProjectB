@@ -48,6 +48,20 @@ public static class ProductAccess
             @"SELECT * FROM Products 
             WHERE Category LIKE @Category 
             LIMIT 10",
-            new { Category= $"{pattern}%" }).ToList();
+            new { Category = $"{pattern}%" }).ToList();
+    }
+    public static IEnumerable<ProductModel> GetAllProducts()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.Query<ProductModel>("SELECT * FROM Products");
+    }
+
+    public static ProductModel? GetProductByID(int id)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<ProductModel>(
+            "SELECT * FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
     }
 }
