@@ -6,6 +6,7 @@ public class LoginLogic
 
         if (Account != null)
         {
+            SessionManager.CurrentUser = Account;
             return Account;
         }
         return null!;

@@ -1,9 +1,9 @@
 public class OrderLogic
-{
-    public static void AddToCart(int product, int quantity)
+{ 
+    public static void AddToCart( ProductModel product, int quantity)
     {
         //Order.ProductsInCart.Add(1);
-        CartAccess.AddToCart(1, product, quantity);
+        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity);
     }
 
     public static List<CartModel> AllUserProducts()
