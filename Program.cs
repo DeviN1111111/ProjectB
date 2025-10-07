@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        LoginAccess.CreateTable();
+        DatabaseFiller.RunDatabaseMethods();
         Console.Clear();
         StartScreen.Show();
         // LoginUI.Login();
