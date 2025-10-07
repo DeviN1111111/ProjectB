@@ -7,10 +7,12 @@ class Program
 {
     static void Main()
     {
-        DatabaseFiller.RunDatabaseMethods();
-        Console.Clear();
-        StartScreen.Show();
+        // DatabaseFiller.RunDatabaseMethods();
+        // Console.Clear();
+        // StartScreen.Show();
         // LoginUI.Login();
 
+        DatabaseFiller.RunDatabaseMethods();
+        ProductLogic.SearchProductByName();
     }
 }

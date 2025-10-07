@@ -45,15 +45,22 @@ public class ProductLogic
                     Console.WriteLine(product.Name);
                 }
 
+                List<string> List1 = [];
+                foreach (ProductModel product in productList)
+                {
+                    List1.Add(product.Name);
+                }
+
                 if (key.Key == ConsoleKey.Enter)
                 {
                     var product = AnsiConsole.Prompt(
-                        new SelectionPrompt<ProductModel>()
+                        new SelectionPrompt<string>()
                             .Title("Select a product")
                             .PageSize(10)
                             .MoreChoicesText("[grey](Move up and down to select)[/]")
-                            .AddChoices(productList));
-                    return product;
+                            .AddChoices(List1));
+
+                    return ProductAccess.GetProductByName(product);
                 }
             }
         }
