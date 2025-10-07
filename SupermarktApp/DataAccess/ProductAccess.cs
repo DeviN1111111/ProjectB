@@ -39,9 +39,9 @@ public static class ProductAccess
                 VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", p);
         }
     }
-    public static IEnumerable<ProductModel> GetAllProducts()
+    public static List<ProductModel> GetAllProducts()
     {
         using var db = new SqliteConnection(ConnectionString);
-        return db.Query<ProductModel>("SELECT * FROM Products");
+        return db.Query<ProductModel>("SELECT * FROM Products").ToList();
     }
 }

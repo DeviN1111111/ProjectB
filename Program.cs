@@ -8,17 +8,12 @@ class Program
     static void Main()
     {
         Console.Clear();
-        OrderLogic.AddToCart();
+        // OrderLogic.AddToCart(1,4);
+        // OrderLogic.AddToCart(2,4);
+        // OrderLogic.AddToCart(3,4);
+        // OrderLogic.AddToCart(4,4);
         Order.ShowCart();
-
-
-
-
-
-
-
-
-
+        
 
 
         // StartScreen screen = new StartScreen();

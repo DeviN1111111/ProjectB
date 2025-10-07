@@ -17,9 +17,11 @@ public class CartAccess
         using var db = new SqliteConnection(ConnectionString);
     }
 
-    public static List<CartModel> GetAllProducts(int userId)
+    public static List<CartModel> GetAllUserProducts(int userId)
     {
         using var db = new SqliteConnection(ConnectionString);
+        var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId ";
+        return db.Query<CartModel>(sql,new {UserId = userId}).ToList();
     }
 
 
