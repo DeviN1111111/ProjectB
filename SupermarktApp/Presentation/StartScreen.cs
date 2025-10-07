@@ -2,7 +2,7 @@ using Spectre.Console;
 
 class StartScreen
 {
-    private readonly string _supermarketName = @"
+    private static readonly string _supermarketName = @"
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 /\                                                                                      /\
@@ -29,43 +29,103 @@ class StartScreen
     /// <summary>
     /// Displays a menu and handles user input for navigation and selection.
     /// </summary>
-    public void Menu()
+    /// 
+    public static UserModel user = null!;
+    public static void Menu()
     {
-        var options = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .AddChoices(new[]{
-                    "Login",
-                    "Register",
-                    "Continue as Guest",
-                    "Exit"
-                })
-        );
-
-        switch (options)
+        bool running = true;
+        while (running)
         {
-            case "Login":
-                UserModel account = LoginUI.Login();
-                UserMenu.StartMenu(account.IsAdmin);
-                break;
-            case "Register":
-                LoginUI.Register();
-                Menu();
-                break;
-            case "Continue as Guest":
-                System.Console.WriteLine("[Continue as Guest placeholder]");
-                break;
-            case "Exit":
-                Environment.Exit(0);
-                break;
+            if (user == null)
+            {
+                Console.Clear();
+                Console.WriteLine($"{_supermarketName}");
+                var options = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .AddChoices(new[]{
+                        "Login",
+                        "Register",
+                        "Continue as Guest",
+                        "Exit"
+                    })
+                );
+
+                switch (options)
+                {
+                    case "Login":
+                        Console.Clear();
+                        user = LoginUI.Login();
+                        break;
+                    case "Register":
+                        Console.Clear();
+                        LoginUI.Register();
+                        break;
+                    case "Continue as Guest":
+                        System.Console.WriteLine("[Continue as Guest placeholder]");
+                        break;
+                    case "Exit":
+                        running = false;
+                        break;
+                }
+            }
+            else if (user.AccountStatus == "User")
+            {
+                var options = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .AddChoices(new[]{
+                        "Order",
+                        "Logout",
+                        "Exit"
+                    })
+                );
+
+                switch (options)
+                {
+                    case "Order":
+                        break;
+                    case "Logout":
+                        Console.Clear();
+                        user = null!;
+                        break;
+                    case "Exit":
+                        Environment.Exit(0);
+                        break;
+                }
+            }
         }
+        // var options = AnsiConsole.Prompt(
+        //     new SelectionPrompt<string>()
+        //         .AddChoices(new[]{
+        //             "Login",
+        //             "Register",
+        //             "Continue as Guest",
+        //             "Exit"
+        //         })
+        // );
+
+            // switch (options)
+            // {
+            //     case "Login":
+            //         LoginUI.Login();
+            //         break;
+            //     case "Register":
+            //         LoginUI.Register();
+            //         break;
+            //     case "Continue as Guest":
+            //         System.Console.WriteLine("[Continue as Guest placeholder]");
+            //         break;
+            //     case "Exit":
+            //         Environment.Exit(0);
+            //         break;
+            // }
     }
     /// <summary>
     /// Displays the start screen with the supermarket name and menu options.
     /// </summary>
-    public void Show()
+    public static void Show()
     {
         AnsiConsole.Clear();
-        AnsiConsole.MarkupLine($"[bold yellow]{_supermarketName}[/]");
+        // AnsiConsole.MarkupLine($"[bold yellow]{_supermarketName}[/]");
         System.Console.WriteLine();
         Menu();
     }

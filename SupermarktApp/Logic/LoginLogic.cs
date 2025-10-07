@@ -1,3 +1,5 @@
+using Spectre.Console;
+
 public class LoginLogic
 {
     public static UserModel Login(string email, string password)
@@ -11,21 +13,29 @@ public class LoginLogic
         return null!;
     }
 
-    public static bool Register(string name, string lastName, string email, string password, string adress, int houseNumber, string zipcode, string phoneNumber, string city)
+    public static List<string> Register(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city)
     {
-        UserModel user = new UserModel(name, lastName, email, password, adress, houseNumber, zipcode, phoneNumber, city);
+        UserModel user = new UserModel(name, lastName, email, password, address, zipcode, phoneNumber, city);
 
-        bool CheckLogin = ValidaterLogic.ValidateEmail(user.Email);
-        bool CheckPassword = ValidaterLogic.ValidatePassword(user.Password);
+        List<string> Errors = [];
 
-        if (CheckLogin && CheckPassword)
+        if (!ValidaterLogic.ValidateEmail(user.Email))
+            Errors.Add("Email invalid, must contain @ and a punctuation.");
+        if (!ValidaterLogic.ValidatePassword(user.Password))
+            Errors.Add("Password invalid, must contain atleast 1 digit and has to be 6 characters long (Example: Cheese1).");
+        if (!ValidaterLogic.ValidatePhoneNumber(user.PhoneNumber))
+            Errors.Add("Phonenumber invalid, must have 10 digits (Example: 1234567890).");
+        if (!ValidaterLogic.ValidateZipcode(user.Zipcode))
+            Errors.Add("Zipcode invalid (Example: 2353TL).");
+
+        if (Errors.Count == 0)
         {
             LoginAccess.Register(user);
-            return true;
+            return Errors;
         }
         else
         {
-            return false;
+            return Errors;
         }
     }
 }
