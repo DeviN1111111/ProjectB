@@ -45,19 +45,24 @@ public static class StatisticLogic
         return sales;
     }
 
-    public static BreakdownChart CreateBreakdownChart(List<ProductSalesDto> sales)
+    public static BreakdownChart CreateBreakdownChart(List<ProductSalesDto> sales, string Type)
     {
-        var categoryTotals = new Dictionary<string, int>();
+        var Totals = new Dictionary<string, double>();
 
         foreach (var sale in sales)
         {
-            if (categoryTotals.ContainsKey(sale.Product.Category))
+            if (!Totals.ContainsKey(sale.Product.Category))
             {
-                categoryTotals[sale.Product.Category] += sale.SoldCount;
+                Totals[sale.Product.Category] = 0;
             }
-            else
+
+            if (Type == "Category")
             {
-                categoryTotals[sale.Product.Category] = sale.SoldCount;
+                Totals[sale.Product.Category] += sale.SoldCount;
+            }
+            else if (Type == "Profit")
+            {
+                Totals[sale.Product.Category] += sale.SoldCount * (double)sale.Product.Price;
             }
         }
 
@@ -72,16 +77,18 @@ public static class StatisticLogic
 
         int colorIndex = 0;
 
-        foreach (var category in categoryTotals)
+        foreach (var category in Totals)
         {
             var color = colors[colorIndex];
-            chart.AddItem(category.Key, category.Value, color);
+            double roundedValue = Math.Round(category.Value, 2);
+            chart.AddItem(category.Key, roundedValue, color);
             colorIndex++;
             if (colorIndex >= colors.Count)
             {
                 colorIndex = 0;
             }
         }
+        Totals.Clear();
         return chart;
     }
 
@@ -99,6 +106,35 @@ public static class StatisticLogic
             totalProfit += (int)(sale.Product.Price * sale.SoldCount);
         }
         return totalProfit;
+    }
+
+    public static Table CreateMostSoldTable(DateTime date)
+    {
+        var table = new Table();
+        table.AddColumn("Product Name");
+        table.AddColumn("Units Sold");
+        table.AddColumn("Category");
+        table.AddColumn("Price per Unit");
+        table.AddColumn("Total Revenue from this product");
+
+        var topSales = OrderAccess.GetTop5MostSoldProductsUpToDate(date);
+        if (topSales == null || topSales.Count == 0)
+        {
+            table.AddRow("No sales data available", "-", "-", "-", "-");
+            return table;
+        }
+
+        foreach (var sale in topSales)
+        {
+            var product = ProductAccess.GetProductByID(sale.ProductID);
+            if (product != null)
+            {
+                double totalRevenue = (double)(product.Price * (double)sale.SoldCount);
+                table.AddRow(product.Name, sale.SoldCount.ToString(), product.Category, $"{product.Price} euro", $"{totalRevenue} euro");
+            }
+        }
+
+        return table;
     }
 
 }

@@ -31,7 +31,7 @@ class StartScreen
     /// Displays a menu and handles user input for navigation and selection.
     /// </summary>
     /// 
-    public static UserModel user = null!;
+    public static UserModel user;
     public static void Menu()
     {
         bool running = true;
