@@ -70,7 +70,7 @@ class Program
             if (selected != null)
             {
                 Console.WriteLine($"You selected {selected.Name}. Opening map...");
-                MapUI.DisplayMap(selected.Category);
+                MapUI.DisplayMap(1);
             }
             else
             {
