@@ -61,11 +61,12 @@ public class DatabaseFiller
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Orders (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                UserId INTEGER NOT NULL,
-                ProductId INTEGER NOT NULL,
-                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
-                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserID INTEGER NOT NULL,
+                ProductID INTEGER NOT NULL,
+                Date DATETIME NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
             );
         ");
 
@@ -106,6 +107,16 @@ public class DatabaseFiller
 
         db.Execute(sql, product);
     }
+    
+    public static void InsertOrder(OrdersModel order)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+
+        string sql = @"INSERT INTO Orders (UserID, ProductID, Date) 
+        VALUES (@UserID, @ProductID, @Date);";
+
+        db.Execute(sql, order);
+    }
 
     public static void SeedData()
     {
@@ -113,8 +124,34 @@ public class DatabaseFiller
         UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "test@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "admin@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
 
+        // Orders
+        List<OrdersModel> orders = new List<OrdersModel>
+        {
+            // Orders for User 1
+            new OrdersModel(1, 1),
+            new OrdersModel(1, 2),
+            new OrdersModel(1, 3),
+            new OrdersModel(1, 4),
+            new OrdersModel(1, 5),
+            new OrdersModel(1, 6),
+            new OrdersModel(1, 7),
+            new OrdersModel(1, 8),
+            new OrdersModel(1, 9),
+            new OrdersModel(1, 10),
+            new OrdersModel(1, 11),
+            new OrdersModel(1, 12),
+            new OrdersModel(1, 13),
+            new OrdersModel(1, 14),
+            new OrdersModel(1, 15),
+            new OrdersModel(1, 16),
+            new OrdersModel(1, 17),
+            new OrdersModel(1, 18),
+            new OrdersModel(1, 19),
+            new OrdersModel(1, 20),
+        };
+
         // products
-        List<ProductModel> products = new List<ProductModel>
+    List <ProductModel> products = new List<ProductModel>
         {
             // Fruits
             new ProductModel { Name = "Apple", Price = 0.5, NutritionDetails = "52 kcal per 100g", Description = "Fresh red apple", Category = "Fruits", Location = "Rotterdam", Quantity = 50 },
@@ -148,13 +185,17 @@ public class DatabaseFiller
             // Beverages
             new ProductModel { Name = "Orange Juice", Price = 2.0, NutritionDetails = "45 kcal per 100ml", Description = "Freshly squeezed orange juice", Category = "Beverages", Location = "Rotterdam", Quantity = 30 }
         };
-
+        // add users 
+            InsertUser(user);
+            InsertUser(admin);
         // add all products to the database
         foreach (var product in products)
         {
             InsertProduct(product);
         }
-        InsertUser(user);
-        InsertUser(admin);
+        foreach (var order in orders)
+        {
+            InsertOrder(order);
+        }
     }
 }
