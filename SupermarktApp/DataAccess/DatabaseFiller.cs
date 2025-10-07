@@ -42,7 +42,7 @@ public class DatabaseFiller
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                IsAdmin INTEGER NOT NULL DEFAULT 0
+                AccountStatus TEXT
             );
         ");
 
