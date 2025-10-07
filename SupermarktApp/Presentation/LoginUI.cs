@@ -3,7 +3,7 @@ using Spectre.Console;
 
 public static class LoginUI
 {
-    public static UserModel Login()
+    public static void Login()
     {
         string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
         string password = AnsiConsole.Prompt(
@@ -14,15 +14,14 @@ public static class LoginUI
         UserModel Account = LoginLogic.Login(email, password);
         if (Account != null)
         {
+            SessionManager.CurrentUser = Account;
             AnsiConsole.MarkupLine("[green]Login successful![/]");
-            AnsiConsole.MarkupLine($"[blue]Welcome, {Account.Name} {Account.LastName}![/]");
-            return Account;
+            AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
         }
         else
         {
             AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
             Console.ReadKey();
-            return null!;
         }
     }
 

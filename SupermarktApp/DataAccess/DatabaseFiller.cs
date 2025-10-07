@@ -27,7 +27,6 @@ public class DatabaseFiller
 
     public static void CreateTables()
     {
-        Console.WriteLine("Creating tables...");
         using var db = new SqliteConnection(ConnectionString);
         db.Execute("PRAGMA foreign_keys = ON;");
 
@@ -43,7 +42,8 @@ public class DatabaseFiller
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                IsAdmin INTEGER NOT NULL DEFAULT 0
+                IsAdmin INTEGER NOT NULL DEFAULT 0,
+                AccountStatus TEXT NOT NULL DEFAULT 'User'
             );
         ");
 
@@ -55,7 +55,7 @@ public class DatabaseFiller
                 NutritionDetails TEXT,
                 Description TEXT,
                 Category TEXT,
-                Location TEXT,
+                Location INTEGER,
                 Quantity INTEGER NOT NULL DEFAULT 0
             );
         ");
@@ -154,7 +154,7 @@ public class DatabaseFiller
                     NutritionDetails = $"Nutrition details for {name}",
                     Description = $"Description for {name}",
                     Category = category,
-                    Location = $"Aisle {(id % 5) + 1}",
+                    Location = random.Next(1, 16),
                     Quantity = 50 + id
                 };
 
