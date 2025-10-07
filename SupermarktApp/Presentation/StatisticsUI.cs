@@ -115,6 +115,10 @@ public static class StatisticsUI
             if (DateTime.TryParse(input, out DateTime date))
             {
                 Console.Clear();
+                AnsiConsole.Write(
+                new FigletText("SuperMart Analytics")
+                    .Centered()
+                    .Color(AsciiPrimary));
                 return date;
             }
             AnsiConsole.MarkupLine("[red]Invalid date format. Please try again.[/]");
