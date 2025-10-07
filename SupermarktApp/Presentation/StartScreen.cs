@@ -45,7 +45,7 @@ public static class StartScreen
                     Console.WriteLine("[Continue as Guest placeholder]");
                     break;
                 case "Order":
-                    // add Order
+                    ProductUI.SearchProduct();
                     break;
                 case "Management":
                     //todo

@@ -2,17 +2,31 @@ using Spectre.Console;
 
 public class ProductUI
 {
-    public static List<ProductModel> SearchCategory()
+    public static void SearchProduct()
     {
-        AnsiConsole.MarkupLine("[blue]Type the category you want to find[/]");
-        List<ProductModel> productList = ProductLogic.SearchProductByCategory();
-        return productList;
-    }
+        var product = ProductLogic.SearchProductByNameOrCategory();
+        var options = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .AddChoices(new[]{
+                "Add to basket",
+                "Show on map",
+                "Show product details",
+                "Go back"
+            })
+        );
 
-    public static ProductModel SearchItem()
-    {
-        AnsiConsole.MarkupLine("[blue]Type the category you want to find[/]");
-        ProductModel Product = ProductLogic.SearchProductByName();
-        return Product;
+        switch (options)
+        {
+            case "Add to basket":
+                break;
+            case "Show on map":
+                MapUI.DisplayMap(product.Location);
+                break;
+            case "Show product details":
+                ProductDetailsUI.ShowProductDetails(product);
+                break;
+            case "Go back":
+                break;
+        }
     }
 }
