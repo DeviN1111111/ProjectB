@@ -44,4 +44,13 @@ public static class ProductAccess
         using var db = new SqliteConnection(ConnectionString);
         return db.Query<ProductModel>("SELECT * FROM Products");
     }
+
+    public static ProductModel? GetProductByID(int id)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<ProductModel>(
+            "SELECT * FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
+    }
 }
