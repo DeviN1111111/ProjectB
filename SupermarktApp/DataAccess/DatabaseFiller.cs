@@ -115,7 +115,7 @@ public class DatabaseFiller
 
     public static void SeedData(int orderCount)
     {
-        UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "test@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
+        UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "test", Password = "test", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user1 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user2 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "admin", Password = "admin", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin"};

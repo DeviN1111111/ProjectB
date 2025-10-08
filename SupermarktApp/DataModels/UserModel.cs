@@ -9,7 +9,7 @@ public class UserModel
     public string Zipcode { get; set; }
     public string PhoneNumber { get; set; }
     public string City { get; set; }
-    public string AccountStatus { get; set; }
+    public string AccountStatus { get; set; } = "User";
 
     public UserModel(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city, string accountStatus = "User")
     {
