@@ -17,7 +17,7 @@ public class ProductLogic
             var key = Console.ReadKey();
             if (key.Key == ConsoleKey.Escape)
                 break;
-            if ((!char.IsControl(key.KeyChar) && char.IsLetter(key.KeyChar)) || char.IsWhiteSpace(key.KeyChar))
+            if ((!char.IsControl(key.KeyChar) && char.IsLetter(key.KeyChar)) || (key.Key == ConsoleKey.Spacebar))
                 input += key.KeyChar;
             if (key.Key == ConsoleKey.Backspace && input.Length > 0)
                 input = input.Remove(input.Length - 1);
