@@ -8,7 +8,6 @@ public class ProductUI
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .AddChoices(new[]{
-                "Add to basket",
                 "Show on map",
                 "Show product details",
                 "Go back"
@@ -17,8 +16,8 @@ public class ProductUI
 
         switch (options)
         {
-            case "Add to basket":
-                break;
+            // case "Add to basket":
+            //     break;
             case "Show on map":
                 MapUI.DisplayMap(product.Location);
                 break;

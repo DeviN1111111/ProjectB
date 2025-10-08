@@ -70,7 +70,13 @@ public static class StatisticsUI
         {
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
-            AnsiConsole.WriteLine($"Your total turnover since {date.ToShortDateString()} is {totalProfit} euro!");
+            if (date == DateTime.MinValue)
+            {
+                AnsiConsole.WriteLine($"Your total turnover of all time is {totalProfit} euro!");
+            }
+            else{
+                AnsiConsole.WriteLine($"Your total turnover since {date.ToShortDateString()} is {totalProfit} euro!");
+            }
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine("Amount of sales per category:");
@@ -94,7 +100,14 @@ public static class StatisticsUI
             {
                 AnsiConsole.WriteLine();
                 AnsiConsole.WriteLine();
-                AnsiConsole.Write($"Top 5 most sold item since {date.ToShortDateString()} were: ");
+                if (date == DateTime.MinValue)
+                {
+                    AnsiConsole.Write($"Top 5 most sold items of all time were: ");
+                }
+                else
+                {
+                    AnsiConsole.Write($"Top 5 most sold items since {date.ToShortDateString()} were: ");
+                }
                 AnsiConsole.WriteLine();
                 AnsiConsole.Write(Table);   
             }

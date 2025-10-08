@@ -10,6 +10,6 @@ class Program
         DatabaseFiller.RunDatabaseMethods();
         // StartScreen.ShowMainMenu();
         // StatisticsUI.DisplayMenu();
-        StartScreen.ShowMainMenu();
+        MenuUI.ShowMainMenu();
     }
 }
