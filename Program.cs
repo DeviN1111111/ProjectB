@@ -1,3 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
-Console.WriteLine("Hello, test 1!");
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Spectre.Console;
+
+class Program
+{
+    static void Main()
+    {
+        DatabaseFiller.RunDatabaseMethods();
+        // StartScreen.ShowMainMenu();
+        // StatisticsUI.DisplayMenu();
+        StartScreen.ShowMainMenu();
+    }
+}
