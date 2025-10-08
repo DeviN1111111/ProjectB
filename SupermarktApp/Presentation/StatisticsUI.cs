@@ -70,7 +70,12 @@ public static class StatisticsUI
         {
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
-            AnsiConsole.WriteLine($"Your total turnover since {date.ToShortDateString()} is {totalProfit} euro!");
+            if (date == DateTime.MinValue)
+                AnsiConsole.WriteLine($"Your total turnover of all time is {totalProfit} euro!");
+            else
+            {
+                AnsiConsole.WriteLine($"Your total turnover since {date.ToShortDateString()} is {totalProfit} euro!");
+            }
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine("Amount of sales per category:");

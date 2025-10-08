@@ -14,7 +14,7 @@ public static class ProductDetailsUI
                 .Color(AsciiPrimary));
 
         
-        // string name = Markup.Escape(product.Name ?? "");
+        string name = Markup.Escape(product.Name ?? "");
         string nutrition = Markup.Escape(product.NutritionDetails ?? "");
         string description = Markup.Escape(product.Description ?? "");
         string category = Markup.Escape(product.Category ?? "");
@@ -23,7 +23,7 @@ public static class ProductDetailsUI
         string qty = product.Quantity.ToString();
 
         var body =
-            $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
+            $"[bold #00014d]Name:[/] [#5dabcf]{name}[/]\n" +
             $"[bold #00014d]Price:[/] [#5dabcf]${price}[/]\n" +
             $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{nutrition}[/]\n" +
             $"[bold #00014d]Description:[/] [#5dabcf]{description}[/]\n" +
