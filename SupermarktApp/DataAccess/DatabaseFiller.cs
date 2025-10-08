@@ -42,8 +42,7 @@ public class DatabaseFiller
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                IsAdmin INTEGER NOT NULL DEFAULT 0,
-                AccountStatus TEXT NOT NULL DEFAULT 'User'
+                AccountStatus TEXT
             );
         ");
 
@@ -93,8 +92,8 @@ public class DatabaseFiller
     public static void InsertUser(UserModel user)
     {
         using var db = new SqliteConnection(ConnectionString);
-        string sql = @"INSERT INTO Users (Name, LastName, Email, Password, Address , Zipcode, PhoneNumber, City) 
-        VALUES (@Name, @LastName, @Email, @Password, @Address , @Zipcode, @PhoneNumber, @City);";
+        string sql = @"INSERT INTO Users (Name, LastName, Email, Password, Address , Zipcode, PhoneNumber, City, AccountStatus) 
+        VALUES (@Name, @LastName, @Email, @Password, @Address , @Zipcode, @PhoneNumber, @City, @AccountStatus);";
         db.Execute(sql, user);
     }
 
@@ -116,10 +115,10 @@ public class DatabaseFiller
 
     public static void SeedData(int orderCount)
     {
-        UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "test@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
+        UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "test", Password = "test", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user1 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user2 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
-        UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "admin@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
+        UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "admin", Password = "admin", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin"};
 
         var categoryProducts = new Dictionary<string, List<string>>
         {

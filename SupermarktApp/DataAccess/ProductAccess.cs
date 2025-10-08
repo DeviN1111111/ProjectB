@@ -35,21 +35,13 @@ public static class ProductAccess
         string pattern = name.Length == 2 ? $"{name}%" : $"%{name}%";
         return db.Query<ProductModel>(
             @"SELECT * FROM Products 
-            WHERE Name LIKE @Name 
+            WHERE Name LIKE @Name
+            OR
+            Category LIKE @Category
             LIMIT 10",
-            new { Name = $"{pattern}%" }).ToList();
+            new { Name = $"{pattern}%", Category = $"{pattern}%"}).ToList();
     }
 
-    public static List<ProductModel> SearchProductByCategory(string category)
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        string pattern = category.Length == 2 ? $"{category}%" : $"%{category}%";
-        return db.Query<ProductModel>(
-            @"SELECT * FROM Products 
-            WHERE Category LIKE @Category 
-            LIMIT 10",
-            new { Category = $"{pattern}%" }).ToList();
-    }
     public static IEnumerable<ProductModel> GetAllProducts()
     {
         using var db = new SqliteConnection(ConnectionString);

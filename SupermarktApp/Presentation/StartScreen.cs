@@ -28,7 +28,12 @@ public static class StartScreen
                 // Options when you're logged in as an admin
                 options.AddRange(new[] { "Management", "Statistics", "Logout", "Exit" });
             }
-
+            else
+            {
+                // Option when account status is unrecognized
+                options.Add("Exit");
+            }
+            
             var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .AddChoices(options));
@@ -45,7 +50,7 @@ public static class StartScreen
                     Console.WriteLine("[Continue as Guest placeholder]");
                     break;
                 case "Order":
-                    // add Order
+                    ProductUI.SearchProduct();
                     break;
                 case "Management":
                     //todo

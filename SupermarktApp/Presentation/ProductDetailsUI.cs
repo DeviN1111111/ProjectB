@@ -13,8 +13,8 @@ public static class ProductDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-
-        string name = Markup.Escape(product.Name ?? "");
+        
+        // string name = Markup.Escape(product.Name ?? "");
         string nutrition = Markup.Escape(product.NutritionDetails ?? "");
         string description = Markup.Escape(product.Description ?? "");
         string category = Markup.Escape(product.Category ?? "");
@@ -23,7 +23,7 @@ public static class ProductDetailsUI
         string qty = product.Quantity.ToString();
 
         var body =
-            $"[bold #00014d]Name:[/] [#5dabcf]{name}[/]\n" +
+            $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
             $"[bold #00014d]Price:[/] [#5dabcf]${price}[/]\n" +
             $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{nutrition}[/]\n" +
             $"[bold #00014d]Description:[/] [#5dabcf]{description}[/]\n" +
@@ -35,7 +35,7 @@ public static class ProductDetailsUI
         {
             Padding = new Padding(1, 1),
             Border = BoxBorder.Heavy,
-            Header = new PanelHeader($"[bold #1B98E0]{name}[/]")
+            Header = new PanelHeader($"[bold #1B98E0]{product.Name}[/]")
         };
 
         AnsiConsole.Write(panel);

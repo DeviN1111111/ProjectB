@@ -9,10 +9,9 @@ public class UserModel
     public string Zipcode { get; set; }
     public string PhoneNumber { get; set; }
     public string City { get; set; }
-    public bool IsAdmin { get; set; }
-    public string AccountStatus { get; set; }
+    public string AccountStatus { get; set; } = "User";
 
-    public UserModel(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city)
+    public UserModel(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city, string accountStatus = "User")
     {
         Name = name;
         LastName = lastName;
@@ -22,8 +21,7 @@ public class UserModel
         Zipcode = zipcode;
         PhoneNumber = phoneNumber;
         City = city;
-        IsAdmin = false;
-        AccountStatus = "User";
+        AccountStatus = accountStatus;
     }
 
     public UserModel() { }
