@@ -13,33 +13,22 @@ public static class ProductDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-
-        string name = Markup.Escape(product.Name ?? "");
-        string nutrition = Markup.Escape(product.NutritionDetails ?? "");
-        string description = Markup.Escape(product.Description ?? "");
-        string category = Markup.Escape(product.Category ?? "");
-        string location = Markup.Escape(product.Location.ToString());
-        string price = product.Price.ToString("0.00");
-        string qty = product.Quantity.ToString();
-
         var body =
-            $"[bold #00014d]Name:[/] [#5dabcf]{name}[/]\n" +
-            $"[bold #00014d]Price:[/] [#5dabcf]${price}[/]\n" +
-            $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{nutrition}[/]\n" +
-            $"[bold #00014d]Description:[/] [#5dabcf]{description}[/]\n" +
-            $"[bold #00014d]Category:[/] [#5dabcf]{category}[/]\n" +
-            $"[bold #00014d]Location:[/] [#5dabcf]{location}[/]\n" +
-            $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{qty}[/]";
+            $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
+            $"[bold #00014d]Price:[/] [#5dabcf]${product.Price:0.00}[/]\n" +
+            $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
+            $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
+            $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
+            $"[bold #00014d]Location:[/] [#5dabcf]{product.Location}[/]\n" +
+            $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{product.Quantity}[/]";
 
         var panel = new Panel(body)
         {
             Padding = new Padding(1, 1),
             Border = BoxBorder.Heavy,
-            Header = new PanelHeader($"[bold #1B98E0]{name}[/]")
+            Header = new PanelHeader($"[bold #1B98E0]{product.Name}[/]")
         };
 
         AnsiConsole.Write(panel);
-        Console.ReadLine();
-        Console.Clear();
     }
 }

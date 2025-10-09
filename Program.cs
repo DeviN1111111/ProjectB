@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        Logo.Show();
-        ShowProductDetails.Show();
+        ShopDetails.Show();
+       
     }
 }

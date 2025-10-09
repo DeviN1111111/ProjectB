@@ -1,10 +1,10 @@
 using Spectre.Console;
-using System.Text;
-
-public static class ShowProductDetails
+public static class ShopDetails
 {
     private static readonly string OpeningHour = "07:00";
     private static readonly string ClosingHour = "22:00";
+    private static readonly string OpeningHourSunday = "12:00";
+    private static readonly string ClosingHourSunday = "19:00";
     public static void Show()
     {
         Color AsciiPrimary = Color.FromHex("#247BA0");
@@ -13,23 +13,22 @@ public static class ShowProductDetails
                 .Centered()
                 .Color(AsciiPrimary));
 
-        AnsiConsole.MarkupLine($"[bold #1B98E0]Opening Hours:[/] {OpeningHour} - {ClosingHour}");
-        Console.ReadLine();
-        Console.Clear();
-    }
-    private static string Center(string text, int targetWidth)
-    {
-        var lines = text.Replace("\r", "").Split('\n');
-        var blockWidth = lines.Max(l => l.Length);
-        var leftPad = Math.Max(0, (targetWidth - blockWidth) / 2);
-        var pad = new string(' ', leftPad);
 
-        var sb = new StringBuilder();
-        foreach (var line in lines)
+        var table = new Table();
+        table.AddColumn(new TableColumn("[bold #00014d]Day[/]").Centered());
+        table.AddColumn(new TableColumn("[bold #00014d]Date[/]").Centered());
+        table.AddColumn(new TableColumn("[bold #00014d]Opening Hours[/]").Centered());
+
+        foreach (var day in GetDayDate.getDayDate())
         {
-            var trimmed = line.TrimEnd();
-            sb.AppendLine(string.IsNullOrEmpty(trimmed) ? "" : pad + trimmed);
+            if (day[0] != "Sunday")
+            {
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHour} - {ClosingHour}[/]");
+            }
+            else
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourSunday} - {ClosingHourSunday}[/]");
         }
-        return sb.ToString();
+        table.Border(TableBorder.Heavy);
+        AnsiConsole.Write(table);
     }
 }

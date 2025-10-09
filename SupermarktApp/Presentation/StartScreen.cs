@@ -7,7 +7,6 @@ public static class StartScreen
         while (true)
         {
             Console.Clear();
-            Logo.Show();
             AnsiConsole.Write(
                 new FigletText("Supermarket App")
                     .Centered()
