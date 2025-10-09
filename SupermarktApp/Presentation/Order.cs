@@ -1,7 +1,7 @@
 using Spectre.Console;
-
 public class Order
-{    public static void ShowCart()
+{
+    public static void ShowCart()
     {
         Console.Clear();
         double totalAmount = 0;
@@ -16,7 +16,7 @@ public class Order
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
-                if (cartProduct.ProductId == Product.Id)
+                if (cartProduct.ProductId == Product.ID)
                 {
                     // Create two text elements
                     var product = new Text($"{Product.Name}", new Style(Color.Red));
@@ -44,25 +44,22 @@ public class Order
                     AnsiConsole.Write(paddedRow);
                 }
             }
-
-
         }
-
         // Total Line
         var rule = new Rule("Total");
         rule.Justification = Justify.Left;
         AnsiConsole.Write(rule);
         // Total price
-        var product1 = new Text($"{totalAmount}", new Style(Color.Red));
+        var product1 = new Text($"12", new Style(Color.Red));
         var paddedProduct1 = new Padder(product1).PadLeft(41).PadBottom(0).PadTop(0);
         var row1 = new Grid();
         row1.AddColumn();
         row1.AddRow(paddedProduct1);
         var paddedRow1 = new Padder(row1).Padding(4, 1);
         AnsiConsole.Write(paddedRow1);
-
+        // Checkout page
+        Checkout();
     }
-
     public static void CartHeader()
     {
         // Get List of user items in cart
@@ -91,4 +88,58 @@ public class Order
         // Write the padded grid to the Console
         AnsiConsole.Write(paddedRow);
     }
+    public static void Checkout()
+    {
+        // Checkout screen
+        AnsiConsole.Write(
+            new FigletText("Checkout")
+                .Centered()
+                .Color(Color.White));
+        var options = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+        .AddChoices(new[]{
+                    "Checkout",
+                    "Go back"
+        })
+);
+
+        switch (options)
+        {
+            case "Checkout":
+                Console.Clear();
+                // pay now or pay on pickup
+                AnsiConsole.WriteLine("Choose payment method:");
+                AnsiConsole.Write(
+                    new FigletText("Checkout")
+                        .Centered()
+                        .Color(Color.White));
+                var option1 = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .AddChoices(new[]{
+                            "Pay now",
+                            "Pay on pickup",
+                }));
+
+                switch (option1)
+                {
+                    case "Pay now":
+                        AnsiConsole.WriteLine("[underline]Thank you purchase succesful![/]");
+                        //OrderLogic.ClearCart();
+                        StartScreen.ShowMainMenu();
+                        break;
+                    case "Pay on pickup":
+                        AnsiConsole.WriteLine("[underline]Thank you purchase succesful![/]");
+                        //OrderLogic.ClearCart();
+                        StartScreen.ShowMainMenu();
+                        break;
+                }
+                break;
+            case "Go back":
+                StartScreen.ShowMainMenu();
+                break;
+
+        }
+        StartScreen.ShowMainMenu();
+    }
+
 }
