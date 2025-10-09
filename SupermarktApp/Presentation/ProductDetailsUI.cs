@@ -39,7 +39,5 @@ public static class ProductDetailsUI
         };
 
         AnsiConsole.Write(panel);
-        Console.ReadLine();
-        Console.Clear();
     }
 }
