@@ -1,4 +1,4 @@
 public static class SessionManager
 {
-    public static UserModel CurrentUser { get; set; } = null!;
+    public static UserModel? CurrentUser { get; set; }
 }

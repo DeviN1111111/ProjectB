@@ -5,7 +5,23 @@ public static class ProductAccess
 {
     private const string ConnectionString = "Data Source=database.db";
 
-    public static void InsertProduct(ProductModel product)
+    public static void CreateTable()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Products (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT,
+                Price REAL,
+                NutritionDetails TEXT,
+                Description TEXT,
+                Category TEXT,
+                Quantity INTEGER
+            );
+        ");
+    }
+
+    public static void AddProduct(ProductModel product)
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Products 
@@ -13,19 +29,41 @@ public static class ProductAccess
             VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", product);
     }
 
-    public static void InsertProducts(IEnumerable<ProductModel> products)
+    public static List<ProductModel> SearchProductByName(string name)
     {
         using var db = new SqliteConnection(ConnectionString);
-        foreach (var p in products)
-        {
-            db.Execute(@"INSERT INTO Products 
-                (Name, Price, NutritionDetails, Description, Category, Quantity)
-                VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", p);
-        }
+        string pattern = name.Length == 2 ? $"{name}%" : $"%{name}%";
+        return db.Query<ProductModel>(
+            @"SELECT * FROM Products 
+            WHERE Name LIKE @Name
+            OR
+            Category LIKE @Category
+            LIMIT 10",
+            new { Name = $"{pattern}%", Category = $"{pattern}%"}).ToList();
     }
-    public static List<ProductModel> GetAllProducts()
+
+    public static IEnumerable<ProductModel> GetAllProducts()
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.Query<ProductModel>("SELECT * FROM Products").ToList();
+    }
+
+    public static ProductModel? GetProductByID(int id)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<ProductModel>(
+            "SELECT * FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
+    }
+
+    public static ProductModel GetProductByName(string name)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<ProductModel>(
+            @"SELECT * FROM Products 
+            WHERE Name = @Name",
+            new { Name = name }
+        );
     }
 }
