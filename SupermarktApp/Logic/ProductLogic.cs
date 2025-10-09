@@ -18,7 +18,6 @@ public class ProductLogic
             var key = Console.ReadKey();
             if (key.Key == ConsoleKey.Escape)
                 break;
-            // if (!char.IsControl(key.KeyChar) && char.IsLetter(key.KeyChar))
             if (char.IsLetter(key.KeyChar) || key.Key == ConsoleKey.Spacebar)
                 input += key.KeyChar;
             if (key.Key == ConsoleKey.Backspace && input.Length > 0)
