@@ -36,7 +36,6 @@ public static class OrderAccess
             new { Date = date }
         );
     }
-
     public static int GetMostSoldCountUpToDate(DateTime date)
     {
         using var db = new SqliteConnection(ConnectionString);
@@ -71,8 +70,6 @@ public static class OrderAccess
 
         return results;
     }
-
-
     public static List<ProductSalesDto> SeedProductSalesDto(DateTime fromDate)
     {
         using var db = new SqliteConnection(ConnectionString);
@@ -105,4 +102,44 @@ public static class OrderAccess
         return result;
     }
 
+    public static ProductSalesDto? GetSalesOfSingleProductByID(int productId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+
+        // get productid userid and date
+        var orderData = db.QueryFirstOrDefault<OrdersModel>(
+            @"SELECT ProductID, UserID, Date
+            FROM Orders
+            WHERE ProductID = @ProductID
+            LIMIT 1;",
+            new { ProductID = productId }
+        );
+
+        if (orderData == null)
+            return null; // return null if there is not atleast 1 order
+
+        // count the amount of the same productid is sold
+        int soldCount = db.ExecuteScalar<int>(
+            @"SELECT COUNT(*) FROM Orders WHERE ProductID = @ProductID;",
+            new { ProductID = productId }
+        );
+
+        // get the whole product for the dto
+        var product = db.QueryFirstOrDefault<ProductModel>(
+            @"SELECT * FROM Products WHERE ID = @ProductID;",
+            new { ProductID = productId }
+        );
+
+        if (product == null)
+            return null;
+
+        // Create aDTO to use in the statistics
+        return new ProductSalesDto
+        {
+            Product = product,
+            SoldCount = soldCount,
+            SaleDate = orderData.Date,
+            UserID = orderData.UserID
+        };
+    }
 }

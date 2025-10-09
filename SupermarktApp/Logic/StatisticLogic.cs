@@ -91,6 +91,29 @@ public static class StatisticLogic
         Totals.Clear();
         return chart;
     }
+    public static void CreateBreakdownChartForSingleProduct(ProductModel Product)
+    {
+        ProductSalesDto saleDTO = OrderAccess.GetSalesOfSingleProductByID(Product.ID);
+        if (saleDTO == null)
+        {
+            AnsiConsole.MarkupLine("No sales data available for this product.");
+            return;
+        }
+        double totalProfit = saleDTO.SoldCount * (double)Product.Price;
+        var table = new Table();
+        table.AddColumn("Product Name");
+        table.AddColumn("Units Sold");
+        table.AddColumn("Price per Unit");
+        table.AddColumn("Total Revenue from this product");
+
+        table.AddRow(
+            saleDTO.Product.Name,
+            saleDTO.SoldCount.ToString(),
+            $"{saleDTO.Product.Price} euro",
+            $"{totalProfit} euro"
+        );
+        AnsiConsole.Write(table);
+    }
 
     public static int TotalProfitSince(DateTime date)
     {

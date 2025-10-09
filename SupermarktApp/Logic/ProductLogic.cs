@@ -63,6 +63,7 @@ public class ProductLogic
                 List<string> productNames = [];
                 foreach (ProductModel product in productList)
                 {
+                    
                     productNames.Add(product.Name);
                 }
 

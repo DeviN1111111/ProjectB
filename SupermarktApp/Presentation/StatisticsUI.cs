@@ -21,7 +21,7 @@ public static class StatisticsUI
             new SelectionPrompt<string>()
                 .Title($"Select the [#{Text.ToHex()}]time period[/]")
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Today", "This Week", "This Month", "This Year", "Custom Range", "All Time", "Go back" }));
+                .AddChoices(new[] { "Today", "This Week", "This Month", "This Year", "Custom Range", "All Time", "Search Statistics per product", "Go back" }));
 
         switch (period)
         {
@@ -51,6 +51,9 @@ public static class StatisticsUI
             case "All Time":
                 DisplayStatistics(DateTime.MinValue);
                 break;
+            case "Search Statistics per product":
+                DisplayStatisticsPerProduct(ProductLogic.SearchProductByNameOrCategory());
+                break;
 
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
@@ -74,7 +77,8 @@ public static class StatisticsUI
             {
                 AnsiConsole.WriteLine($"Your total turnover of all time is {totalProfit} euro!");
             }
-            else{
+            else
+            {
                 AnsiConsole.WriteLine($"Your total turnover since {date.ToShortDateString()} is {totalProfit} euro!");
             }
             AnsiConsole.WriteLine();
@@ -109,7 +113,7 @@ public static class StatisticsUI
                     AnsiConsole.Write($"Top 5 most sold items since {date.ToShortDateString()} were: ");
                 }
                 AnsiConsole.WriteLine();
-                AnsiConsole.Write(Table);   
+                AnsiConsole.Write(Table);
             }
 
         }
@@ -118,7 +122,7 @@ public static class StatisticsUI
         Console.ReadLine();
         DisplayMenu();
     }
-    
+
 
     public static DateTime PromptForDate()
     {
@@ -136,5 +140,11 @@ public static class StatisticsUI
             }
             AnsiConsole.MarkupLine("[red]Invalid date format. Please try again.[/]");
         }
+    }
+
+    public static void DisplayStatisticsPerProduct(ProductModel product)
+    {
+        StatisticLogic.CreateBreakdownChartForSingleProduct(product);
+        Console.ReadLine();
     }
 }
