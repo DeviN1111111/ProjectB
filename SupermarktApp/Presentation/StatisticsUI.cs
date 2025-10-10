@@ -133,8 +133,8 @@ public static class StatisticsUI
     {
         while (true)
         {
-            var startDate = AnsiConsole.Ask<string>($"Enter the [#{Text.ToHex()}] start date for the analytics![/]([blue]{firstOrderDate.ToShortDateString()}[/]):");
-            var endDate = AnsiConsole.Ask<string>($"Enter the [#{Text.ToHex()}] end date for the analytics![/]([blue]{DateTime.Now.ToShortDateString()}[/]):");
+            var startDate = AnsiConsole.Prompt(new TextPrompt<string>($"Enter the start date for the analytics!:").DefaultValue(firstOrderDate.ToShortDateString()));
+            var endDate = AnsiConsole.Prompt(new TextPrompt<string>($"Enter the end date for the analytics!:").DefaultValue(DateTime.Now.ToShortDateString()));
 
             if (DateTime.TryParse(startDate, out DateTime startDate1) && DateTime.TryParse(endDate, out DateTime endDate1))
             {
