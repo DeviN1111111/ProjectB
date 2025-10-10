@@ -81,7 +81,7 @@ public static class StatisticsUI
             }
             else
             {
-                AnsiConsole.WriteLine($"Your total turnover from {startDate.ToShortDateString()} till {endDate.ToShortDateString()}is {totalProfit} euro!");
+                AnsiConsole.WriteLine($"Your total turnover from {startDate.ToShortDateString()} till {endDate.ToShortDateString()} is {totalProfit} euro!");
             }
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
