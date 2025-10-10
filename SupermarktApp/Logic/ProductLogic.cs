@@ -33,9 +33,12 @@ public class ProductLogic
             if (input.Length == 0)
             {
                 AnsiConsole.MarkupLine("[blue]Search: [/]");
+                AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
             }
             else
+            {
                 AnsiConsole.MarkupLine($"[blue]Search: {input}[/]");
+            }
 
             var table = new Table();
             table.AddColumn("Name");
@@ -44,7 +47,7 @@ public class ProductLogic
             if (input.Length != 0)
             {
                 List<ProductModel> productList = ProductAccess.SearchProductByName(input);
-
+                AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
                 if (productList.Count == 0)
                 {
                     Console.WriteLine("No products found.");
