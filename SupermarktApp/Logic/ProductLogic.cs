@@ -11,7 +11,7 @@ public class ProductLogic
             .Centered()
             .Color(AsciiPrimary));
         AnsiConsole.MarkupLine("[blue]Search:[/]");
-
+        AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
         string input = "";
         while (true)
         {
