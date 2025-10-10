@@ -13,30 +13,28 @@ public static class OrderAccess
         return db.Query<OrdersModel>("SELECT * FROM Orders");
     }
 
-    public static IEnumerable<OrdersModel> GetOrdersAfterDate(DateTime date)
+    public static DateTime GetDateOfFirstOrder()
     {
         using var db = new SqliteConnection(ConnectionString);
-        return db.Query<OrdersModel>(
-            @"SELECT * FROM Orders
-              WHERE DATE(Date) >= DATE(@Date);",
-            new { Date = date }
+        return db.ExecuteScalar<DateTime>(
+            @"SELECT MIN(Date) FROM Orders;"
         );
     }
 
-    public static OrdersModel? GetMostSoldProductAfterDate(DateTime date)
+    public static OrdersModel? GetMostSoldProductAfterDate(DateTime startDate, DateTime endDate)
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.QueryFirstOrDefault<OrdersModel>(
             @"SELECT ProductID, COUNT(*) AS SoldCount
               FROM Orders
-              WHERE DATE(Date) >= DATE(@Date)
+              WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
               GROUP BY ProductID
               ORDER BY SoldCount DESC
               LIMIT 1;",
-            new { Date = date }
+            new { StartDate = startDate, EndDate = endDate }
         );
     }
-    public static int GetMostSoldCountUpToDate(DateTime date)
+    public static int GetMostSoldCountUpToDate(DateTime startDate, DateTime endDate)
     {
         using var db = new SqliteConnection(ConnectionString);
         int count = db.ExecuteScalar<int>(
@@ -45,41 +43,41 @@ public static class OrderAccess
               WHERE ProductID = (
                   SELECT ProductID
                   FROM Orders
-                  WHERE DATE(Date) >= DATE(@Date)
+                  WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
                   GROUP BY ProductID
                   ORDER BY COUNT(*) DESC
                   LIMIT 1
               );",
-            new { Date = date }
+            new { StartDate = startDate, EndDate = endDate }
         );
         return count;
     }
     
-    public static List<(int ProductID, int SoldCount)> GetTop5MostSoldProductsUpToDate(DateTime date)
+    public static List<(int ProductID, int SoldCount)> GetTop5MostSoldProductsUpToDate(DateTime startDate, DateTime endDate)
     {
         using var db = new SqliteConnection(ConnectionString);
         var results = db.Query<(int ProductID, int SoldCount)>(
             @"SELECT ProductID, COUNT(*) AS SoldCount
             FROM Orders
-            WHERE DATE(Date) >= DATE(@Date)
+            WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
             GROUP BY ProductID
             ORDER BY SoldCount DESC
             LIMIT 5;",
-            new { Date = date }
+            new { StartDate = startDate, EndDate = endDate }
         ).ToList();
 
         return results;
     }
-    public static List<ProductSalesDto> SeedProductSalesDto(DateTime fromDate)
+    public static List<ProductSalesDto> SeedProductSalesDto(DateTime startDate, DateTime endDate)
     {
         using var db = new SqliteConnection(ConnectionString);
 
         var sales = db.Query<(int ProductID, DateTime Date, int UserID, int SoldCount)>(
             @"SELECT o.ProductID, DATE(o.Date) AS Date, o.UserID, COUNT(*) AS SoldCount
             FROM Orders o
-            WHERE DATE(o.Date) >= DATE(@FromDate)
+            WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
             GROUP BY o.ProductID, DATE(o.Date), o.UserID",
-            new { FromDate = fromDate }
+            new { StartDate = startDate, EndDate = endDate }
         );
 
         var result = new List<ProductSalesDto>();

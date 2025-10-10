@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        DatabaseFiller.RunDatabaseMethods(5000);
+        // DatabaseFiller.RunDatabaseMethods(1500);
         // StartScreen.ShowMainMenu();
         // StatisticsUI.DisplayMenu();
         MenuUI.ShowMainMenu();
