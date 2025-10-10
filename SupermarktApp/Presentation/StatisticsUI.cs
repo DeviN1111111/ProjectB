@@ -81,7 +81,7 @@ public static class StatisticsUI
             }
             else
             {
-                AnsiConsole.WriteLine($"Your total turnover since {startDate.ToShortDateString()} is {totalProfit} euro!");
+                AnsiConsole.WriteLine($"Your total turnover from {startDate.ToShortDateString()} till {endDate.ToShortDateString()}is {totalProfit} euro!");
             }
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
@@ -112,7 +112,7 @@ public static class StatisticsUI
                 }
                 else
                 {
-                    AnsiConsole.Write($"Top 5 most sold items since {startDate.ToShortDateString()} were: ");
+                    AnsiConsole.Write($"Top 5 most sold items from {startDate.ToShortDateString()} to {endDate.ToShortDateString()} were: ");
                 }
                 AnsiConsole.WriteLine();
                 AnsiConsole.Write(Table);
