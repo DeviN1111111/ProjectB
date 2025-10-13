@@ -112,10 +112,15 @@ public static class ManagementUI
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
         var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
 
-        ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity);
-        ProductDetailsUI.ShowProductDetails(new ProductModel(name, price, nutritionDetails, description, category, location, quantity));
-        AnsiConsole.MarkupLine($"[green]Succesfully added [red]{name}[/], press enter to continue.[/]");
-        Console.ReadKey();
+        if (ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity))
+        {
+            ProductDetailsUI.ShowProductDetails(new ProductModel(name, price, nutritionDetails, description, category, location, quantity));
+            AnsiConsole.MarkupLine($"[green]Succesfully added [red]{name}[/], press enter to continue.[/]");
+            Console.ReadKey();
+        }
+        else
+            AnsiConsole.MarkupLine("[red]Product already exists.[/]");
+            Console.ReadKey();
     }
     
     public static void DeleteProduct()
