@@ -82,4 +82,12 @@ public static class ProductAccess
             WHERE 
             ID = @ID", newProduct);
     }
+
+    public static void DeleteProductByID(int ID)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(@"DELETE FROM PRODUCTS
+            WHERE
+            ID = @ID", new { ID });
+    }
 }

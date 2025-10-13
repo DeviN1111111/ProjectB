@@ -89,11 +89,22 @@ public class ProductLogic
         }
         return null!;
     }
-    
+
     public static void ChangeProductDetails(int id, string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
     {
         ProductModel NewProduct = new ProductModel(id, name, price, nutritionDetails, description, category, location, quantity);
         ProductAccess.ChangeProductDetails(NewProduct);
         return;
+    }
+
+    public static void DeleteProductByID(int id)
+    {
+        ProductAccess.DeleteProductByID(id);
+    }
+
+    public static void AddProduct(string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    {
+        ProductModel NewProduct = new ProductModel(name, price, nutritionDetails, description, category, location, quantity);
+        ProductAccess.AddProduct(NewProduct);
     }
 }

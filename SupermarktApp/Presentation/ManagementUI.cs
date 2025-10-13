@@ -18,12 +18,20 @@ public static class ManagementUI
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Go back" }));
+                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Go back" }));
 
         switch (period)
         {
             case "Go back":
                 return;
+
+            case "Add new product":
+                AddProduct();
+                break;
+
+            case "Delete product":
+                DeleteProduct();
+                break;
 
             case "Edit product details":
                 ChangeProductDetails();
@@ -33,9 +41,8 @@ public static class ManagementUI
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
         }
-
     }
-    
+
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
@@ -53,6 +60,33 @@ public static class ManagementUI
 
         ProductLogic.ChangeProductDetails(EditProduct.ID, name, price, nutritionDetails, description, category, location, quantity);
         AnsiConsole.MarkupLine("[green]Succesfully edited press enter to continue.[/]");
+        Console.ReadKey();
+    }
+
+    public static void AddProduct()
+    {
+        var name = AnsiConsole.Prompt(new TextPrompt<string>("New name of product:"));
+        var price = AnsiConsole.Prompt(new TextPrompt<double>("New price of product:"));
+        var nutritionDetails = AnsiConsole.Prompt(new TextPrompt<string>("New nutritionDetails of product:"));
+        var description = AnsiConsole.Prompt(new TextPrompt<string>("New description of product:"));
+        var category = AnsiConsole.Prompt(new TextPrompt<string>("New category of product:"));
+        int location;
+        do
+        {
+            location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)"));
+        } while (ValidaterLogic.ValidateLocationProduct(location) == false);
+        var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
+
+        ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity);
+        AnsiConsole.MarkupLine("[green]Succesfully added new product, press enter to continue.[/]");
+        Console.ReadKey();
+    }
+    
+    public static void DeleteProduct()
+    {
+        ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+        ProductLogic.DeleteProductByID(EditProduct.ID);
+        AnsiConsole.MarkupLine("[green]Succesfully deleted product, press enter to continue.[/]");
         Console.ReadKey();
     }
 }
