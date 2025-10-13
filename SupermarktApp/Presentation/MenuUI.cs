@@ -26,7 +26,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
                 // Options when you're logged in as an admin
-                options.AddRange(new[] { "Statistics", "Logout", "Exit" });
+                options.AddRange(new[] { "Management", "Statistics", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             {
@@ -58,7 +58,7 @@ public static class MenuUI
                     ProductUI.SearchProduct();
                     break;
                 case "Management":
-                    //todo
+                    ManagementUI.DisplayMenu();
                     break;
                 case "Statistics":
                     StatisticsUI.DisplayMenu();

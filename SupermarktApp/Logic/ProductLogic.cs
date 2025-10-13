@@ -18,7 +18,7 @@ public class ProductLogic
             var key = Console.ReadKey();
             if (key.Key == ConsoleKey.Escape)
                 break;
-            if (char.IsLetter(key.KeyChar) || key.Key == ConsoleKey.Spacebar)
+            if (char.IsLetter(key.KeyChar) || key.Key == ConsoleKey.Spacebar || char.IsDigit(key.KeyChar))
                 input += key.KeyChar;
             if (key.Key == ConsoleKey.Backspace && input.Length > 0)
                 input = input.Remove(input.Length - 1);
@@ -66,7 +66,7 @@ public class ProductLogic
                 List<string> productNames = [];
                 foreach (ProductModel product in productList)
                 {
-                    
+
                     productNames.Add(product.Name);
                 }
 
@@ -88,5 +88,12 @@ public class ProductLogic
             }
         }
         return null!;
+    }
+    
+    public static void ChangeProductDetails(int id, string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    {
+        ProductModel NewProduct = new ProductModel(id, name, price, nutritionDetails, description, category, location, quantity);
+        ProductAccess.ChangeProductDetails(NewProduct);
+        return;
     }
 }

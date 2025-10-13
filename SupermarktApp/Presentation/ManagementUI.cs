@@ -1,36 +1,41 @@
-using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
 
-public class ProductUI
+public static class ManagementUI
 {
-    public static void SearchProduct()
+    public static readonly Color Text = Color.FromHex("#E8F1F2");
+    public static readonly Color Hover = Color.FromHex("#006494");
+    public static readonly Color Confirm = Color.FromHex("#13293D");
+    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
+    public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
+    public static void DisplayMenu()
     {
-        var product = ProductLogic.SearchProductByNameOrCategory();
-        var options = AnsiConsole.Prompt(
-        new SelectionPrompt<string>()
-            .AddChoices(new[]{
-                "Add to basket",
-                "Show on map",
-                "Show product details",
-                "Go back"
-            })
-        );
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("SuperMart Analytics")
+                .Centered()
+                .Color(AsciiPrimary));
 
-        switch (options)
+        var period = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Edit product details", "Go back" }));
+
+        switch (period)
         {
-            case "Add to basket":
-                break;
-            case "Show on map":
-                MapUI.DisplayMap(product.Location);
-                break;
-            case "Show product details":
-                ProductDetailsUI.ShowProductDetails(product);
-                break;
             case "Go back":
+                return;
+
+            case "Edit product details":
+                ProductUI.ChangeProductDetails();
+                break;
+
+            default:
+                AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
         }
-    }
 
+    }
+    
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();

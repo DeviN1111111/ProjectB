@@ -30,17 +30,17 @@ public static class ProductAccess
     }
 
     public static List<ProductModel> SearchProductByName(string name)
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        string pattern = name.Length == 2 ? $"{name}%" : $"%{name}%";
-        return db.Query<ProductModel>(
-            @"SELECT * FROM Products 
-            WHERE Name LIKE @Name
-            OR
-            Category LIKE @Category
-            LIMIT 10",
-            new { Name = $"{pattern}%", Category = $"{pattern}%"}).ToList();
-    }
+        {
+            using var db = new SqliteConnection(ConnectionString);
+            string pattern = $"{name}%";
+            return db.Query<ProductModel>(
+                @"SELECT * FROM Products 
+                WHERE Name LIKE @Name
+                OR
+                Category LIKE @Category
+                LIMIT 10",
+                new { Name = pattern, Category = pattern }).ToList();
+        }
 
     public static IEnumerable<ProductModel> GetAllProducts()
     {
@@ -57,7 +57,7 @@ public static class ProductAccess
         );
     }
 
-    public static ProductModel GetProductByName(string name)
+    public static ProductModel? GetProductByName(string name)
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.QueryFirstOrDefault<ProductModel>(
@@ -65,5 +65,21 @@ public static class ProductAccess
             WHERE Name = @Name",
             new { Name = name }
         );
+    }
+
+    public static void ChangeProductDetails(ProductModel newProduct)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(@"UPDATE Products
+            SET
+            Name = @Name,
+            Price = @Price,
+            NutritionDetails = @NutritionDetails,
+            Description = @Description,
+            Category = @Category,
+            Location = @Location,
+            Quantity = @Quantity
+            WHERE 
+            ID = @ID", newProduct);
     }
 }
