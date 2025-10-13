@@ -11,7 +11,7 @@ public static class ManagementUI
     {
         Console.Clear();
         AnsiConsole.Write(
-            new FigletText("SuperMart Analytics")
+            new FigletText("Product Management")
                 .Centered()
                 .Color(AsciiPrimary));
 
@@ -46,6 +46,12 @@ public static class ManagementUI
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Change Product Details")
+                .Centered()
+                .Color(AsciiPrimary));
+
         var name = AnsiConsole.Prompt(new TextPrompt<string>("New name of product:").DefaultValue(EditProduct.Name));
         var price = AnsiConsole.Prompt(new TextPrompt<double>("New price of product:").DefaultValue(EditProduct.Price));
         var nutritionDetails = AnsiConsole.Prompt(new TextPrompt<string>("New nutritionDetails of product:").DefaultValue(EditProduct.NutritionDetails));
@@ -65,6 +71,12 @@ public static class ManagementUI
 
     public static void AddProduct()
     {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Add Product")
+                .Centered()
+                .Color(AsciiPrimary));
+
         var name = AnsiConsole.Prompt(new TextPrompt<string>("New name of product:"));
         var price = AnsiConsole.Prompt(new TextPrompt<double>("New price of product:"));
         var nutritionDetails = AnsiConsole.Prompt(new TextPrompt<string>("New nutritionDetails of product:"));
@@ -78,15 +90,39 @@ public static class ManagementUI
         var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
 
         ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity);
-        AnsiConsole.MarkupLine("[green]Succesfully added new product, press enter to continue.[/]");
+        ProductDetailsUI.ShowProductDetails(new ProductModel(name, price, nutritionDetails, description, category, location, quantity));
+        AnsiConsole.MarkupLine($"[green]Succesfully added [red]{name}[/], press enter to continue.[/]");
         Console.ReadKey();
     }
     
     public static void DeleteProduct()
     {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Delete Product")
+                .Centered()
+                .Color(AsciiPrimary));
+
         ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
-        ProductLogic.DeleteProductByID(EditProduct.ID);
-        AnsiConsole.MarkupLine("[green]Succesfully deleted product, press enter to continue.[/]");
-        Console.ReadKey();
+        AnsiConsole.MarkupLine($"Are you sure you want to delete [red]{EditProduct.Name}[/]? This action cannot be undone.");
+        var confirm = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Confirm", "Cancel" }));
+        switch(confirm)
+        {
+            case "Confirm":
+                ProductLogic.DeleteProductByID(EditProduct.ID);
+                Console.Clear();
+                AnsiConsole.Write(
+                new FigletText("Delete Product")
+                    .Centered()
+                    .Color(AsciiPrimary));
+                AnsiConsole.MarkupLine($"[green]Succesfully[/] deleted [red]{EditProduct.Name}[/], press [green]ENTER[/] to continue.");
+                Console.ReadKey();
+                break;
+            case "Cancel":
+                return;
+        }
     }
 }

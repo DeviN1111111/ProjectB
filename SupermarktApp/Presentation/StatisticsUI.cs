@@ -21,7 +21,7 @@ public static class StatisticsUI
             new SelectionPrompt<string>()
                 .Title($"Select the [#{Text.ToHex()}]time period[/]")
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Today", "This Week", "This Month", "This Year", "Custom Range", "All Time", "Search Statistics per product", "Go back" }));
+                .AddChoices(new[] { "Today", "This Week", "This Month", "This Year", "All Time", "Custom Range", "Search Statistics per product", "Go back" }));
 
         switch (period)
         {

@@ -31,7 +31,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             {
                 // Options when you're logged in as a guest
-                options.AddRange(new[] { "Order", "Login", "Register", "Exit" });
+                options.AddRange(new[] { "Order", "Login", "Register", "Go back", "Exit" });
             }
             else
             {
@@ -64,6 +64,9 @@ public static class MenuUI
                     StatisticsUI.DisplayMenu();
                     break;
                 case "Logout":
+                    SessionManager.CurrentUser = null!;
+                    break;
+                case "Go back":
                     SessionManager.CurrentUser = null!;
                     break;
                 case "Exit":
