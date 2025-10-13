@@ -64,9 +64,32 @@ public static class ManagementUI
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
         var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:").DefaultValue(EditProduct.Quantity));
 
-        ProductLogic.ChangeProductDetails(EditProduct.ID, name, price, nutritionDetails, description, category, location, quantity);
-        AnsiConsole.MarkupLine("[green]Succesfully edited press enter to continue.[/]");
-        Console.ReadKey();
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Compare Product Changes")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        ProductDetailsUI.CompareTwoProducts(EditProduct, new ProductModel(name, price, nutritionDetails, description, category, location, quantity));
+        AnsiConsole.MarkupLine($"Are you sure you want to save changes to [red]{EditProduct.Name}[/]?");
+
+        var confirm = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Confirm", "Cancel" }));
+                
+        switch(confirm)
+        {
+            case "Confirm":
+                AnsiConsole.Write(
+                new FigletText("Edit Product")
+                    .Centered()
+                    .Color(AsciiPrimary));
+                ProductLogic.ChangeProductDetails(EditProduct.ID, name, price, nutritionDetails, description, category, location, quantity);
+                break;
+            case "Cancel":
+                return;
+        }
     }
 
     public static void AddProduct()
@@ -97,13 +120,14 @@ public static class ManagementUI
     
     public static void DeleteProduct()
     {
+        ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+    
         Console.Clear();
         AnsiConsole.Write(
             new FigletText("Delete Product")
                 .Centered()
                 .Color(AsciiPrimary));
-
-        ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+                
         AnsiConsole.MarkupLine($"Are you sure you want to delete [red]{EditProduct.Name}[/]? This action cannot be undone.");
         var confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -114,12 +138,6 @@ public static class ManagementUI
             case "Confirm":
                 ProductLogic.DeleteProductByID(EditProduct.ID);
                 Console.Clear();
-                AnsiConsole.Write(
-                new FigletText("Delete Product")
-                    .Centered()
-                    .Color(AsciiPrimary));
-                AnsiConsole.MarkupLine($"[green]Succesfully[/] deleted [red]{EditProduct.Name}[/], press [green]ENTER[/] to continue.");
-                Console.ReadKey();
                 break;
             case "Cancel":
                 return;
