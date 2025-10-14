@@ -8,7 +8,12 @@ public class OrderLogic
 
     public static List<CartModel> AllUserProducts()
     {
-        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(1);
+        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         return allUserProducts;
+    }
+
+    public static void ClearCart()
+    {
+        CartAccess.ClearCart();
     }
 }

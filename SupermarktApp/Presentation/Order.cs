@@ -1,16 +1,34 @@
 using Spectre.Console;
 public class Order
 {
+    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
+
     public static void ShowCart()
     {
         Console.Clear();
         double totalAmount = 0;
-        CartHeader();
-
+        double deliveryFee = 4;
+        bool diliveryFeeChecker = totalAmount < 25 && totalAmount > 0;
         List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
         List<ProductModel> allProducts = ProductAccess.GetAllProducts();  // List of all products
 
-        // Loop through user products in cart
+        // Title
+        AnsiConsole.Write(
+            new FigletText("Cart")
+                .Centered()
+                .Color(AsciiPrimary));
+
+
+        // Cart table
+        var cartTable = new Table()
+            .BorderColor(AsciiPrimary)
+            .AddColumn("[white]Product[/]")
+            .AddColumn("[white]Quantity[/]")
+            .AddColumn("[white]Price[/]")
+            .AddColumn("[white]Total[/]");
+
+
+        // Products in cart
         foreach (var cartProduct in allUserProducts)
         {
             // Get Product id and find match in all products
@@ -18,83 +36,32 @@ public class Order
             {
                 if (cartProduct.ProductId == Product.ID)
                 {
-                    // Create two text elements
-                    var product = new Text($"{Product.Name}", new Style(Color.Red));
-                    var quantity = new Text($"{cartProduct.Quantity}", new Style(Color.Blue));
-                    var price = new Text($"{Product.Price}", new Style(Color.Blue));
-                    totalAmount += Product.Price;
-
-                    // Create, apply padding on text elements
-                    var paddedProduct = new Padder(product).PadRight(2).PadBottom(0).PadTop(0);
-                    var paddedQuantity = new Padder(quantity).PadLeft(20).PadBottom(0).PadTop(0);
-                    var paddedPrice = new Padder(price).PadLeft(2).PadBottom(0).PadTop(0);
-
-                    // Insert the text elements into a single row grid
-                    var row = new Grid();
-
-                    row.AddColumn();
-                    row.AddColumn();
-                    row.AddColumn();
-                    row.AddRow(paddedProduct, paddedQuantity, paddedPrice);
-
-                    // Apply horizontal and vertical padding on the grid
-                    var paddedRow = new Padder(row).Padding(4, 1);
-
-                    // Write the padded grid to the Console
-                    AnsiConsole.Write(paddedRow);
+                    cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"${Product.Price}", $"${Product.Price * cartProduct.Quantity}");
+                    totalAmount += Product.Price * cartProduct.Quantity;
                 }
             }
         }
-        // Total Line
-        var rule = new Rule("Total");
-        rule.Justification = Justify.Left;
-        AnsiConsole.Write(rule);
-        // Total price
-        var product1 = new Text($"12", new Style(Color.Red));
-        var paddedProduct1 = new Padder(product1).PadLeft(41).PadBottom(0).PadTop(0);
-        var row1 = new Grid();
-        row1.AddColumn();
-        row1.AddRow(paddedProduct1);
-        var paddedRow1 = new Padder(row1).Padding(4, 1);
-        AnsiConsole.Write(paddedRow1);
-        // Checkout page
+
+        AnsiConsole.Write(cartTable);
+        AnsiConsole.WriteLine();
+
+        // Summary box
+        var panel = new Panel(
+
+            new Markup($"[bold white]Total:[/] [white]${totalAmount}[/]\n[bold white]Delivery Fee:[/] [white]${(diliveryFeeChecker ? 0 : deliveryFee.ToString())}[/]\n[bold white]Total:[/] [white]${(diliveryFeeChecker ? totalAmount : totalAmount + deliveryFee):F2}[/]"))
+            .Header("[bold white]Summary[/]", Justify.Left)
+            .Border(BoxBorder.Rounded)
+            .BorderColor(AsciiPrimary)
+            .Expand();
+
+        AnsiConsole.Write(panel);
+        AnsiConsole.WriteLine();
+
         Checkout();
-    }
-    public static void CartHeader()
-    {
-        // Get List of user items in cart
-        List<CartModel> allUserProducts = OrderLogic.AllUserProducts();
-        // Create two text elements
-        var productHeader = new Text("Product", new Style(Color.Red));
-        var quantityHeader = new Text("Qty", new Style(Color.Blue));
-        var priceHeader = new Text("Price", new Style(Color.Blue));
-
-        // Create, apply padding on text elements
-        var paddedProductHeader = new Padder(productHeader).PadRight(2).PadBottom(0).PadTop(0);
-        var paddedQuantityHeader = new Padder(quantityHeader).PadLeft(20).PadBottom(0).PadTop(0);
-        var paddedPriceHeader = new Padder(priceHeader).PadLeft(2).PadBottom(0).PadTop(0);
-
-        // Insert the text elements into a single row grid
-        var row = new Grid();
-
-        row.AddColumn();
-        row.AddColumn();
-        row.AddColumn();
-        row.AddRow(paddedProductHeader, paddedQuantityHeader, paddedPriceHeader);
-
-        // Apply horizontal and vertical padding on the grid
-        var paddedRow = new Padder(row).Padding(4, 1);
-
-        // Write the padded grid to the Console
-        AnsiConsole.Write(paddedRow);
     }
     public static void Checkout()
     {
-        // Checkout screen
-        AnsiConsole.Write(
-            new FigletText("Checkout")
-                .Centered()
-                .Color(Color.White));
+        // Checkout or go back options
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
         .AddChoices(new[]{
@@ -123,14 +90,14 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        AnsiConsole.WriteLine("[underline]Thank you purchase succesful![/]");
-                        //OrderLogic.ClearCart();
-                        StartScreen.ShowMainMenu();
+                        AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        OrderLogic.ClearCart();
+                        Thread.Sleep(3000);
                         break;
                     case "Pay on pickup":
-                        AnsiConsole.WriteLine("[underline]Thank you purchase succesful![/]");
-                        //OrderLogic.ClearCart();
-                        StartScreen.ShowMainMenu();
+                        AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        OrderLogic.ClearCart();
+                        Thread.Sleep(3000);
                         break;
                 }
                 break;
@@ -139,6 +106,7 @@ public class Order
                 break;
 
         }
+
         StartScreen.ShowMainMenu();
     }
 

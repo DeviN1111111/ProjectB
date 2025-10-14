@@ -21,8 +21,15 @@ public class CartAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId ";
-        return db.Query<CartModel>(sql,new {UserId = userId}).ToList();
+        return db.Query<CartModel>(sql, new { UserId = userId }).ToList();
     }
-
+    
+    public static void ClearCart()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"DELETE FROM Cart WHERE UserId = @UserId";
+        db.Execute(sql, new { UserId = SessionManager.CurrentUser.ID });
+    }
+       
 
 }
