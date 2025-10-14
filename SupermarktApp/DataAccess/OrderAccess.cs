@@ -73,10 +73,10 @@ public static class OrderAccess
         using var db = new SqliteConnection(ConnectionString);
 
         var sales = db.Query<(int ProductID, DateTime Date, int UserID, int SoldCount)>(
-            @"SELECT o.ProductID, DATE(o.Date) AS Date, o.UserID, COUNT(*) AS SoldCount
-            FROM Orders o
+            @"SELECT ProductID, DATE(Date) AS Date, UserID, COUNT(*) AS SoldCount
+            FROM Orders
             WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
-            GROUP BY o.ProductID, DATE(o.Date), o.UserID",
+            GROUP BY ProductID, DATE(Date), UserID",
             new { StartDate = startDate, EndDate = endDate }
         );
 
@@ -99,6 +99,7 @@ public static class OrderAccess
 
         return result;
     }
+
 
     public static ProductSalesDto? GetSalesOfSingleProductByID(int productId)
     {
