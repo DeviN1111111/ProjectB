@@ -6,6 +6,10 @@ public class ProductUI
     {
         var product = ProductLogic.SearchProductByNameOrCategory();
 
+        if (product == null)
+        {
+            return;
+        }
         ProductDetailsUI.ShowProductDetails(product);
 
         var options = AnsiConsole.Prompt(

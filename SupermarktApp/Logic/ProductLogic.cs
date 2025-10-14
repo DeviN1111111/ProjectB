@@ -102,9 +102,16 @@ public class ProductLogic
         ProductAccess.DeleteProductByID(id);
     }
 
-    public static void AddProduct(string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    public static bool AddProduct(string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
     {
         ProductModel NewProduct = new ProductModel(name, price, nutritionDetails, description, category, location, quantity);
-        ProductAccess.AddProduct(NewProduct);
+        ProductModel? ExistingProductCheck = ProductAccess.GetProductByName(NewProduct.Name);
+        if (ExistingProductCheck == null)
+        {
+            ProductAccess.AddProduct(NewProduct);
+            return true;
+        }
+        else
+            return false;
     }
 }
