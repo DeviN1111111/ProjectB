@@ -46,6 +46,10 @@ public static class ManagementUI
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+        if(EditProduct == null)
+        {
+            return;
+        }
         Console.Clear();
         AnsiConsole.Write(
             new FigletText("Change Product Details")
@@ -126,7 +130,10 @@ public static class ManagementUI
     public static void DeleteProduct()
     {
         ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
-    
+        if(EditProduct == null)
+        {
+            return;
+        }
         Console.Clear();
         AnsiConsole.Write(
             new FigletText("Delete Product")

@@ -54,7 +54,12 @@ public static class StatisticsUI
                 DisplayStatistics(DateTime.MinValue, DateTime.Now);
                 break;
             case "Search Statistics per product":
-                DisplayStatisticsPerProduct(ProductLogic.SearchProductByNameOrCategory());
+                ProductModel product = ProductLogic.SearchProductByNameOrCategory();
+                if(product == null)
+                {
+                    break;
+                }
+                DisplayStatisticsPerProduct(product);
                 break;
 
             default:
