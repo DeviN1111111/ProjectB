@@ -7,10 +7,8 @@ public class Order
     {
         Console.Clear();
         double totalAmount = 0;
-        double deliveryFee = 4;
-        bool diliveryFeeChecker = totalAmount < 25 && totalAmount > 0;
         List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
-        List<ProductModel> allProducts = ProductAccess.GetAllProducts();  // List of all products
+        List<ProductModel> allProducts = ProductAccess.GetAllProducts();  // List of all products dit moet via logic
 
         // Title
         AnsiConsole.Write(
@@ -37,7 +35,7 @@ public class Order
                 if (cartProduct.ProductId == Product.ID)
                 {
                     cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"${Product.Price}", $"${Product.Price * cartProduct.Quantity}");
-                    totalAmount += Product.Price * cartProduct.Quantity;
+                    totalAmount = totalAmount + ( Product.Price * cartProduct.Quantity);
                 }
             }
         }
@@ -45,10 +43,13 @@ public class Order
         AnsiConsole.Write(cartTable);
         AnsiConsole.WriteLine();
 
+        // Calculate delivery fee
+        double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
+
         // Summary box
         var panel = new Panel(
 
-            new Markup($"[bold white]Total:[/] [white]${totalAmount}[/]\n[bold white]Delivery Fee:[/] [white]${(diliveryFeeChecker ? 0 : deliveryFee.ToString())}[/]\n[bold white]Total:[/] [white]${(diliveryFeeChecker ? totalAmount : totalAmount + deliveryFee):F2}[/]"))
+            new Markup($"[bold white]Total:[/] [white]${totalAmount}[/]\n[bold white]Delivery Fee:[/] [white]${deliveryFee}[/]\n[bold white]Total:[/] [white]${totalAmount + deliveryFee}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -91,11 +92,13 @@ public class Order
                 {
                     case "Pay now":
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
                         Thread.Sleep(3000);
                         break;
                     case "Pay on pickup":
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
                         Thread.Sleep(3000);
                         break;
@@ -109,5 +112,4 @@ public class Order
 
         StartScreen.ShowMainMenu();
     }
-
 }

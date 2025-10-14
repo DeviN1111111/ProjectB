@@ -66,4 +66,13 @@ public static class ProductAccess
             new { Name = name }
         );
     }
+
+    public static void UpdateProductStock(int productId, int newQuantity)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(
+            "UPDATE Products SET Quantity = @Quantity WHERE Id = @Id",
+            new { Quantity = newQuantity, Id = productId }
+        );
+    }
 }
