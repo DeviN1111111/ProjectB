@@ -4,7 +4,7 @@ public class ProductUI
 {
     public static void SearchProduct()
     {
-        var product = ProductLogic.SearchProductByNameOrCategory();
+        var product = SearchUI.SearchProductByNameOrCategory();
 
         if (product == null)
         {
@@ -27,7 +27,7 @@ public class ProductUI
                 break;
             case "Go back":
                 break;
-            
+
         }
     }
 }

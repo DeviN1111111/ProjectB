@@ -45,7 +45,7 @@ public static class ManagementUI
 
     public static void ChangeProductDetails()
     {
-        ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+        ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
         if(EditProduct == null)
         {
             return;
@@ -129,7 +129,7 @@ public static class ManagementUI
     
     public static void DeleteProduct()
     {
-        ProductModel EditProduct = ProductLogic.SearchProductByNameOrCategory();
+        ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
         if(EditProduct == null)
         {
             return;
