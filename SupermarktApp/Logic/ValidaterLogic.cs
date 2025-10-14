@@ -17,14 +17,25 @@ public static class ValidaterLogic
 
     public static bool ValidateZipcode(string zipcode)
     {
-        if (zipcode.Length != 6)
+        string zipcodeTrim = zipcode.Replace(" ", "");
+        if (zipcodeTrim.Length != 6)
         {
             return false;
         }
-        if (char.IsDigit(zipcode[0]) && char.IsDigit(zipcode[1]) && char.IsDigit(zipcode[2]) && char.IsDigit(zipcode[3]) && char.IsLetter(zipcode[4]) && char.IsLetter(zipcode[5]))
+        if (char.IsDigit(zipcodeTrim[0]) && char.IsDigit(zipcodeTrim[1]) && char.IsDigit(zipcodeTrim[2]) && char.IsDigit(zipcodeTrim[3]) && char.IsLetter(zipcodeTrim[4]) && char.IsLetter(zipcodeTrim[5]))
         {
             return true;
         }
         return false;
-    } 
+    }
+    
+    public static bool ValidateLocationProduct(int location)
+    {
+        if (location <= 43 && location > 0)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
 }

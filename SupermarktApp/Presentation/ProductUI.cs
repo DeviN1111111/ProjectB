@@ -4,13 +4,18 @@ public class ProductUI
 {
     public static void SearchProduct()
     {
-        var product = ProductLogic.SearchProductByNameOrCategory();
+        var product = SearchUI.SearchProductByNameOrCategory();
+
+        if (product == null)
+        {
+            return;
+        }
+        ProductDetailsUI.ShowProductDetails(product);
+
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .AddChoices(new[]{
-                "Add to basket",
                 "Show on map",
-                "Show product details",
                 "Go back"
             })
         );
@@ -26,11 +31,9 @@ public class ProductUI
             case "Show on map":
                 MapUI.DisplayMap(product.Location);
                 break;
-            case "Show product details":
-                ProductDetailsUI.ShowProductDetails(product);
-                break;
             case "Go back":
                 break;
+
         }
     }
 }

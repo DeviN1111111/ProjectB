@@ -7,9 +7,13 @@ class Program
 {
     static void Main()
     {
-        DatabaseFiller.RunDatabaseMethods();
+        // DatabaseFiller.RunDatabaseMethods(1500);
         // StartScreen.ShowMainMenu();
         // StatisticsUI.DisplayMenu();
-        StartScreen.ShowMainMenu();
+        MenuUI.ShowMainMenu();
     }
 }
+
+// Als out of stock laten zien op search menu dat die out of search is.
+// Product details gelijk laten zien als je product selecteert.
+//

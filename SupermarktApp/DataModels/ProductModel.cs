@@ -20,5 +20,17 @@ public class ProductModel
         Quantity = quantity;
     }
 
+    public ProductModel(int id, string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    {
+        ID = id;
+        Name = name;
+        Price = price;
+        NutritionDetails = nutritionDetails;
+        Description = description;
+        Category = category;
+        Location = location;
+        Quantity = quantity;
+    }
+
     public ProductModel() { }
 }

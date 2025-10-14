@@ -1,5 +1,5 @@
 using Spectre.Console;
-public static class StartScreen
+public static class MenuUI
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static void ShowMainMenu()
@@ -28,6 +28,11 @@ public static class StartScreen
                 // Options when you're logged in as an admin
                 options.AddRange(new[] { "Management", "Statistics", "Logout", "Exit" });
             }
+            else if (SessionManager.CurrentUser.AccountStatus == "Guest")
+            {
+                // Options when you're logged in as a guest
+                options.AddRange(new[] { "Order", "Login", "Register", "Go back", "Exit" });
+            }
             else
             {
                 // Option when account status is unrecognized
@@ -47,7 +52,7 @@ public static class StartScreen
                     LoginUI.Register();
                     break;
                 case "Continue as Guest":
-                    Console.WriteLine("[Continue as Guest placeholder]");
+                    SessionManager.CurrentUser = new UserModel { Name = "Guest", LastName = "Guest", Email = "Guest@gmail.com", Password = "Guest", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Guest", AccountStatus = "Guest" };
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
@@ -57,12 +62,15 @@ public static class StartScreen
                     Order.ShowCart();
                     break;
                 case "Management":
-                    //todo
+                    ManagementUI.DisplayMenu();
                     break;
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
                     break;
                 case "Logout":
+                    SessionManager.CurrentUser = null!;
+                    break;
+                case "Go back":
                     SessionManager.CurrentUser = null!;
                     break;
                 case "Exit":
