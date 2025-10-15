@@ -42,10 +42,10 @@ public static class ProductAccess
                 new { Name = pattern, Category = pattern }).ToList();
         }
 
-    public static IEnumerable<ProductModel> GetAllProducts()
+    public static List<ProductModel> GetAllProducts()
     {
         using var db = new SqliteConnection(ConnectionString);
-        return db.Query<ProductModel>("SELECT * FROM Products");
+        return db.Query<ProductModel>("SELECT * FROM Products").ToList();
     }
 
     public static ProductModel? GetProductByID(int id)
@@ -67,6 +67,14 @@ public static class ProductAccess
         );
     }
 
+    public static void UpdateProductStock(int productId, int newQuantity)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(
+            "UPDATE Products SET Quantity = @Quantity WHERE Id = @Id",
+            new { Quantity = newQuantity, Id = productId }
+        );
+    }
     public static void ChangeProductDetails(ProductModel newProduct)
     {
         using var db = new SqliteConnection(ConnectionString);

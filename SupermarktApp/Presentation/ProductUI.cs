@@ -22,6 +22,12 @@ public class ProductUI
 
         switch (options)
         {
+            case "Add to basket":
+            Console.Clear();
+                Console.WriteLine("How many? ");
+                int quantity = int.Parse(Console.ReadLine()!);
+                OrderLogic.AddToCart(product, quantity);
+                break;
             case "Show on map":
                 MapUI.DisplayMap(product.Location);
                 break;

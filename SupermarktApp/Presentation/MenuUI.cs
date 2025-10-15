@@ -21,7 +21,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Logout", "Exit" });
+                options.AddRange(new[] { "Order", "Cart", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -56,6 +56,10 @@ public static class MenuUI
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
+                    break;
+                case "Cart":
+                    Console.Clear();
+                    Order.ShowCart();
                     break;
                 case "Management":
                     ManagementUI.DisplayMenu();
