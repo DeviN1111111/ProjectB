@@ -76,11 +76,11 @@ public class Order
             case "Checkout":
                 Console.Clear();
                 // pay now or pay on pickup
-                AnsiConsole.WriteLine("Choose payment method:");
                 AnsiConsole.Write(
                     new FigletText("Checkout")
                         .Centered()
                         .Color(Color.White));
+                AnsiConsole.WriteLine("Choose payment method:");
                 var option1 = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                 .AddChoices(new[]{
@@ -92,15 +92,17 @@ public class Order
                 {
                     case "Pay now":
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
-                        Thread.Sleep(3000);
                         break;
                     case "Pay on pickup":
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
-                        Thread.Sleep(3000);
                         break;
                 }
                 break;

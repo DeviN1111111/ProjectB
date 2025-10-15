@@ -24,8 +24,9 @@ public class ProductUI
         switch (options)
         {
             case "Add to basket":
-            Console.Clear();
-                int quantity = AnsiConsole.Prompt(new TextPrompt<int>("How many:"));
+                int quantity = AnsiConsole.Prompt(new TextPrompt<int>("Enter amount:"));
+                AnsiConsole.MarkupLine($"Added [blue]{quantity}[/] [green]{product.Name}[/] to cart, press [green]ENTER[/] to continue");
+                Console.ReadKey();
                 if (quantity > 0)
                 {
                     OrderLogic.AddToCart(product, quantity);
