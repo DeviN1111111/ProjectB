@@ -105,11 +105,7 @@ public class Order
                 }
                 break;
             case "Go back":
-                StartScreen.ShowMainMenu();
-                break;
-
+                return;
         }
-
-        StartScreen.ShowMainMenu();
     }
 }

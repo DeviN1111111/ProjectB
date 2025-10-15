@@ -15,6 +15,7 @@ public class ProductUI
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .AddChoices(new[]{
+                "Add to basket",
                 "Show on map",
                 "Go back"
             })
@@ -24,9 +25,16 @@ public class ProductUI
         {
             case "Add to basket":
             Console.Clear();
-                Console.WriteLine("How many? ");
-                int quantity = int.Parse(Console.ReadLine()!);
-                OrderLogic.AddToCart(product, quantity);
+                int quantity = AnsiConsole.Prompt(new TextPrompt<int>("How many:"));
+                if (quantity > 0)
+                {
+                    OrderLogic.AddToCart(product, quantity);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Can't have negative quantity.[/]");
+                    Console.ReadKey();
+                }
                 break;
             case "Show on map":
                 MapUI.DisplayMap(product.Location);
