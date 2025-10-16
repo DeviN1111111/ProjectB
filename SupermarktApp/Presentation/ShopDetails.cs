@@ -42,5 +42,7 @@ public static class ShopDetails
 
         var columns = new Columns(table, panel);
         AnsiConsole.Write(columns);
+
+        Console.ReadLine();
     }
 }
