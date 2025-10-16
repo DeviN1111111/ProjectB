@@ -12,24 +12,25 @@ public class CartAccess
         db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity });
     }
 
-    public static void RemoveFromCart(int userId, int productId)
-    {
-        using var db = new SqliteConnection(ConnectionString);
-    }
-
     public static List<CartModel> GetAllUserProducts(int userId)
     {
         using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId ";
         return db.Query<CartModel>(sql, new { UserId = userId }).ToList();
     }
-    
+
     public static void ClearCart()
     {
         using var db = new SqliteConnection(ConnectionString);
         var sql = $"DELETE FROM Cart WHERE UserId = @UserId";
         db.Execute(sql, new { UserId = SessionManager.CurrentUser.ID });
     }
-       
+
+   public static void RemoveFromCart(int userId, int productId)
+   {
+       using var db = new SqliteConnection(ConnectionString);
+       var sql = $"DELETE FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
+       db.Execute(sql, new { UserId = userId, ProductId = productId });
+   }
 
 }

@@ -35,7 +35,7 @@ public class Order
                 if (cartProduct.ProductId == Product.ID)
                 {
                     cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"${Product.Price}", $"${Product.Price * cartProduct.Quantity}");
-                    totalAmount = totalAmount + ( Product.Price * cartProduct.Quantity);
+                    totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
                 }
             }
         }
@@ -58,16 +58,18 @@ public class Order
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
-        Checkout();
+        Checkout(allUserProducts, allProducts);
     }
-    public static void Checkout()
+    public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts)
     {
         // Checkout or go back options
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
         .AddChoices(new[]{
-                    "Checkout",
-                    "Go back"
+
+            "Checkout",
+            "Remove items",
+            "Go back"
         })
 );
 
@@ -75,6 +77,13 @@ public class Order
         {
             case "Checkout":
                 Console.Clear();
+                // check if cart is empty
+                if (cartProducts.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+                    Thread.Sleep(1500);
+                    return;
+                }
                 // pay now or pay on pickup
                 AnsiConsole.Write(
                     new FigletText("Checkout")
@@ -106,8 +115,69 @@ public class Order
                         break;
                 }
                 break;
+
+            case "Remove items":
+                RemoveFromCart(cartProducts, allProducts);
+                break;
+
             case "Go back":
-                return;
+                break;
+
         }
+        return;
+    }
+
+    public static void RemoveFromCart(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    {
+        // Build list of item names
+        var cartChoices = new List<string>();
+        foreach (var item in cartProducts)
+        {
+            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+            if (product != null)
+                cartChoices.Add($"{product.Name} (x{item.Quantity})");
+        }
+
+        if (cartChoices.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+            Thread.Sleep(1500);
+            return;
+        }
+
+        var itemsToRemove = AnsiConsole.Prompt(
+            new MultiSelectionPrompt<string>()
+                .Title("[bold white]Select items to remove from your cart:[/]")
+                .NotRequired()
+                .PageSize(10)
+                .MoreChoicesText("[grey](Use ↑/↓ to navigate, [blue]<space>[/] to select, [green]<enter>[/] to confirm)[/]")
+                .AddChoices(cartChoices)
+        );
+
+        if (itemsToRemove.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No items selected.[/]");
+            Thread.Sleep(1000);
+            return;
+        }
+
+        // Actually remove items
+        foreach (var choice in itemsToRemove)
+        {
+            var productName = choice.Split(" (x")[0];
+            var product = allProducts.FirstOrDefault(Product => Product.Name == productName);
+            if (product != null)
+                RemoveItemFromCart(product.ID);
+        }
+
+        AnsiConsole.MarkupLine("[green]Selected items have been removed![/]");
+        Thread.Sleep(1500);
+
+        // Refresh cart view
+        ShowCart();
+    }
+    private static void RemoveItemFromCart(int productId)
+    {
+        OrderLogic.RemoveFromCart(productId);
     }
 }
