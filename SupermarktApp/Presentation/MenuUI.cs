@@ -31,7 +31,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             {
                 // Options when you're logged in as a guest
-                options.AddRange(new[] { "Order", "Login", "Register", "Go back", "Exit" });
+                options.AddRange(new[] { "Order", "Cart", "Login", "Register", "Go back", "Exit" });
             }
             else
             {

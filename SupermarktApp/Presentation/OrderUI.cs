@@ -49,7 +49,7 @@ public class Order
         // Summary box
         var panel = new Panel(
 
-            new Markup($"[bold white]Total:[/] [white]${totalAmount}[/]\n[bold white]Delivery Fee:[/] [white]${deliveryFee}[/]\n[bold white]Total:[/] [white]${totalAmount + deliveryFee}[/]"))
+            new Markup($"[bold white]Total:[/] [white]${Math.Round(totalAmount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]\n[bold white]Total:[/] [white]${Math.Round(totalAmount + deliveryFee, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
