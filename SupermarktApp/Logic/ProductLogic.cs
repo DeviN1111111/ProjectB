@@ -2,123 +2,38 @@ using Spectre.Console;
 
 public class ProductLogic
 {
-    public static ProductModel SearchProductByName()
+    public static void ChangeProductDetails(int id, string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
     {
-        string input = "";
-        while (true)
-        {
-            var key = Console.ReadKey();
-            if (key.Key == ConsoleKey.Escape)
-                break;
-
-            if (!char.IsControl(key.KeyChar))
-            {
-                input += key.KeyChar;
-            }
-            if (key.Key == ConsoleKey.Backspace && input.Length > 0)
-            {
-                input = input.Remove(input.Length - 1);
-            }
-
-            Console.Clear();
-            if (input.Length == 0)
-            {
-                Console.WriteLine("Search: ");
-            }
-            else
-            {
-                Console.WriteLine($"Search: {input}");
-            }
-
-
-            if (input.Length != 0)
-            {
-                List<ProductModel> productList = ProductAccess.SearchProductByName(input);
-                if (productList.Count == 0)
-                {
-                    Console.WriteLine("No products found.");
-                    continue;
-                }
-
-                foreach (ProductModel product in productList)
-                {
-                    Console.WriteLine(product.Name);
-                }
-
-                List<string> List1 = [];
-                foreach (ProductModel product in productList)
-                {
-                    List1.Add(product.Name);
-                }
-
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    var product = AnsiConsole.Prompt(
-                        new SelectionPrompt<string>()
-                            .Title("Select a product")
-                            .PageSize(10)
-                            .MoreChoicesText("[grey](Move up and down to select)[/]")
-                            .AddChoices(List1));
-
-                    return ProductAccess.GetProductByName(product);
-                }
-            }
-        }
-        return null!;
+        ProductModel NewProduct = new ProductModel(id, name, price, nutritionDetails, description, category, location, quantity);
+        ProductAccess.ChangeProductDetails(NewProduct);
+        return;
     }
 
-    public static List<ProductModel> SearchProductByCategory()
+    public static void DeleteProductByID(int id)
     {
-        string input = "";
-        while (true)
+        ProductAccess.DeleteProductByID(id);
+    }
+
+    public static bool AddProduct(string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    {
+        ProductModel NewProduct = new ProductModel(name, price, nutritionDetails, description, category, location, quantity);
+        ProductModel? ExistingProductCheck = ProductAccess.GetProductByName(NewProduct.Name);
+        if (ExistingProductCheck == null)
         {
-            var key = Console.ReadKey();
-            if (key.Key == ConsoleKey.Escape)
-                break;
-
-            if (!char.IsControl(key.KeyChar))
-            {
-                input += key.KeyChar;
-            }
-            if (key.Key == ConsoleKey.Backspace && input.Length > 0)
-            {
-                input = input.Remove(input.Length - 1);
-            }
-
-            Console.Clear();
-            if (input.Length == 0)
-            {
-                Console.WriteLine("Search: ");
-            }
-            else
-            {
-                Console.WriteLine($"Search: {input}");
-            }
-
-            if (input.Length != 0)
-            {
-                List<ProductModel> productList = ProductAccess.SearchProductByCategory(input);
-                if (productList.Count == 0)
-                {
-                    Console.WriteLine("No categories found.");
-                    continue;
-                }
-
-                foreach (ProductModel product in productList.DistinctBy(productmodel => productmodel.Category))
-                {
-                    Console.WriteLine(product.Category);
-                }
-
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    foreach (ProductModel product in productList)
-                    {
-                        Console.WriteLine(product.Name);
-                    }
-                    return productList;
-                }
-            }
+            ProductAccess.AddProduct(NewProduct);
+            return true;
         }
-        return null!;
+        else
+            return false;
+    }
+
+    public static List<ProductModel> SearchProductByName(string name)
+    {
+        return ProductAccess.SearchProductByName(name);
+    }
+
+    public static ProductModel GetProductByName(string name)
+    {
+        return ProductAccess.GetProductByName(name);
     }
 }

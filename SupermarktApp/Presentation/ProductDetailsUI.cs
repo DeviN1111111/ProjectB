@@ -31,4 +31,44 @@ public static class ProductDetailsUI
 
         AnsiConsole.Write(panel);
     }
+    
+    public static void CompareTwoProducts(ProductModel product1, ProductModel product2)
+    {
+        var beforeEditTable = new Table()
+            .Title("[yellow]Before EDIT:[/]")
+            .AddColumn("Field")
+            .AddColumn("Value");
+
+
+        beforeEditTable.AddRow("Name", product1.Name);
+        beforeEditTable.AddRow("Price", product1.Price.ToString("C"));
+        beforeEditTable.AddRow("Nutrition", product1.NutritionDetails);
+        beforeEditTable.AddRow("Description", product1.Description);
+        beforeEditTable.AddRow("Category", product1.Category);
+        beforeEditTable.AddRow("Location", product1.Location.ToString());
+        beforeEditTable.AddRow("Quantity", product1.Quantity.ToString());
+
+        var afterTable = new Table()
+            .Title("[green]After EDIT:[/]")
+            .AddColumn("Field")
+            .AddColumn("Value");
+
+        afterTable.AddRow("Name", product2.Name);
+        afterTable.AddRow("Price", product2.Price.ToString("C"));
+        afterTable.AddRow("Nutrition", product2.NutritionDetails);
+        afterTable.AddRow("Description", product2.Description);
+        afterTable.AddRow("Category", product2.Category);
+        afterTable.AddRow("Location", product2.Location.ToString());
+        afterTable.AddRow("Quantity", product2.Quantity.ToString());
+
+        var grid = new Grid();
+        grid.AddColumn();
+        grid.AddColumn();
+        grid.AddRow(beforeEditTable, afterTable);
+
+        var panel = new Panel(grid)
+            .Header("[bold cyan]Product Edit Comparison[/]")
+            .Border(BoxBorder.Double);
+        AnsiConsole.Write(panel);
+        }
 }

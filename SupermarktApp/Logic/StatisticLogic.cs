@@ -3,9 +3,9 @@ using Spectre.Console;
 
 public static class StatisticLogic
 {
-    public static ProductModel MostSoldItem(DateTime date)
+    public static ProductModel MostSoldItem(DateTime startDate, DateTime endDate)
     {
-        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(date);
+        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate);
 
         if (MostSold == null)
         {
@@ -22,22 +22,22 @@ public static class StatisticLogic
         return MostSoldProduct;
     }
 
-    public static int MostSoldItemCount(DateTime date)
+    public static int MostSoldItemCount(DateTime startDate, DateTime endDate)
     {
-        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(date);
+        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate);
 
         if (MostSold == null)
         {
             return 0;
         }
 
-        int count = OrderAccess.GetMostSoldCountUpToDate(date);
+        int count = OrderAccess.GetMostSoldCountUpToDate(startDate, endDate);
         return count;
     }
 
-    public static List<ProductSalesDto> GetProductSalesData(DateTime date)
+    public static List<ProductSalesDto> GetProductSalesData(DateTime startDate, DateTime endDate)
     {
-        List<ProductSalesDto> sales = OrderAccess.SeedProductSalesDto(date);
+        List<ProductSalesDto> sales = OrderAccess.SeedProductSalesDto(startDate, endDate);
         if (sales == null)
         {
             return null;
@@ -91,10 +91,35 @@ public static class StatisticLogic
         Totals.Clear();
         return chart;
     }
-
-    public static int TotalProfitSince(DateTime date)
+    public static Table CreateBreakdownChartForSingleProduct(ProductModel Product)
     {
-        List<ProductSalesDto> sales = GetProductSalesData(date);
+        ProductSalesDto saleDTO = OrderAccess.GetSalesOfSingleProductByID(Product.ID);
+        if (saleDTO == null)
+        {
+            return null;
+        }
+        double totalProfit = saleDTO.SoldCount * (double)Product.Price;
+        double roundedValue = Math.Round(totalProfit, 2);
+        var table = new Table();
+        table.AddColumn("Product Name");
+        table.AddColumn("Units Sold");
+        table.AddColumn("Price per Unit");
+        table.AddColumn("Total Revenue from this product");
+        table.AddColumn("Stock left");
+
+        table.AddRow(
+            saleDTO.Product.Name,
+            saleDTO.SoldCount.ToString(),
+            $"{saleDTO.Product.Price} euro",
+            $"{roundedValue} euro",
+            saleDTO.Product.Quantity.ToString()
+        );
+        return table;
+    }
+
+    public static int TotalProfitSince(DateTime startDate, DateTime endDate)
+    {
+        List<ProductSalesDto> sales = GetProductSalesData(startDate, endDate);
         if (sales == null)
         {
             return 0;
@@ -108,7 +133,7 @@ public static class StatisticLogic
         return totalProfit;
     }
 
-    public static Table CreateMostSoldTable(DateTime date)
+    public static Table CreateMostSoldTable(DateTime startDate, DateTime endDate)
     {
         var table = new Table();
         table.AddColumn("Product Name");
@@ -117,7 +142,7 @@ public static class StatisticLogic
         table.AddColumn("Price per Unit");
         table.AddColumn("Total Revenue from this product");
 
-        var topSales = OrderAccess.GetTop5MostSoldProductsUpToDate(date);
+        var topSales = OrderAccess.GetTop5MostSoldProductsUpToDate(startDate, endDate);
         if (topSales == null || topSales.Count == 0)
         {
             table.AddRow("No sales data available", "-", "-", "-", "-");
@@ -130,11 +155,18 @@ public static class StatisticLogic
             if (product != null)
             {
                 double totalRevenue = (double)(product.Price * (double)sale.SoldCount);
-                table.AddRow(product.Name, sale.SoldCount.ToString(), product.Category, $"{product.Price} euro", $"{totalRevenue} euro");
+                double roundedtotalRevenue = Math.Round(totalRevenue, 2);
+                table.AddRow(product.Name, sale.SoldCount.ToString(), product.Category, $"{product.Price} euro", $"{roundedtotalRevenue} euro");
             }
         }
 
         return table;
+    }
+    
+    public static DateTime GetDateOfFirstOrder()
+    {
+        DateTime firstOrderDate = OrderAccess.GetDateOfFirstOrder();
+        return firstOrderDate;
     }
 
 }
