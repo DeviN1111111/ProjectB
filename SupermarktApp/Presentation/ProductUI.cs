@@ -26,36 +26,39 @@ public class ProductUI
             case "Add to basket":
                 while(true)
                 {
-                    Console.Clear();
-                    Console.WriteLine("Enter quantity to add to cart (max 20): ");
+                    Console.WriteLine("Enter quantity to add to cart (max 99): ");
                     if (!int.TryParse(Console.ReadLine(), out int quantity))
                     {
                         Console.WriteLine("Invalid input. Please enter a number.");
-                        Thread.Sleep(2000);
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         continue;
 
                     }
                     else
                     {
-                        if (quantity > 20 && quantity > product.Quantity)
+                        if (quantity > 99 || quantity > product.Quantity)
                         {
-                            if (product.Quantity < 20)
+                            if (product.Quantity < 99)
                             {
                                 Console.WriteLine($"Only {product.Quantity} items in stock. Please enter a valid quantity.");
-                                Thread.Sleep(2000);
+                                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                                Console.ReadKey();
                                 continue;
                             }
                             else
                             {
-                                Console.WriteLine($"Only {20} items in stock. Please enter a valid quantity.");
-                                Thread.Sleep(2000);
+                                Console.WriteLine($"Max 99 items Please enter a valid quantity.");
+                                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                                Console.ReadKey();
                                 continue;
                             }
                         }
                         else if (quantity <= 0)
                         {
                             Console.WriteLine("Quantity must be at least 1. Please enter a valid quantity.");
-                            Thread.Sleep(2000);
+                            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                            Console.ReadKey();
                             continue;
                         } 
                     }

@@ -9,9 +9,9 @@ public class OrderLogic
         if (CartItem != null)
         {
             int newQuantity = CartItem.Quantity + quantity;
-            if (newQuantity > 20)
+            if (newQuantity > 99)
             {
-                newQuantity = 20; // max stock limit
+                newQuantity = 99; // max stock limit
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
             CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity);

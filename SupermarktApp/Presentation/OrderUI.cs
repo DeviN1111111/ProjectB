@@ -81,7 +81,8 @@ public class Order
                 if (cartProducts.Count == 0)
                 {
                     AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
-                    Thread.Sleep(1500);
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
                     return;
                 }
                 // pay now or pay on pickup
@@ -141,7 +142,8 @@ public class Order
         if (cartChoices.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
-            Thread.Sleep(1500);
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
             return;
         }
 
@@ -157,7 +159,8 @@ public class Order
         if (itemsToRemove.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No items selected.[/]");
-            Thread.Sleep(1000);
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
             return;
         }
 
@@ -171,7 +174,8 @@ public class Order
         }
 
         AnsiConsole.MarkupLine("[green]Selected items have been removed![/]");
-        Thread.Sleep(1500);
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();
 
         // Refresh cart view
         ShowCart();
