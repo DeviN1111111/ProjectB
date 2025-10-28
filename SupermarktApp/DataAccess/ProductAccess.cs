@@ -25,8 +25,8 @@ public static class ProductAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Products 
-            (Name, Price, NutritionDetails, Description, Category, Quantity)
-            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", product);
+            (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
+            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity)", product);
     }
 
     public static List<ProductModel> SearchProductByName(string name)
