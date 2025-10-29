@@ -73,13 +73,6 @@ public class ManageAdminUI
             return;
         }
 
-        // string NewRole;
-        // do
-        // {
-        //     AnsiConsole.MarkupLine("Choose between [blue]User[/], [yellow]Admin[/], [green]SuperAdmin[/]");
-        //     NewRole = AnsiConsole.Prompt(new TextPrompt<string>("New role: "));
-        // } while (NewRole != "User" && NewRole != "Admin" && NewRole != "SuperAdmin");
-
         var NewRole = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[blue]Select a role.[/]")
@@ -141,18 +134,35 @@ public class ManageAdminUI
 
         string[] NewDelete = UserToDelete.Replace(" ", "").Split("/");
 
-        if (AdminLogic.DeleteUser(Convert.ToInt32(NewDelete[0])) == true)
+        AnsiConsole.MarkupLine($"Are you sure you want to delete [red]{NewDelete[1]}[/]? This action cannot be undone.");
+        bool ConfirmForLines = false;
+
+        var Confirm = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Confirm", "Cancel" }));
+        
+        switch (Confirm)
         {
-            AnsiConsole.MarkupLine("[green]Succesfully deleted user.[/]");
+            case "Confirm":
+                ConfirmForLines = AdminLogic.DeleteUser(Convert.ToInt32(NewDelete[0]));
+                break;
+            case "Cancel":
+                return;
+        }
+
+        if (ConfirmForLines)
+        {
+            AnsiConsole.MarkupLine("[green]Successfully deleted user.[/]");
             Console.ReadKey();
         }
         else
         {
             Console.Clear();
             AnsiConsole.Write(
-            new FigletText("ERROR")
-                .Centered()
-                .Color(AsciiPrimary));
+                new FigletText("ERROR")
+                    .Centered()
+                    .Color(AsciiPrimary));
             AnsiConsole.MarkupLine("[yellow]You can't delete yourself![/]");
             Console.ReadKey();
         }
