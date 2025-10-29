@@ -38,7 +38,6 @@ public class DatabaseFiller
                 Email TEXT UNIQUE NOT NULL,
                 Password TEXT NOT NULL,
                 Address TEXT,
-                HouseNumber INTEGER,
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
@@ -118,7 +117,8 @@ public class DatabaseFiller
         UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user1 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user2 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
-        UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin"};
+        UserModel SuperAdmin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "SuperAdmin" };
+        UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "aa", Password = "aa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin"};
 
         var categoryProducts = new Dictionary<string, List<string>>
         {
@@ -197,6 +197,7 @@ public class DatabaseFiller
                 InsertUser(user1); userTask.Increment(1);
                 InsertUser(user2); userTask.Increment(1);
                 InsertUser(admin); userTask.Increment(1);
+                InsertUser(SuperAdmin); userTask.Increment(1);
 
                 foreach (var product in products)
                 {

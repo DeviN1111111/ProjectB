@@ -14,9 +14,9 @@ public class LoginLogic
         return null!;
     }
 
-    public static List<string> Register(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city)
+    public static List<string> Register(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city, string AccountStatus = "User")
     {
-        UserModel user = new UserModel(name, lastName, email, password, address, zipcode, phoneNumber, city);
+        UserModel user = new UserModel(name, lastName, email, password, address, zipcode, phoneNumber, city, AccountStatus);
 
         List<string> Errors = [];
 

@@ -33,6 +33,11 @@ public static class MenuUI
                 // Options when you're logged in as a guest
                 options.AddRange(new[] { "Order", "Cart", "Login", "Register", "Go back", "Exit" });
             }
+            else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
+            {
+                // Options when you're logged in as a guest
+                options.AddRange(new[] { "Management", "Statistics", "Manage admin" ,"Logout", "Exit" });
+            }
             else
             {
                 // Option when account status is unrecognized
@@ -66,6 +71,9 @@ public static class MenuUI
                     break;
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
+                    break;
+                case "Manage admin":
+                    ManageAdminUI.DisplayMenu();
                     break;
                 case "Logout":
                     SessionManager.CurrentUser = null!;
