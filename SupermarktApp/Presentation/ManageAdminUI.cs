@@ -73,7 +73,6 @@ public class ManageAdminUI
             AnsiConsole.MarkupLine("Choose between [blue]User[/], [yellow]Admin[/], [green]SuperAdmin[/]"); 
             NewRole = AnsiConsole.Prompt(new TextPrompt<string>("New role: "));
         } while (NewRole != "User" && NewRole != "Admin" && NewRole != "SuperAdmin");
-        AnsiConsole.WriteLine();
 
         string[] UserID = UserToChangeRole.Replace(" ", "").Split("/");
         if(AdminLogic.ChangeRole(Convert.ToInt32(UserID[0]), NewRole) == true)
