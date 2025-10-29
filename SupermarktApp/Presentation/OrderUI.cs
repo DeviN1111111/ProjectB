@@ -46,10 +46,13 @@ public class Order
         // Calculate delivery fee
         double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
 
+        // Calculate total discount
+        double discount = OrderLogic.CalculateTotalDiscount();
+
         // Summary box
         var panel = new Panel(
-
-            new Markup($"[bold white]Total:[/] [white]${Math.Round(totalAmount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]\n[bold white]Total:[/] [white]${Math.Round(totalAmount + deliveryFee, 2)}[/]"))
+            // new Markup($"[bold white]Price:[/] [white]${Math.Round(totalAmount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]\n[bold white]Discount:[/] [white]${discount}[/]\n[bold white]Total price:[/] [white]${Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
+            new Markup($"[bold white]Total price:[/] [white]${Math.Round(totalAmount + deliveryFee - discount, 2)}[/]\n[bold white]Discount:[/] [white]${discount}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -57,10 +60,11 @@ public class Order
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
+        double finalAmount = totalAmount + deliveryFee - discount;
 
-        Checkout(allUserProducts, allProducts);
+        Checkout(allUserProducts, allProducts, finalAmount);
     }
-    public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount)
     {
         // Checkout or go back options
         var options = AnsiConsole.Prompt(
@@ -85,6 +89,9 @@ public class Order
                     Console.ReadKey();
                     return;
                 }
+                // Add reward points to user
+                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
+                RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 AnsiConsole.Write(
                     new FigletText("Checkout")
@@ -101,14 +108,16 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
-                        AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();

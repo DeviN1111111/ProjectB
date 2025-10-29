@@ -1,9 +1,8 @@
 public class OrderLogic
 {
-    public static void AddToCart(ProductModel product, int quantity)
+    public static void AddToCart(ProductModel product, int quantity, double discount = 0)
     {
         // check if product already in cart
-        
         List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartItem != null)
@@ -14,11 +13,11 @@ public class OrderLogic
                 newQuantity = 99; // max stock limit
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
-            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity);
+            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount);
             return;
         }
         // add new item to cart
-        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity);
+        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity, discount);
     }
 
     public static List<CartModel> AllUserProducts()
@@ -67,10 +66,21 @@ public class OrderLogic
             }
         }
     }
-    
+
     // remove a product from cart by product id
     public static void RemoveFromCart(int productId)
     {
         CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, productId);
+    }
+    public static double CalculateTotalDiscount()
+    {
+        if (SessionManager.CurrentUser == null) return 0;
+        var allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        double totalDiscount = 0;
+        foreach (var item in allUserProducts)
+        {
+            totalDiscount += item.Discount * item.Quantity;
+        }
+        return Math.Round(totalDiscount, 2);
     }
 }
