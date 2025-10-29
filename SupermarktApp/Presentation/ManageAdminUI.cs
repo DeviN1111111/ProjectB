@@ -73,12 +73,23 @@ public class ManageAdminUI
             return;
         }
 
-        string NewRole;
-        do
+        // string NewRole;
+        // do
+        // {
+        //     AnsiConsole.MarkupLine("Choose between [blue]User[/], [yellow]Admin[/], [green]SuperAdmin[/]");
+        //     NewRole = AnsiConsole.Prompt(new TextPrompt<string>("New role: "));
+        // } while (NewRole != "User" && NewRole != "Admin" && NewRole != "SuperAdmin");
+
+        var NewRole = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[blue]Select a role.[/]")
+                .PageSize(10)
+                .AddChoices("User", "Admin", "SuperAdmin", "Go back"));
+                
+        if (NewRole == "Go back")
         {
-            AnsiConsole.MarkupLine("Choose between [blue]User[/], [yellow]Admin[/], [green]SuperAdmin[/]"); 
-            NewRole = AnsiConsole.Prompt(new TextPrompt<string>("New role: "));
-        } while (NewRole != "User" && NewRole != "Admin" && NewRole != "SuperAdmin");
+            return;
+        }
 
         string[] UserID = UserToChangeRole.Replace(" ", "").Split("/");
         if(AdminLogic.ChangeRole(Convert.ToInt32(UserID[0]), NewRole) == true)
