@@ -54,6 +54,7 @@ public class ManageAdminUI
 
         List<UserModel> AllUsers = AdminLogic.GetAllUsers();
         List<string> UsersToDeleteList = [];
+        UsersToDeleteList.Add("Go back");
         foreach (UserModel user in AllUsers)
         {
             UsersToDeleteList.Add($"{user.ID} / {user.Name} / {user.AccountStatus}");
@@ -64,8 +65,13 @@ public class ManageAdminUI
         var UserToChangeRole = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[blue]Select a User to change role.[/]")
-                .PageSize(3)
+                .PageSize(10)
                 .AddChoices(UsersToDeleteList));
+
+        if (UserToChangeRole == "Go back")
+        {
+            return;
+        }
 
         string NewRole;
         do
@@ -102,6 +108,7 @@ public class ManageAdminUI
 
         List<UserModel> AllUsers = AdminLogic.GetAllUsers();
         List<string> UsersToDeleteList = [];
+        UsersToDeleteList.Add("Go back");
         foreach (UserModel user in AllUsers)
         {
             UsersToDeleteList.Add($"{user.ID} / {user.Name} / {user.AccountStatus}");
@@ -112,9 +119,13 @@ public class ManageAdminUI
         var UserToDelete = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[blue]Select a User to delete.[/]")
-                .PageSize(3)
+                .PageSize(10)
                 .AddChoices(UsersToDeleteList));
-
+        
+        if (UserToDelete == "Go back")
+        {
+            return;
+        }
         AnsiConsole.WriteLine();
 
         string[] NewDelete = UserToDelete.Replace(" ", "").Split("/");
