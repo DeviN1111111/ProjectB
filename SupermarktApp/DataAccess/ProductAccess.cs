@@ -5,28 +5,12 @@ public static class ProductAccess
 {
     private const string ConnectionString = "Data Source=database.db";
 
-    public static void CreateTable()
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"
-            CREATE TABLE IF NOT EXISTS Products (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT,
-                Price REAL,
-                NutritionDetails TEXT,
-                Description TEXT,
-                Category TEXT,
-                Quantity INTEGER
-            );
-        ");
-    }
-
     public static void AddProduct(ProductModel product)
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Products 
-            (Name, Price, NutritionDetails, Description, Category, Quantity)
-            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Quantity)", product);
+            (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
+            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity)", product);
     }
 
     public static List<ProductModel> SearchProductByName(string name)
