@@ -10,37 +10,40 @@ public class ManageAdminUI
     public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Manage Users")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var period = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Add User", "Delete User", "Change Role", "Go back" }));
-
-        switch (period)
+        while (true)
         {
-            case "Go back":
-                return;
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Manage Users")
+                    .Centered()
+                    .Color(AsciiPrimary));
 
-            case "Add User":
-                AddUser();
-                break;
+            var period = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(new[] { "Add User", "Delete User", "Change Role", "Go back" }));
 
-            case "Delete User":
-                DeleteUser();
-                break;
+            switch (period)
+            {
+                case "Go back":
+                    return;
 
-            case "Change Role":
-                ChangeRole();
-                break;
+                case "Add User":
+                    AddUser();
+                    break;
 
-            default:
-                AnsiConsole.MarkupLine("[red]Invalid selection[/]");
-                break;
+                case "Delete User":
+                    DeleteUser();
+                    break;
+
+                case "Change Role":
+                    ChangeRole();
+                    break;
+
+                default:
+                    AnsiConsole.MarkupLine("[red]Invalid selection[/]");
+                    break;
+            }
         }
     }
 
