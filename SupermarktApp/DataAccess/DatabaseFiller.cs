@@ -40,7 +40,6 @@ public class DatabaseFiller
                 Email TEXT UNIQUE NOT NULL,
                 Password TEXT NOT NULL,
                 Address TEXT,
-                HouseNumber INTEGER,
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
@@ -216,6 +215,7 @@ public class DatabaseFiller
                 InsertUser(user1); userTask.Increment(1);
                 InsertUser(user2); userTask.Increment(1);
                 InsertUser(admin); userTask.Increment(1);
+                InsertUser(SuperAdmin); userTask.Increment(1);
 
                 foreach (var product in products)
                 {

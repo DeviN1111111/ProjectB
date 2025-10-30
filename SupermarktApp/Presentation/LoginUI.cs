@@ -78,18 +78,6 @@ public static class LoginUI
                 Console.ReadKey();
                 break;
             }
-            // else
-            // {
-            //     AnsiConsole.MarkupLine("[red]Registration unsuccessful![/]");
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     foreach (string errorLine in Errors)
-            //     {
-            //         AnsiConsole.MarkupLine($"[yellow]{errorLine}[/]");
-            //     }
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     Console.ReadKey();
-            //     break;
-            // }
         }
     }
 }
