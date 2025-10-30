@@ -22,9 +22,9 @@ public class NotificationUI
             {
                 case "Go back":
                     return;
-                case "Fill all stock products":
-                    FillAllLowStockProducts();
-                    return;
+                // case "Fill all stock products":
+                //     FillAllLowStockProducts();
+                //     return;
                 case "Fill specific low stock product":
                     FillSpecificLowStockProduct();
                     return;
@@ -39,7 +39,7 @@ public class NotificationUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-        int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(50));
+        int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(100));
         List<ProductModel> AllLowQuantityProducts = NotificationLogic.GetAllLowQuantityProducts(QuantityThreshold);
 
         int count = 0;
@@ -90,7 +90,7 @@ public class NotificationUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-        int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(50));
+        int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(100));
         List<ProductModel> AllLowQuantityProducts = NotificationLogic.GetAllLowQuantityProducts(QuantityThreshold);
 
         if (AllLowQuantityProducts.Count == 0)
