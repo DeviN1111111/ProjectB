@@ -79,7 +79,6 @@ public class Order
         switch (options)
         {
             case "Checkout":
-                Console.Clear();
                 // check if cart is empty
                 if (cartProducts.Count == 0)
                 {
@@ -92,6 +91,7 @@ public class Order
                 int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
+                Console.Clear();
                 AnsiConsole.Write(
                     new FigletText("Checkout")
                         .Centered()
@@ -108,7 +108,10 @@ public class Order
                 {
                     case "Pay now":
                         AnsiConsole.MarkupLine("Thank you purchase succesful!");
-                        AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
+                        if(rewardPoints > 0)
+                        {
+                            AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
+                        }
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -116,7 +119,10 @@ public class Order
                         break;
                     case "Pay on pickup":
                         AnsiConsole.MarkupLine("Thank you purchase succesful!");
-                        AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
+                        if(rewardPoints > 0)
+                        {
+                            AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
+                        }
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();

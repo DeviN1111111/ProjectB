@@ -4,48 +4,52 @@ public static class RewardUI
 {
     public static void DisplayMenu()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Reward System")
-                .Centered()
-                .Color(MenuUI.AsciiPrimary));
-
-        AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser.AccountPoints}[/]");
-
-        List<RewardProductDTO> AllRewardProducts = RewardLogic.GetAllRewardItems();
-
-        AnsiConsole.MarkupLine("Available Reward Items:");
-
-        var table = new Table();
-        table.AddColumn("Product");
-        table.AddColumn("Points");
-
-        foreach (var item in AllRewardProducts)
+        while (true)
         {
-            table.AddRow(
-                $"[yellow]{item.Product.Name}[/]",
-                $"[green]{item.PriceInPoints}[/]"
-                );
-        }
 
-        AnsiConsole.Write(table);
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Reward System")
+                    .Centered()
+                    .Color(MenuUI.AsciiPrimary));
 
-        var options = new List<string> { "Use reward points", "Go back" }; ;
+            AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser.AccountPoints}[/]");
 
-        var prompt = new SelectionPrompt<string>()
-            .Title("Select an item to add to cart (this will be free in checkout)")
-            .PageSize(10)
-            .AddChoices(options);
+            List<RewardProductDTO> AllRewardProducts = RewardLogic.GetAllRewardItems();
 
-        var selectedItem = AnsiConsole.Prompt(prompt);
+            AnsiConsole.MarkupLine("Available Reward Items:");
 
-        switch (selectedItem)
-        {
-            case "Use reward points":
-                SelectRewardMenu(AllRewardProducts);
-                break;
-            case "Go back":
-                return;
+            var table = new Table();
+            table.AddColumn("Product");
+            table.AddColumn("Points");
+
+            foreach (var item in AllRewardProducts)
+            {
+                table.AddRow(
+                    $"[yellow]{item.Product.Name}[/]",
+                    $"[green]{item.PriceInPoints}[/]"
+                    );
+            }
+
+            AnsiConsole.Write(table);
+
+            var options = new List<string> { "Use reward points", "Go back" }; ;
+
+            var prompt = new SelectionPrompt<string>()
+                .Title("Select an item to add to cart (this will be free in checkout)")
+                .PageSize(10)
+                .AddChoices(options);
+
+            var selectedItem = AnsiConsole.Prompt(prompt);
+
+            switch (selectedItem)
+            {
+                case "Use reward points":
+                    SelectRewardMenu(AllRewardProducts);
+                    break;
+                case "Go back":
+                    return;
+            }
         }
     }
 
@@ -57,13 +61,18 @@ public static class RewardUI
         {
             options.Add(rp.Product.Name);
         }
-
+        options.Add("Go back");
         var prompt = new SelectionPrompt<string>()
             .Title("Select an item to add to cart (this will be free in checkout)")
             .PageSize(10)
             .AddChoices(options);
 
         var selectedItem = AnsiConsole.Prompt(prompt);
+
+        if (selectedItem == "Go back")
+        {
+            return;
+        }
 
         ProductModel? selectedProduct = ProductAccess.GetProductByName(selectedItem);
         RewardProductDTO? selectedReward = RewardItemsAccess.GetRewardItemByProductId(selectedProduct.ID);
