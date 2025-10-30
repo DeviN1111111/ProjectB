@@ -74,8 +74,8 @@ public static class RewardUI
             return;
         }
 
-        ProductModel? selectedProduct = ProductAccess.GetProductByName(selectedItem);
-        RewardProductDTO? selectedReward = RewardItemsAccess.GetRewardItemByProductId(selectedProduct.ID);
+        ProductModel? selectedProduct = ProductLogic.GetProductByName(selectedItem);
+        RewardProductDTO? selectedReward = RewardLogic.GetRewardItemByProductId(selectedProduct.ID);
         AddItemToCart(selectedReward);
 
     }
