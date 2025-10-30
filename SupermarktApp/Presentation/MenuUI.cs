@@ -13,6 +13,10 @@ public static class MenuUI
                     .Color(AsciiPrimary));
             var options = new List<string>();
 
+            List<ProductModel> products = NotificationLogic.GetAllLowQuantityProducts(120);
+            int lowStockCount = products.Count;
+
+
             if (SessionManager.CurrentUser == null)
             {
                 // Options when you're not logged in
@@ -26,7 +30,11 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
                 // Options when you're logged in as an admin
-                options.AddRange(new[] { "Management", "Statistics", "Logout", "Exit" });
+                if (lowStockCount > 0)
+                    AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
+                else
+                    AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             {
@@ -36,17 +44,26 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
                 // Options when you're logged in as a guest
-                options.AddRange(new[] { "Management", "Statistics", "Manage admin" ,"Logout", "Exit" });
+                if (lowStockCount > 0)
+                    AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
+                else
+                    AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage admin", "Logout", "Exit" });
             }
             else
             {
                 // Option when account status is unrecognized
                 options.Add("Exit");
             }
-            
+
             var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .AddChoices(options));
+
+            if (choice == $"Notification[{lowStockCount}]")
+            {   
+                NotificationUI.DisplayMenu();
+            }
 
             switch (choice)
             {
@@ -69,6 +86,9 @@ public static class MenuUI
                 case "Management":
                     ManagementUI.DisplayMenu();
                     break;
+                case "Notification":
+                    NotificationUI.DisplayMenu();
+                    break;
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
                     break;
@@ -87,6 +107,7 @@ public static class MenuUI
                 case "Exit":
                     return;
             }
+
 
 
         }
