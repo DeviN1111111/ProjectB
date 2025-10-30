@@ -21,17 +21,17 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Logout", "Exit" });
+                options.AddRange(new[] { "Order", "Cart", "Shop Details", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
                 // Options when you're logged in as an admin
-                options.AddRange(new[] { "Management", "Statistics", "Logout", "Exit" });
+                options.AddRange(new[] { "Management", "Statistics", "Shop Details", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             {
                 // Options when you're logged in as a guest
-                options.AddRange(new[] { "Order", "Cart", "Login", "Register", "Go back", "Exit" });
+                options.AddRange(new[] { "Order", "Cart", "Login", "Register", "Shop Details", "Go Back", "Exit" });
             }
             else
             {

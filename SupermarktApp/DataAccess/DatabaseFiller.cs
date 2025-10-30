@@ -5,7 +5,7 @@ using Spectre.Console;
 public class DatabaseFiller
 {
     private const string ConnectionString = "Data Source=database.db";
-    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderHistory" };
+    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderHistory", "ShopInfo" };
 
     public static void RunDatabaseMethods(int orderCount = 50)
     {
@@ -85,6 +85,16 @@ public class DatabaseFiller
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL
+            );
+        ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS ShopInfo (
+                Id INTEGER PRIMARY KEY,
+                Description TEXT,
+                OpeningHour TEXT,
+                ClosingHour TEXT,
+                OpeningHourSunday TEXT,
+                ClosingHourSunday TEXT
             );
         ");
     }
