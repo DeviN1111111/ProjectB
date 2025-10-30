@@ -5,11 +5,11 @@ public class CartAccess
     private const string ConnectionString = "Data Source=database.db";
     public static string Table = "Cart";
 
-    public static void AddToCart(int userId, int productId, int quantity, double discount = 0)
+    public static void AddToCart(int userId, int productId, int quantity, double discount = 0, double rewardPrice = 0)
     {
         using var db = new SqliteConnection(ConnectionString);
-        var sql = $"INSERT INTO {Table} (UserId, ProductId, Quantity, Discount) VALUES (@UserId, @ProductId, @Quantity, @Discount)";
-        db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity, Discount = discount });
+        var sql = $"INSERT INTO {Table} (UserId, ProductId, Quantity, Discount, RewardPrice) VALUES (@UserId, @ProductId, @Quantity, @Discount, @RewardPrice)";
+        db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity, Discount = discount, RewardPrice = rewardPrice });
     }
 
     public static List<CartModel> GetAllUserProducts(int userId)
@@ -17,6 +17,13 @@ public class CartAccess
         using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId ";
         return db.Query<CartModel>(sql, new { UserId = userId }).ToList();
+    }
+
+    public static CartModel? GetUserProductByProductId(int userId, int productId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
+        return db.QueryFirstOrDefault<CartModel>(sql, new { UserId = userId, ProductId = productId });
     }
 
     public static void ClearCart()

@@ -80,7 +80,7 @@ public static class RewardUI
             Console.ReadKey();
             return;
         }
-        OrderLogic.AddToCart(selectedProduct.Product, 1, selectedProduct.Product.Price);
+        OrderLogic.AddToCart(selectedProduct.Product, 1, selectedProduct.Product.Price, selectedProduct.PriceInPoints);
         
         RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints - selectedProduct.PriceInPoints);
         SessionManager.CurrentUser.AccountPoints -= selectedProduct.PriceInPoints;

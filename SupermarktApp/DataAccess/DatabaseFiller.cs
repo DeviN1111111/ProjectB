@@ -88,7 +88,8 @@ public class DatabaseFiller
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
-                Discount REAL NOT NULL DEFAULT 0
+                Discount REAL NOT NULL DEFAULT 0,
+                RewardPrice REAL NOT NULL DEFAULT 0
             );
         ");
 
