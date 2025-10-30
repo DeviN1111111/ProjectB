@@ -40,9 +40,14 @@ public static class RewardLogic
 
         return products;
     }
-    
+
     public static void ChangeRewardPoints(int userId, int newPoints)
     {
         UserAccess.UpdateUserPoints(userId, newPoints);
+    }
+    
+    public static RewardProductDTO? GetRewardItemByProductId(int productId)
+    {
+        return RewardItemsAccess.GetRewardItemByProductId(productId);
     }
 }
