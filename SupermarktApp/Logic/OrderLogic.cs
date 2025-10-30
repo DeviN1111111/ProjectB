@@ -15,7 +15,8 @@ public class OrderLogic
                 newQuantity = 99; // max stock limit
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
-            RewardPrice = CartItem.RewardPrice + RewardPrice; 
+            RewardPrice = CartItem.RewardPrice + RewardPrice;
+            discount = CartItem.Discount + discount;
             CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount, RewardPrice);
             return;
         }
@@ -98,7 +99,7 @@ public class OrderLogic
         double totalDiscount = 0;
         foreach (var item in allUserProducts)
         {
-            totalDiscount += item.Discount * item.Quantity;
+            totalDiscount += item.Discount;
         }
         return Math.Round(totalDiscount, 2);
     }

@@ -17,6 +17,7 @@ public static class LoginUI
         {
             SessionManager.CurrentUser = Account;
             AnsiConsole.MarkupLine("[green]Login successful![/]");
+            SessionManager.CurrentUser.AccountPoints = 100000; // For testing purposes
             AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
         }
         else
