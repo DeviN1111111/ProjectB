@@ -36,4 +36,8 @@ public class ProductLogic
     {
         return ProductAccess.GetProductByName(name);
     }
+    public static List<ProductModel> GetAllProducts()
+    {
+        return ProductAccess.GetAllProducts();
+    }
 }

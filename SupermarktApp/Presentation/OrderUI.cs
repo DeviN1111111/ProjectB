@@ -8,7 +8,7 @@ public class Order
         Console.Clear();
         double totalAmount = 0;
         List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
-        List<ProductModel> allProducts = ProductAccess.GetAllProducts();  // List of all products dit moet via logic
+        List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
 
         // Title
         AnsiConsole.Write(
@@ -101,6 +101,9 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
+
+                        OrderLogic.AddToItemOrders(cartProducts, allProducts);
+
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();

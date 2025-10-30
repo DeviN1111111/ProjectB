@@ -3,7 +3,7 @@ public class OrderLogic
     public static void AddToCart(ProductModel product, int quantity)
     {
         // check if product already in cart
-        
+
         List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartItem != null)
@@ -67,10 +67,47 @@ public class OrderLogic
             }
         }
     }
-    
+
     // remove a product from cart by product id
     public static void RemoveFromCart(int productId)
     {
         CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, productId);
     }
+
+
+    // add to order history after checkout
+    public static void AddToOrderHistory(List<CartModel> cartProducts)
+    {
+        foreach (var cartProduct in cartProducts)
+        {
+            //OrderHistoryAccess.AddToOrderHistory(SessionManager.CurrentUser.ID, cartProduct.ProductId, cartProduct.Quantity, DateTime.Now);
+        }
+    }
+
+    // Get all order history for current user
+    public static List<OrderHistoryModel> GetOrderHistory()
+    {
+        //return OrderHistoryAccess.GetOrderHistoryByUserID(SessionManager.CurrentUser.ID);
+        return new List<OrderHistoryModel>();
+    }
+
+    // after checkout add all cart items to itemOrders
+    public static void AddToItemOrders(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    {
+        foreach (var cartProduct in cartProducts)
+        {
+            var product = allProducts.FirstOrDefault(p => p.ID == cartProduct.ProductId);
+            if (product != null)
+            {
+                OrderItemsAccess.AddToOrderItems(SessionManager.CurrentUser.ID, product.ID, cartProduct.Quantity, product.Price);
+            }
+        }
+    }
+
+    // turn order itmes into list of order item models
+    public static List<OrderItemModel> GetOrderItemsForCurrentUser()
+    {
+        return OrderItemsAccess.GetOrderItemsByUserId(SessionManager.CurrentUser.ID);
+    }
+
 }
