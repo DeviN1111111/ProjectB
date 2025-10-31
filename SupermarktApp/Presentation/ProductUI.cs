@@ -2,7 +2,37 @@ using Spectre.Console;
 
 public class ProductUI
 {
-    public static void SearchProduct()
+    // add to basket and add to checklist had dubbel code 
+    // heb er dit van gemaakt :) -a
+    private static int AskForQuantity(ProductModel product)
+    {
+        while(true)
+        {
+            AnsiConsole.Markup($"[white]Enter quantity (1–{Math.Min(99, product.Quantity)}): [/]");
+            string? input = Console.ReadLine();
+
+            if (!int.TryParse(input, out int quantity))
+            {
+                AnsiConsole.MarkupLine("[red]Invalid input![/] Please enter a number.");
+                continue;
+            }
+
+            if (quantity <= 0)
+            {
+                AnsiConsole.MarkupLine("[red]Quantity must be at least 1.[/]");
+                continue;
+            }
+
+            if (quantity > Math.Min(99, product.Quantity))
+            {
+                AnsiConsole.MarkupLine($"[red]Max allowed: {Math.Min(99, product.Quantity)}[/]");
+                continue;
+            }
+
+            return quantity;
+        }
+    }
+    public static void SearchProduct(string mode = "default")
     {
         var product = SearchUI.SearchProductByNameOrCategory();
 
@@ -11,6 +41,19 @@ public class ProductUI
             return;
         }
         ProductDetailsUI.ShowProductDetails(product);
+
+        // maak een "mode" voor checklist
+        // gebruiker kan sneller items teovoegen aan checklist -a
+
+        if (mode == "checklist")
+        {
+            int quantity = AskForQuantity(product);
+            ChecklistLogic.AddToChecklist(product, quantity);
+            AnsiConsole.MarkupLine($"[green] {quantity}x {product.Name} added to your checklist![/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
 
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
@@ -25,90 +68,20 @@ public class ProductUI
         switch (options)
         {
             case "Add to basket":
-                while(true)
                 {
-                    Console.WriteLine("Enter quantity to add to cart (max 99): ");
-                    if (!int.TryParse(Console.ReadLine(), out int quantity))
-                    {
-                        Console.WriteLine("Invalid input. Please enter a number.");
-                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                        Console.ReadKey();
-                        continue;
-
-                    }
-                    else
-                    {
-                        if (quantity > 99 || quantity > product.Quantity)
-                        {
-                            if (product.Quantity < 99)
-                            {
-                                Console.WriteLine($"Only {product.Quantity} items in stock. Please enter a valid quantity.");
-                                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                                Console.ReadKey();
-                                continue;
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Max 99 items Please enter a valid quantity.");
-                                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                                Console.ReadKey();
-                                continue;
-                            }
-                        }
-                        else if (quantity <= 0)
-                        {
-                            Console.WriteLine("Quantity must be at least 1. Please enter a valid quantity.");
-                            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                            Console.ReadKey();
-                            continue;
-                        } 
-                    }
+                    int quantity = AskForQuantity(product);
                     OrderLogic.AddToCart(product, quantity);
+                    AnsiConsole.MarkupLine($"[green]{quantity}x {product.Name} added to cart![/]");
                     break;
                 }
-                break;
 
             case "Add to checklist":
-                while(true)
                 {
-                    Console.WriteLine("Enter quantity to add to the Checklist (max 99): ");
-                    if (!int.TryParse(Console.ReadLine(), out int quantity))
-                    {
-                        Console.WriteLine("Invalid input. Please enter a number.");
-                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                        Console.ReadKey();
-                        continue;
-
-                    }
-                    else
-                    {
-                        if (quantity > 99 || quantity > product.Quantity)
-                        {
-                            if (product.Quantity < 99)
-                            {
-                                Console.WriteLine($"Only {product.Quantity} items in stock. Please enter a valid quantity.");
-                                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                                Console.ReadKey();
-                                continue;
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Max 99 items Please enter a valid quantity.");
-                                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                                Console.ReadKey();
-                                continue;
-                            }
-                        }
-                        else if (quantity <= 0)
-                        {
-                            Console.WriteLine("Quantity must be at least 1. Please enter a valid quantity.");
-                            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                            Console.ReadKey();
-                            continue;
-                        }
-                    }
-                    ChecklistLogic.AddToChecklist(product, quantity); 
-                }      
+                    int quantity = AskForQuantity(product);
+                    ChecklistLogic.AddToChecklist(product, quantity);
+                    AnsiConsole.MarkupLine($"[green]{quantity}x {product.Name} added to checklist![/]");
+                    break;
+                }
             case "Show on map":
                 MapUI.DisplayMap(product.Location);
                 break;

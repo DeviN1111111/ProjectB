@@ -16,8 +16,9 @@ public class ChecklistAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE Userid = @UserID ";
-        return db.Query<ChecklistModel>(sql, new { userId = userId }).ToList();
+        return db.Query<ChecklistModel>(sql, new { UserID = userId }).ToList();
     }
+    
 
         public static ChecklistModel? GetUserProductByProductId(int userId, int productId)
         {
