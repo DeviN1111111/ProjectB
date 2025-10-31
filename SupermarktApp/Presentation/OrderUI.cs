@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
 public class Order
 {
@@ -62,6 +63,98 @@ public class Order
         double finalAmount = totalAmount + deliveryFee - discount;
 
         Checkout(allUserProducts, allProducts, finalAmount);
+    }
+
+    public static void ShowChecklist()
+    {
+        Console.Clear();
+        List<ChecklistModel> allUserProducts = ChecklistLogic.AllUserProducts();
+        List<ProductModel> allProducts = ProductAccess.GetAllProducts();
+
+        AnsiConsole.Write(
+            new FigletText("Checklist")
+            .Centered()
+            .Color(AsciiPrimary));
+
+        var checklistChoices = new List<string>();
+
+        foreach (var checklistProduct in allUserProducts)
+        {
+            var product = allProducts.FirstOrDefault(p => p.ID == checklistProduct.ProductId);
+            if (product != null)
+            {
+                checklistChoices.Add($"{product.Name} (x{checklistProduct.Quantity})");
+            }
+        }
+
+        if (checklistChoices.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]Your checklist is empty![/]");
+            AnsiConsole.MarkupLine("Press [green] ENTER[/] to go back.");
+            Console.ReadKey();
+            return;
+        }
+
+        var checkedItems = AnsiConsole.Prompt(
+            new MultiSelectionPrompt<string>()
+                .Title("[bold white] Select items you've completed or want to remove:[/]")
+                .NotRequired()
+                .PageSize(10)
+                .MoreChoicesText("[grey](Use ↑/↓ to navigate, [blue]<space>[/] to select, [green]<enter>[/] to confirm)[/]")
+                .InstructionsText("[grey](Press [blue]<space>[/] to toggle, [green]<enter>[/] to confirm)[/]")
+                .AddChoices(checklistChoices)
+        );
+
+        if (checkedItems.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[yellow]No items selected.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
+
+        var action = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[bold white]What would you like to do  with the selected items?[/]")
+                .AddChoices("Mark as done", "Remove from checklist", "Cancel")
+        );
+
+        switch (action)
+        {
+            case "Mark as done":
+                foreach (var choice in checkedItems)
+                {
+                    var productName = choice.Split(" (x")[0];
+                    var product = allProducts.FirstOrDefault(p => p.Name == productName);
+
+                    if (product != null)
+                    {
+                        AnsiConsole.MarkupLine($"[green] {product.Name} marked as done![/]");
+                    }
+                }
+                break;
+
+            case "Remove from checklist":
+                foreach (var choice in checkedItems)
+                {
+                    var productName = choice.Split(" (x")[0];
+                    var product = allProducts.FirstOrDefault(p => p.Name == productName);
+
+                    if (product != null)
+                    {
+                        ChecklistLogic.RemoveFromChecklist(product.ID);
+                    }
+                }
+                AnsiConsole.MarkupLine("[green]Selected items removed from your checklist![/]");
+                break;
+
+            case "Cancel":
+                AnsiConsole.MarkupLine("[grey]No changes made.[/]");
+                break;
+        }
+        AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to continue");
+        Console.ReadKey();
+        ShowChecklist();
     }
     public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount)
     {

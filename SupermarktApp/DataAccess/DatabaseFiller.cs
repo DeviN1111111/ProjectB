@@ -81,6 +81,7 @@ public class DatabaseFiller
                 FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE
             );
         ");
+        
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,6 +90,15 @@ public class DatabaseFiller
                 Quantity INTEGER NOT NULL,
                 Discount REAL NOT NULL DEFAULT 0,
                 RewardPrice REAL NOT NULL DEFAULT 0
+            );
+        ");
+
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Checklist (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId INTEGER NOT NULL,
+                ProductId INTEGER NOT NULL,
+                Quantity INTEGER NOT NULL
             );
         ");
 
