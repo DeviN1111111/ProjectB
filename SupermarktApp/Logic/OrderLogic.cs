@@ -74,40 +74,20 @@ public class OrderLogic
         CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, productId);
     }
 
-
-    // add to order history after checkout
-    public static void AddToOrderHistory(List<CartModel> cartProducts)
+    //create a new order for the current user.
+    public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {
+        // Create a new order and get its ID
+        int orderId = OrderAccess.AddToOrders(SessionManager.CurrentUser.ID);
         foreach (var cartProduct in cartProducts)
         {
-            //OrderHistoryAccess.AddToOrderHistory(SessionManager.CurrentUser.ID, cartProduct.ProductId, cartProduct.Quantity, DateTime.Now);
-        }
-    }
-
-    // Get all order history for current user
-    public static List<OrderHistoryModel> GetOrderHistory()
-    {
-        //return OrderHistoryAccess.GetOrderHistoryByUserID(SessionManager.CurrentUser.ID);
-        return new List<OrderHistoryModel>();
-    }
-
-    // after checkout add all cart items to itemOrders
-    public static void AddToItemOrders(List<CartModel> cartProducts, List<ProductModel> allProducts)
-    {
-        foreach (var cartProduct in cartProducts)
-        {
-            var product = allProducts.FirstOrDefault(p => p.ID == cartProduct.ProductId);
-            if (product != null)
+            // Find the matching product details
+            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
+            if (matchingProduct != null)
             {
-                OrderItemsAccess.AddToOrderItems(SessionManager.CurrentUser.ID, product.ID, cartProduct.Quantity, product.Price);
+                // Add each item to OrderItems with the new orderId
+                OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price);
             }
         }
     }
-
-    // turn order itmes into list of order item models
-    public static List<OrderItemModel> GetOrderItemsForCurrentUser()
-    {
-        return OrderItemsAccess.GetOrderItemsByUserId(SessionManager.CurrentUser.ID);
-    }
-
 }

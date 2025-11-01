@@ -3,6 +3,7 @@ public class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
 
+
     public static void ShowCart()
     {
         Console.Clear();
@@ -101,8 +102,18 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
+                        List<OrderItemModel> allOrderItems = new List<OrderItemModel>();  // List to hold order items
 
-                        OrderLogic.AddToItemOrders(cartProducts, allProducts);
+                        foreach (var item in cartProducts)
+                        {
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                allOrderItems.Add(orderItem);
+                            }
+                        }
+                        OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -111,6 +122,18 @@ public class Order
                         OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
+                        List<OrderItemModel> allOrderItem = new List<OrderItemModel>();  // List to hold order items
+
+                        foreach (var item in cartProducts)
+                        {
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                allOrderItem.Add(orderItem);
+                            }
+                        }
+                        OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -187,4 +210,94 @@ public class Order
     {
         OrderLogic.RemoveFromCart(productId);
     }
+
+ public static void DisplayOrderHistory()
+{
+    while (true)
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Order History")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        // Get all orders for the current user
+        var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID);
+        if (userOrders.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No order history found.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        // ESC instruction
+        AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
+
+        // Let user choose to exit before showing the menu
+        if (Console.ReadKey(true).Key == ConsoleKey.Escape)
+            return;
+
+        // Create a selection menu per order
+        var orderChoices = userOrders
+            .Select(order => $"Order #{order.ID} - {order.Date:yyyy-MM-dd HH:mm}")
+            .ToList();
+
+        string selectedOrderLabel = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Select an order to view details[/]")
+                .AddChoices(orderChoices)
+        );
+
+        // Extract the order ID from the selected label
+        var selectedOrderId = int.Parse(
+            selectedOrderLabel
+                .Split(' ')[1]
+                .Replace("#", "")
+        );
+
+        // Get items from that order
+        var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId);
+    
+        if (orderItems.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[grey]This order has no items.[/]");
+            Console.ReadKey();
+            continue;
+        }
+
+        // Display order details
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText($"Order #{selectedOrderId}")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        var orderTable = new Table()
+            .BorderColor(AsciiPrimary)
+            .AddColumn("[white]Product[/]")
+            .AddColumn("[white]Quantity[/]")
+            .AddColumn("[white]Price per Unit[/]")
+            .AddColumn("[white]Total Price[/]");
+
+        foreach (var item in orderItems)
+        {
+            var product = ProductAccess.GetProductByID(item.ProductId);
+            if (product != null)
+            {
+                orderTable.AddRow(
+                    product?.Name ?? "[red]Unknown Product[/]",
+                    item.Quantity.ToString(),
+                    $"${item.Price:F2}",
+                    $"${item.Quantity * item.Price:F2}"
+);
+            }
+        }
+
+        AnsiConsole.Write(orderTable);
+        AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
+        Console.ReadKey();
+    }
+}
+
 }

@@ -7,10 +7,10 @@ class Program
 {
     static void Main()
     {
-        DatabaseFiller.RunDatabaseMethods(3);
         // StartScreen.ShowMainMenu();
         // StatisticsUI.DisplayMenu();
         MenuUI.ShowMainMenu();
+
     }
 }
 
