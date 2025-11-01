@@ -3,20 +3,29 @@ namespace SupermarktAppTests
     [TestClass]
     public class TestOrderHistoryDisplay
     {
-        [TestMethod]
-        public void TestOrderHistoryDisplay_ShouldPass()
+        [TestClass]
+        public class OrderLogicTests
         {
-            int expected = 5;
-            int actual = 5;
-            Assert.AreEqual(expected, actual);
-        }
+            [TestMethod]
+            public void DeliveryFee_ShouldBeZero_WhenTotalIs25OrMore()
+            {
+                double result = OrderLogic.DeliveryFee(30);
+                Assert.AreEqual(0, result);
+            }
 
-        [TestMethod]
-        public void TestOrderHistoryDisplay_ShouldFail()
-        {
-            int expected = 5;
-            int actual = 10;
-            Assert.AreEqual(expected, actual);
+            [TestMethod]
+            public void DeliveryFee_ShouldBeFive_WhenTotalIsBelow25()
+            {
+                double result = OrderLogic.DeliveryFee(10);
+                Assert.AreEqual(5, result);
+            }
+
+            [TestMethod]
+            public void DeliveryFee_ShouldBeZero_WhenTotalIsZero()
+            {
+                double result = OrderLogic.DeliveryFee(0);
+                Assert.AreEqual(0, result);
+            }
         }
     }
 }
