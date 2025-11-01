@@ -1,6 +1,8 @@
+using Spectre.Console;
+
 public class OrderLogic
 {
-    public static void AddToCart(ProductModel product, int quantity)
+    public static void AddToCart(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
         // check if product already in cart
 
@@ -14,11 +16,13 @@ public class OrderLogic
                 newQuantity = 99; // max stock limit
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
-            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity);
+            RewardPrice = CartItem.RewardPrice + RewardPrice;
+            discount = CartItem.Discount + discount;
+            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount, RewardPrice);
             return;
         }
         // add new item to cart
-        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity);
+        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity, discount, RewardPrice);
     }
 
     public static List<CartModel> AllUserProducts()
@@ -29,6 +33,14 @@ public class OrderLogic
 
     public static void ClearCart()
     {
+        foreach (var item in AllUserProducts())
+        {
+            if(item.RewardPrice > 0)
+            {
+                RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints + (int)(item.RewardPrice * item.Quantity));
+                SessionManager.CurrentUser.AccountPoints += (int)(item.RewardPrice * item.Quantity);
+            }
+        }
         CartAccess.ClearCart();
     }
     public static double DeliveryFee(double totalAmount)
@@ -71,8 +83,28 @@ public class OrderLogic
     // remove a product from cart by product id
     public static void RemoveFromCart(int productId)
     {
+        double rewardPrice = CartAccess.GetUserProductByProductId(SessionManager.CurrentUser.ID, productId).RewardPrice;
+        string rewardItemName = ProductAccess.GetProductByID(productId).Name;
+        if(rewardPrice > 0)
+        {
+            SessionManager.CurrentUser.AccountPoints += (int)rewardPrice;
+            RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints);
+            AnsiConsole.MarkupLine($"[white]You have been refunded [/][green]{rewardPrice}[/] reward points for [yellow1]{rewardItemName}[/]!");
+        }
         CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, productId);
     }
+    public static double CalculateTotalDiscount()
+    {
+        if (SessionManager.CurrentUser == null) return 0;
+        var allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        double totalDiscount = 0;
+        foreach (var item in allUserProducts)
+        {
+            totalDiscount += item.Discount;
+        }
+        return Math.Round(totalDiscount, 2);
+    }
+}
 
     //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)

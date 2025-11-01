@@ -21,7 +21,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart","Order History", "Logout", "Exit" });
+                options.AddRange(new[] { "Order", "Cart","Order History", "Rewards", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -32,6 +32,11 @@ public static class MenuUI
             {
                 // Options when you're logged in as a guest
                 options.AddRange(new[] { "Order", "Cart", "Login", "Register", "Go back", "Exit" });
+            }
+            else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
+            {
+                // Options when you're logged in as a guest
+                options.AddRange(new[] { "Management", "Statistics", "Manage admin" ,"Logout", "Exit" });
             }
             else
             {
@@ -70,8 +75,14 @@ public static class MenuUI
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
                     break;
+                case "Manage admin":
+                    ManageAdminUI.DisplayMenu();
+                    break;
                 case "Logout":
                     SessionManager.CurrentUser = null!;
+                    break;
+                case "Rewards":
+                    RewardUI.DisplayMenu();
                     break;
                 case "Go back":
                     SessionManager.CurrentUser = null!;

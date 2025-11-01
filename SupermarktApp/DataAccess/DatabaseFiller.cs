@@ -1,11 +1,13 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
 using Spectre.Console;
+using System;
+using System.Collections.Generic;
 
 public class DatabaseFiller
 {
     private const string ConnectionString = "Data Source=database.db";
-    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderHistory" };
+    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderHistory", "RewardItems" };
 
     public static void RunDatabaseMethods(int orderCount = 50)
     {
@@ -38,11 +40,11 @@ public class DatabaseFiller
                 Email TEXT UNIQUE NOT NULL,
                 Password TEXT NOT NULL,
                 Address TEXT,
-                HouseNumber INTEGER,
                 Zipcode TEXT,
                 PhoneNumber TEXT,
                 City TEXT,
-                AccountStatus TEXT
+                AccountStatus TEXT,
+                AccountPoints INTEGER DEFAULT 0
             );
         ");
 
@@ -84,7 +86,17 @@ public class DatabaseFiller
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
-                Quantity INTEGER NOT NULL
+                Quantity INTEGER NOT NULL,
+                Discount REAL NOT NULL DEFAULT 0,
+                RewardPrice REAL NOT NULL DEFAULT 0
+            );
+        ");
+
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS RewardItems (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                ProductId INTEGER NOT NULL,
+                PriceInPoints INTEGER NOT NULL
             );
         ");
     }
@@ -118,7 +130,13 @@ public class DatabaseFiller
         UserModel user = new UserModel { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user1 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user2 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
-        UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin"};
+        UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin" };
+        UserModel SuperAdmin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "SuperAdmin" };
+
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(271, 50));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(272, 60));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(273, 30));
+
 
         var categoryProducts = new Dictionary<string, List<string>>
         {
@@ -130,7 +148,8 @@ public class DatabaseFiller
             ["Meat"] = new List<string> { "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin", "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver", "Goose Breast", "Rabbit Meat", "Bison Steak", "Pork Belly", "Lamb Shoulder", "Beef Tenderloin", "Turkey Leg", "Chicken Drumstick", "Kielbasa", "Mortadella" },
             ["Seafood"] = new List<string> { "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout", "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn", "Halibut", "Pollock", "Swordfish", "Mussels", "Catfish", "Anchovy Fillet", "Sea Bass", "Clam Chowder", "Caviar", "King Crab" },
             ["Frozen"] = new List<string> { "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries", "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli", "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry", "Frozen Tater Tots", "Frozen Burrito", "Frozen Ravioli", "Frozen Fish Sticks", "Frozen Spring Rolls", "Frozen Edamame", "Frozen Peaches", "Frozen Cherries", "Frozen Cauliflower" },
-            ["Snacks"] = new List<string> { "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel" }
+            ["Snacks"] = new List<string> { "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel" },
+            ["Rewards"] = new List<string> { "Efteling ticket", "Blijdorp ticket", "Walibi ticket"}
         };
 
         List<ProductModel> products = new List<ProductModel>();
@@ -197,6 +216,7 @@ public class DatabaseFiller
                 InsertUser(user1); userTask.Increment(1);
                 InsertUser(user2); userTask.Increment(1);
                 InsertUser(admin); userTask.Increment(1);
+                InsertUser(SuperAdmin); userTask.Increment(1);
 
                 foreach (var product in products)
                 {
