@@ -202,7 +202,7 @@ public class DatabaseFiller
             orders.Add(new OrdersModel
             {
                 UserID = (i % 3) + 1,
-                Date = DateTime.Today.AddDays(-i)
+                Date = DateTime.Today.AddDays(-(orderCount - i - 1))
             });
         }
 
