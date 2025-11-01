@@ -104,7 +104,6 @@ public class OrderLogic
         }
         return Math.Round(totalDiscount, 2);
     }
-}
 
     //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
