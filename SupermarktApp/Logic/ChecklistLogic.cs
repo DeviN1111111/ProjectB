@@ -28,12 +28,6 @@ public class ChecklistLogic // ik volg hiervoor de code die in OrderLogic.cs sta
         List<ChecklistModel> allUserProducts = ChecklistAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         return allUserProducts;
     }
-
-    public static void ClearChecklist()
-    {
-        ChecklistAccess.ClearChecklist();
-    }
-
     
     public static void RemoveFromChecklist(int productId)
     {
