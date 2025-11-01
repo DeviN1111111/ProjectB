@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class DatabaseFiller
 {
     private const string ConnectionString = "Data Source=database.db";
-    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderHistory", "RewardItems" };
+    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems" };
 
     public static void RunDatabaseMethods(int orderCount = 50)
     {
@@ -63,27 +63,28 @@ public class DatabaseFiller
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Orders (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                UserID INTEGER NOT NULL,
-                ProductID INTEGER NOT NULL,
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId INTEGER NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
-                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
-                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
+                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );
         ");
 
         db.Execute(@"
-            CREATE TABLE IF NOT EXISTS OrderHistory (
+            CREATE TABLE IF NOT EXISTS OrderItem (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 OrderId INTEGER NOT NULL,
-                Date DATETIME NOT NULL DEFAULT (datetime('now')),
-                TotalPrice REAL NOT NULL,
-                FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE
+                ProductId INTEGER NOT NULL,
+                Quantity INTEGER NOT NULL,
+                Price REAL NOT NULL,
+                FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
             );
         ");
+
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
@@ -94,18 +95,18 @@ public class DatabaseFiller
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS RewardItems (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ProductId INTEGER NOT NULL,
                 PriceInPoints INTEGER NOT NULL
             );
         ");
     }
-    
+
     public static void InsertUser(UserModel user)
     {
         using var db = new SqliteConnection(ConnectionString);
-        string sql = @"INSERT INTO Users (Name, LastName, Email, Password, Address , Zipcode, PhoneNumber, City, AccountStatus) 
-        VALUES (@Name, @LastName, @Email, @Password, @Address , @Zipcode, @PhoneNumber, @City, @AccountStatus);";
+        string sql = @"INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus) 
+                       VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);";
         db.Execute(sql, user);
     }
 
@@ -113,16 +114,30 @@ public class DatabaseFiller
     {
         using var db = new SqliteConnection(ConnectionString);
         string sql = @"INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
-        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);";
+                       VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);";
         db.Execute(sql, product);
     }
-    
-    public static void InsertOrder(OrdersModel order)
+
+    public static int InsertOrder(OrdersModel order)
     {
         using var db = new SqliteConnection(ConnectionString);
-        string sql = @"INSERT INTO Orders (UserID, ProductID, Date) 
-        VALUES (@UserID, @ProductID, @Date);";
-        db.Execute(sql, order);
+        db.Open();
+        db.Execute("PRAGMA foreign_keys = ON;");
+        string sql = @"
+            INSERT INTO Orders (UserID, Date)
+            VALUES (@UserID, @Date);
+            SELECT last_insert_rowid();
+        ";
+        int orderId = db.ExecuteScalar<int>(sql, order);
+        return orderId;
+    }
+
+    public static void InsertOrderItem(OrderItemModel item)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        string sql = @"INSERT INTO OrderItem (OrderId, ProductId, Quantity, Price)
+                       VALUES (@OrderId, @ProductId, @Quantity, @Price);";
+        db.Execute(sql, item);
     }
 
     public static void SeedData(int orderCount)
@@ -131,13 +146,13 @@ public class DatabaseFiller
         UserModel user1 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel user2 = new UserModel { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" };
         UserModel admin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin" };
-        UserModel SuperAdmin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "SuperAdmin" };
+        UserModel superAdmin = new UserModel { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "SuperAdmin" };
 
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(271, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(272, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(273, 30));
 
-
+        
         var categoryProducts = new Dictionary<string, List<string>>
         {
             ["Fruits"] = new List<string> { "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango", "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime", "Nectarine", "Apricot", "Fig", "Pomegranate", "Tangerine", "Clementine", "Dragonfruit", "Passionfruit", "Guava", "Lychee" },
@@ -173,7 +188,7 @@ public class DatabaseFiller
                     Description = $"Description for {name}",
                     Category = category,
                     Location = random.Next(1, 16),
-                    Quantity = 50 + id
+                    Quantity = 100
                 };
 
                 products.Add(product);
@@ -184,18 +199,14 @@ public class DatabaseFiller
         List<OrdersModel> orders = new List<OrdersModel>();
         for (int i = 0; i < orderCount; i++)
         {
-            int productIndex = random.Next(products.Count);
-            OrdersModel order = new OrdersModel
+            orders.Add(new OrdersModel
             {
                 UserID = (i % 3) + 1,
-                ProductID = productIndex + 1,
                 Date = DateTime.Today.AddDays(-i)
-            };
-            orders.Add(order);
+            });
         }
 
         Console.Clear();
-        
         AnsiConsole.Progress()
             .AutoClear(true)
             .HideCompleted(true)
@@ -208,7 +219,7 @@ public class DatabaseFiller
             })
             .Start(ctx =>
             {
-                var userTask = ctx.AddTask("Seeding Users", maxValue: 4);
+                var userTask = ctx.AddTask("Seeding Users", maxValue: 5);
                 var productTask = ctx.AddTask("Seeding Products", maxValue: products.Count);
                 var orderTask = ctx.AddTask("Seeding Orders", maxValue: orders.Count);
 
@@ -216,7 +227,7 @@ public class DatabaseFiller
                 InsertUser(user1); userTask.Increment(1);
                 InsertUser(user2); userTask.Increment(1);
                 InsertUser(admin); userTask.Increment(1);
-                InsertUser(SuperAdmin); userTask.Increment(1);
+                InsertUser(superAdmin); userTask.Increment(1);
 
                 foreach (var product in products)
                 {
@@ -226,7 +237,20 @@ public class DatabaseFiller
 
                 foreach (var order in orders)
                 {
-                    InsertOrder(order);
+                    int orderId = InsertOrder(order);
+                    int itemCount = random.Next(1, 4);
+                    for (int j = 0; j < itemCount; j++)
+                    {
+                        var product = products[random.Next(products.Count)];
+                        var orderItem = new OrderItemModel
+                        {
+                            OrderId = orderId,
+                            ProductId = products.IndexOf(product) + 1,
+                            Quantity = random.Next(1, 5),
+                            Price = product.Price
+                        };
+                        InsertOrderItem(orderItem);
+                    }
                     orderTask.Increment(1);
                 }
             });
