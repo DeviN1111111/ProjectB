@@ -14,15 +14,16 @@ public static class ShopDetails
         table.AddColumn(new TableColumn("[bold #00014d]Day[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Date[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Opening Hours[/]").Centered());
-        string? OpeningHour = ShopInfoAccess.GetOpeningHours().Item1;
-        string? ClosingHour = ShopInfoAccess.GetOpeningHours().Item2;
+
+        var OpeningHour = UpdateShopInfo.PassOpeningHours().Item1;
+        var ClosingHour = UpdateShopInfo.PassOpeningHours().Item2;
         if (OpeningHour == null || ClosingHour == null)
         {
             OpeningHour = "07:00";
             ClosingHour = "22:00";
         }
-        string? OpeningHourSunday = ShopInfoAccess.GetOpeningHoursSunday().Item1;
-        string? ClosingHourSunday = ShopInfoAccess.GetOpeningHoursSunday().Item2;
+        var OpeningHourSunday = UpdateShopInfo.PassOpeningHoursSunday().Item1;
+        var ClosingHourSunday = UpdateShopInfo.PassOpeningHoursSunday().Item2;
         if (OpeningHourSunday == null || ClosingHourSunday == null)
         {
             OpeningHourSunday = "12:00";
@@ -40,7 +41,7 @@ public static class ShopDetails
         }
         table.Border(TableBorder.Heavy);
 
-        var description = ShopInfoAccess.GetDescription();
+        var description = UpdateShopInfo.PassDescription();
 
         var body = string.IsNullOrWhiteSpace(description) ? @"
         Welcome to our supermarket — where freshness comes first.
@@ -55,37 +56,6 @@ public static class ShopDetails
         var columns = new Columns(table, panel);
         AnsiConsole.Write(columns);
         AnsiConsole.WriteLine();
-
-        var options = new List<string>();
-        if (SessionManager.CurrentUser == null)
-        {
-            options.AddRange(new [] {"Go Back"} );
-        }
-        else if (SessionManager.CurrentUser.AccountStatus == "User")
-        {
-            options.AddRange(new[] { "Go Back" });
-        }
-        else if (SessionManager.CurrentUser.AccountStatus == "Admin")
-        {
-            options.AddRange(new[] { "Go Back", "Edit Shop Description", "Edit Opening Hours" });
-        }
-        else if (SessionManager.CurrentUser.AccountStatus == "Guest")
-        {
-            options.AddRange(new[] { "Go Back" });
-        }
-        var choice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .AddChoices(options));
-        switch (choice)
-        {
-            case "Go Back":
-                break;
-            case "Edit Shop Description":
-                UpdateShopInfo.UpdateDescription();
-                break;
-            case "Edit Opening Hours":
-                UpdateShopInfo.UpdateOpeningHours();
-                break;
-        }
+        Console.ReadLine();
     }
 }

@@ -9,6 +9,10 @@ public class UpdateShopInfo
         AnsiConsole.MarkupLine("[green]Shop description updated successfully![/]");
         Console.ReadLine();
     }
+    public static string? PassDescription()
+    {
+        return ShopInfoAccess.GetDescription();
+    }
     public static void UpdateOpeningHours()
     {
         string openingHour, closingHour;
@@ -63,5 +67,13 @@ public class UpdateShopInfo
             AnsiConsole.MarkupLine("[green]Shop Sunday opening hours updated successfully![/]");
             Console.ReadLine();
         }
+    }
+    public static (string?, string?) PassOpeningHours()
+    {
+        return ShopInfoAccess.GetOpeningHours();
+    }
+    public static (string?, string?) PassOpeningHoursSunday()
+    {
+        return ShopInfoAccess.GetOpeningHoursSunday();
     }
 }
