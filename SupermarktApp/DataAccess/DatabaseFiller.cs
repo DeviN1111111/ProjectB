@@ -62,11 +62,21 @@ public class DatabaseFiller
         ");
 
         db.Execute(@"
-            CREATE TABLE IF NOT EXISTS Orders (
+            CREATE TABLE IF NOT EXISTS OrderHistory (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        ");
+                db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Orders (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserID INTEGER NOT NULL,
+                ProductID INTEGER NOT NULL,
+                Date DATETIME NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
             );
         ");
 
@@ -77,8 +87,9 @@ public class DatabaseFiller
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
                 Price REAL NOT NULL,
-                FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE,
-                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
+                FOREIGN KEY (OrderId) REFERENCES OrderHistory(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
+                 UNIQUE(OrderId, ProductId)
             );
         ");
 
@@ -89,7 +100,10 @@ public class DatabaseFiller
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
                 Discount REAL NOT NULL DEFAULT 0,
-                RewardPrice REAL NOT NULL DEFAULT 0
+                RewardPrice REAL NOT NULL DEFAULT 0,
+                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
+                UNIQUE(UserId, ProductId) -- Ensure one entry per user-product pair
             );
         ");
 
@@ -118,13 +132,20 @@ public class DatabaseFiller
         db.Execute(sql, product);
     }
 
-    public static int InsertOrder(OrdersModel order)
+        public static void InsertOrder(OrdersModel order)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        string sql = @"INSERT INTO Orders (UserID, ProductID, Date) 
+        VALUES (@UserID, @ProductID, @Date);";
+        db.Execute(sql, order);
+    }
+    public static int InsertOrderHistory(OrdersModel order)
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Open();
         db.Execute("PRAGMA foreign_keys = ON;");
         string sql = @"
-            INSERT INTO Orders (UserID, Date)
+            INSERT INTO OrderHistory (UserID, Date)
             VALUES (@UserID, @Date);
             SELECT last_insert_rowid();
         ";
@@ -196,14 +217,26 @@ public class DatabaseFiller
             }
         }
 
-        List<OrdersModel> orders = new List<OrdersModel>();
+        List<OrdersModel> orderHistorys = new List<OrdersModel>();
         for (int i = 0; i < orderCount; i++)
         {
-            orders.Add(new OrdersModel
+            orderHistorys.Add(new OrdersModel
             {
                 UserID = (i % 3) + 1,
                 Date = DateTime.Today.AddDays(-(orderCount - i - 1))
             });
+        }
+         List<OrdersModel> orders = new List<OrdersModel>();
+        for (int i = 0; i < orderCount; i++)
+        {
+            int productIndex = random.Next(products.Count);
+            OrdersModel order = new OrdersModel
+            {
+                UserID = (i % 3) + 1,
+                ProductID = productIndex + 1,
+                Date = DateTime.Today.AddDays(-i)
+            };
+            orders.Add(order);
         }
 
         Console.Clear();
@@ -237,7 +270,7 @@ public class DatabaseFiller
 
                 foreach (var order in orders)
                 {
-                    int orderId = InsertOrder(order);
+                    int orderId = InsertOrderHistory(order);
                     int itemCount = random.Next(1, 4);
                     for (int j = 0; j < itemCount; j++)
                     {
@@ -251,6 +284,11 @@ public class DatabaseFiller
                         };
                         InsertOrderItem(orderItem);
                     }
+                    orderTask.Increment(1);
+                }
+                 foreach (var order in orders)
+                {
+                    InsertOrder(order);
                     orderTask.Increment(1);
                 }
             });
