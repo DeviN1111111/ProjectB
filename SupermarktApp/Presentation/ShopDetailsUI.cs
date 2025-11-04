@@ -7,6 +7,8 @@ public static class ShopDetailsUI
     public static void Show()
     {
         ShopInfoModel shopInfo = UpdateShopInfo.GetShopInfo();
+
+        Console.Clear();
         Color AsciiPrimary = Color.FromHex("#247BA0");
         AnsiConsole.Write(
             new FigletText("Welcome to our Supermarket!")
@@ -67,7 +69,9 @@ public static class ShopDetailsUI
         var columns = new Columns(table, panel);
         AnsiConsole.Write(columns);
         AnsiConsole.WriteLine();
-        Console.ReadLine();
+
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+        Console.ReadKey();
     }
     public static void PromptDescription()
     {
