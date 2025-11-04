@@ -7,6 +7,7 @@ public static class ShopDetails
     private static readonly string ClosingHourSunday = "19:00";
     public static void Show()
     {
+        Console.Clear();
         Color AsciiPrimary = Color.FromHex("#247BA0");
         AnsiConsole.Write(
             new FigletText("Welcome to our Supermarket!")
@@ -42,7 +43,7 @@ public static class ShopDetails
 
         var columns = new Columns(table, panel);
         AnsiConsole.Write(columns);
-
-        Console.ReadLine();
+        AnsiConsole.MarkupLine("Press [green]Any key[/] to continue.");
+        Console.ReadKey();
     }
 }
