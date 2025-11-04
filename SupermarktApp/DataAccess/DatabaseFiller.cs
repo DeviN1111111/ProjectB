@@ -35,7 +35,7 @@ public class DatabaseFiller
                 var seedUsersTask = ctx.AddTask("[cyan]Seeding Users[/]", maxValue: 5);
                 var seedProductsTask = ctx.AddTask("[cyan]Seeding Products[/]", maxValue: 459);
                 var seedOrdersTask = ctx.AddTask("[cyan]Seeding Orders[/]", maxValue: orderCount);
-                var seedPromotionsTask = ctx.AddTask("[magenta]Seeding Promotions[/]", maxValue: 5); // New task
+                var seedPromotionsTask = ctx.AddTask("[magenta]Seeding Promotions[/]", maxValue: 5);
 
                 // Delete tables
                 DeleteTables(_ => deleteTask.Increment(1));
@@ -388,6 +388,29 @@ public class DatabaseFiller
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(1, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(2, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(3, 30));
+
+        // ORDER HISTORY
+        var orderHistoryList = new List<OrderHistoryModel>();
+        for (int i = 0; i < orderCount; i++)
+        {
+            // Create a corresponding OrderHistory entry for each order
+            var history = new OrderHistoryModel
+            {
+                UserId = (i % users.Count) + 1,
+                Date = DateTime.Today.AddDays(-i)
+            };
+
+            int orderHistoryId = InsertOrderHistory(history); // insert into DB and get the ID
+            orderHistoryList.Add(history);
+
+            // OPTIONAL: Add random OrderItems for this OrderHistory
+            int itemCount = random.Next(1, 4); // 1–3 items per order
+            for (int j = 0; j < itemCount; j++)
+            {
+                var product = products[random.Next(products.Count)];
+                InsertOrderItem(orderHistoryId, products.IndexOf(product) + 1, random.Next(1, 5), product.Price);
+            }
+        }
     }
 
     public static void InsertUser(UserModel user)
