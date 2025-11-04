@@ -1,7 +1,9 @@
+using Microsoft.Data.Sqlite;
+using Dapper;
 namespace SupermarktAppTests
 {
     [TestClass]
-    public class TestOrderHistoryDisplay
+    public class OrderTest
     {
         [TestClass]
         public class OrderLogicTests

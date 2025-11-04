@@ -25,6 +25,8 @@ public class DatabaseFiller
             db.Execute($"DROP TABLE IF EXISTS {table};");
         }
         db.Execute("PRAGMA foreign_keys = ON;");
+
+
     }
 
     public static void CreateTables()
@@ -82,7 +84,7 @@ public class DatabaseFiller
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS OrderItem (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Id INTEGER PRIMARY KEY,
                 OrderId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
@@ -114,6 +116,8 @@ public class DatabaseFiller
                 PriceInPoints INTEGER NOT NULL
             );
         ");
+
+
     }
 
     public static void InsertUser(UserModel user)
@@ -139,26 +143,33 @@ public class DatabaseFiller
         VALUES (@UserID, @ProductID, @Date);";
         db.Execute(sql, order);
     }
-    public static int InsertOrderHistory(OrdersModel order)
+    public static int InsertOrderHistory(OrderHistoryModel order)
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Open();
         db.Execute("PRAGMA foreign_keys = ON;");
-        string sql = @"
-            INSERT INTO OrderHistory (UserID, Date)
-            VALUES (@UserID, @Date);
+        string sql = @" 
+            INSERT INTO OrderHistory (UserId, Date)
+            VALUES (@UserId, @Date);
             SELECT last_insert_rowid();
         ";
         int orderId = db.ExecuteScalar<int>(sql, order);
         return orderId;
     }
 
-    public static void InsertOrderItem(OrderItemModel item)
+    public static void InsertOrderItem(int orderId, int productId, int quantity, double price)
     {
         using var db = new SqliteConnection(ConnectionString);
-        string sql = @"INSERT INTO OrderItem (OrderId, ProductId, Quantity, Price)
-                       VALUES (@OrderId, @ProductId, @Quantity, @Price);";
-        db.Execute(sql, item);
+        db.Open();
+        db.Execute(@"
+            INSERT INTO OrderItem (OrderId, ProductId, Quantity, Price)
+            VALUES (@OrderId, @ProductId, @Quantity, @Price)
+            ON CONFLICT(OrderId, ProductId)
+            DO UPDATE SET
+                Quantity = excluded.Quantity,
+                Price = excluded.Price;",
+            new { OrderId = orderId, ProductId = productId, Quantity = quantity, Price = price }
+    );
     }
 
     public static void SeedData(int orderCount)
@@ -216,16 +227,26 @@ public class DatabaseFiller
                 id++;
             }
         }
+        using var db = new SqliteConnection("Data Source=database.db");
+        db.Open();
 
-        List<OrdersModel> orderHistorys = new List<OrdersModel>();
+        // Reset autoincrement counters and clear tables for a clean reseed
+        db.Execute("DELETE FROM sqlite_sequence WHERE name = 'OrderHistory';");
+        db.Execute("DELETE FROM sqlite_sequence WHERE name = 'OrderItem';");
+        db.Execute("DELETE FROM OrderItem;");
+        db.Execute("DELETE FROM OrderHistory;");
+        
+        List<OrderHistoryModel> orderHistory = new List<OrderHistoryModel>();
         for (int i = 0; i < orderCount; i++)
         {
-            orderHistorys.Add(new OrdersModel
+            orderHistory.Add(new OrderHistoryModel
             {
-                UserID = (i % 3) + 1,
-                Date = DateTime.Today.AddDays(-(orderCount - i - 1))
+                UserId = (i % 3) + 1,
+                Date = DateTime.Today.AddDays(-i)
+
             });
         }
+
          List<OrdersModel> orders = new List<OrdersModel>();
         for (int i = 0; i < orderCount; i++)
         {
@@ -268,23 +289,24 @@ public class DatabaseFiller
                     productTask.Increment(1);
                 }
 
-                foreach (var order in orders)
+                foreach (var order in orderHistory)
                 {
-                    int orderId = InsertOrderHistory(order);
+                    int orderID = InsertOrderHistory(order);
                     int itemCount = random.Next(1, 4);
                     for (int j = 0; j < itemCount; j++)
                     {
                         var product = products[random.Next(products.Count)];
                         var orderItem = new OrderItemModel
                         {
-                            OrderId = orderId,
+                            OrderId = orderID,
                             ProductId = products.IndexOf(product) + 1,
                             Quantity = random.Next(1, 5),
                             Price = product.Price
                         };
-                        InsertOrderItem(orderItem);
+                        InsertOrderItem(orderItem.OrderId, orderItem.ProductId, orderItem.Quantity, orderItem.Price);
+                        orderTask.Increment(1);
                     }
-                    orderTask.Increment(1);
+
                 }
                  foreach (var order in orders)
                 {

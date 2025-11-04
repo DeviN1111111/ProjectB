@@ -22,8 +22,7 @@ public static void AddToOrderItems(int orderId, int productId, int quantity, dou
     {
         using var connection = new SqliteConnection(ConnectionString);
         var query = @"
-            SELECT Id AS OrderItemId, OrderId, ProductId, Quantity, Price
-            FROM OrderItem
+            SELECT * FROM OrderItem
             WHERE OrderId = @OrderId;
         ";
         return connection.Query<OrderItemModel>(query, new { OrderId = orderId }).AsList();
