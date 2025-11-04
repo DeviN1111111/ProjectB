@@ -4,6 +4,12 @@ public class UpdateShopInfo
 {
     public static void UpdateDescription()
     {
+        Console.Clear();
+        Color AsciiPrimary = Color.FromHex("#247BA0");
+        AnsiConsole.Write(
+            new FigletText("Update Description")
+                .Centered()
+                .Color(AsciiPrimary));
         string description = AnsiConsole.Ask<string>("Enter the new [green]shop description[/]:");
         ShopInfoAccess.UpdateDescription(description);
         AnsiConsole.MarkupLine("[green]Shop description updated successfully![/]");
@@ -16,7 +22,12 @@ public class UpdateShopInfo
     public static void UpdateOpeningHours()
     {
         string openingHour, closingHour;
-
+        Console.Clear();
+        Color AsciiPrimary = Color.FromHex("#247BA0");
+        AnsiConsole.Write(
+            new FigletText("Update Opening Hours")
+                .Centered()
+                .Color(AsciiPrimary));
         var options = new List<string>();
         options.AddRange(new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
         var choice = AnsiConsole.Prompt(
@@ -27,8 +38,8 @@ public class UpdateShopInfo
         {
             while (true)
             {
-                openingHour = AnsiConsole.Ask<string>("Enter the new [green]opening hour[/] (HH:MM or HHMM):").Trim();
-                closingHour = AnsiConsole.Ask<string>("Enter the new [green]closing hour[/] (HH:MM or HHMM):").Trim();
+                openingHour = AnsiConsole.Ask<string>("Enter the new [green]Monday opening hour[/] (HH:MM or HHMM):").Trim();
+                closingHour = AnsiConsole.Ask<string>("Enter the new [green]Monday closing hour[/] (HH:MM or HHMM):").Trim();
 
                 if (Regex.IsMatch(openingHour, @"^\d{4}$"))
                     openingHour = openingHour.Insert(2, ":");

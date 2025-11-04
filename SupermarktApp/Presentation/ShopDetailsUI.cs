@@ -3,6 +3,7 @@ public static class ShopDetails
 {
     public static void Show()
     {
+        Console.Clear();
         Color AsciiPrimary = Color.FromHex("#247BA0");
         AnsiConsole.Write(
             new FigletText("Welcome to our Supermarket!")
