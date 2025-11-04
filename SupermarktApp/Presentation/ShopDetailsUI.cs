@@ -1,12 +1,12 @@
 using Spectre.Console;
 using System.Text.RegularExpressions;
+using System.Globalization;
+
 public static class ShopDetailsUI
 {
     public static void Show()
     {
-        ShopInfoModel shopInfo = ShopInfoAccess.GetShopInfo() ?? new ShopInfoModel();
-
-        Console.Clear();
+        ShopInfoModel shopInfo = UpdateShopInfo.GetShopInfo();
         Color AsciiPrimary = Color.FromHex("#247BA0");
         AnsiConsole.Write(
             new FigletText("Welcome to our Supermarket!")
@@ -21,27 +21,30 @@ public static class ShopDetailsUI
 
         foreach (var day in GetDayDate.getDayDate())
         {
-            if (day[0] == "Monday")
+            DateTime date = DateTime.Parse(day[1]);
+            string dayName = date.ToString("dddd", CultureInfo.InvariantCulture);
+
+            if (dayName == "Monday")
             {
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourMonday} - {shopInfo.ClosingHourMonday}[/]");
             }
-            else if (day[0] == "Tuesday")
+            else if (dayName == "Tuesday")
             {
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourTuesday} - {shopInfo.ClosingHourTuesday}[/]");
             }
-            else if (day[0] == "Wednesday")
+            else if (dayName == "Wednesday")
             {
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourWednesday} - {shopInfo.ClosingHourWednesday}[/]");
             }
-            else if (day[0] == "Thursday")
+            else if (dayName == "Thursday")
             {
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourThursday} - {shopInfo.ClosingHourThursday}[/]");
             }
-            else if (day[0] == "Friday")
+            else if (dayName == "Friday")
             {
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourFriday} - {shopInfo.ClosingHourFriday}[/]");
             }
-            else if (day[0] == "Saturday")
+            else if (dayName == "Saturday")
             {
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSaturday} - {shopInfo.ClosingHourSaturday}[/]");
             }
@@ -82,7 +85,7 @@ public static class ShopDetailsUI
     public static void PromptOpeningHours()
     {
         string openingHour, closingHour;
-        ShopInfoModel shopInfo = ShopInfoAccess.GetShopInfo() ?? new ShopInfoModel();
+        ShopInfoModel shopInfo = UpdateShopInfo.GetShopInfo();
 
         Console.Clear();
         Color AsciiPrimary = Color.FromHex("#247BA0");
