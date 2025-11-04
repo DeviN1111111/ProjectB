@@ -73,7 +73,9 @@ public static class ShopDetailsUI
         var rows = new Rows(table, panel);
         AnsiConsole.Write(rows);
         AnsiConsole.WriteLine();
-        Console.ReadLine();
+
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+        Console.ReadKey();
     }
     public static void PromptDescription()
     {
