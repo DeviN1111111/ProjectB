@@ -7,6 +7,12 @@ public static class ProductDetailsUI
     public static void ShowProductDetails(ProductModel product)
     {
         Console.Clear();
+        WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
+        if(WeeklyDiscountProduct != null)
+        {
+            product.Price = product.Price - WeeklyDiscountProduct.Discount;
+        }
+            
 
         AnsiConsole.Write(
             new FigletText("Product Details")
@@ -15,7 +21,7 @@ public static class ProductDetailsUI
 
         var body =
             $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
-            $"[bold #00014d]Price:[/] [#5dabcf]${product.Price:0.00}[/]\n" +
+            $"[bold #00014d]Price:[/] [#5dabcf]${Math.Round(product.Price, 2)}[/]\n" +
             $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
             $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
             $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +

@@ -5,6 +5,11 @@ public class OrderLogic
     public static void AddToCart(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
         // check if product already in cart
+        WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
+        if(WeeklyDiscountProduct != null)
+        {
+            discount = WeeklyDiscountProduct.Discount;
+        }
 
         List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
@@ -17,7 +22,7 @@ public class OrderLogic
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
             RewardPrice = CartItem.RewardPrice + RewardPrice;
-            discount = CartItem.Discount + discount;
+            discount = CartItem.Discount;
             CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount, RewardPrice);
             return;
         }
@@ -100,10 +105,15 @@ public class OrderLogic
         double totalDiscount = 0;
         foreach (var item in allUserProducts)
         {
-            totalDiscount += item.Discount;
+            if (item.RewardPrice == 0)
+            {
+                totalDiscount += item.Discount * item.Quantity;
+            }
         }
+
         return Math.Round(totalDiscount, 2);
     }
+    
         //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {
@@ -121,6 +131,3 @@ public class OrderLogic
         }
     }
 }
-
-
-
