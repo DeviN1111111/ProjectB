@@ -212,6 +212,37 @@ public class DatabaseFiller
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(271, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(272, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(273, 30));
+        var defaultShopInfo = new ShopInfoModel
+        {
+            Description = @"
+            Welcome to our supermarket — where freshness comes first.
+            Our bakery opens early with warm, freshly baked bread, and all our vegetables are kept perfectly cooled throughout the day.
+            Most restocking takes place in the evening, so the shelves are full and ready for you every morning.",
+
+            OpeningHourMonday = "07:00",
+            ClosingHourMonday = "22:00",
+
+            OpeningHourTuesday = "07:00",
+            ClosingHourTuesday = "22:00",
+
+            OpeningHourWednesday = "07:00",
+            ClosingHourWednesday = "22:00",
+
+            OpeningHourThursday = "07:00",
+            ClosingHourThursday = "22:00",
+
+            OpeningHourFriday = "07:00",
+            ClosingHourFriday = "22:00",
+
+            OpeningHourSaturday = "08:00",
+            ClosingHourSaturday = "20:00",
+
+            OpeningHourSunday = "08:00",
+            ClosingHourSunday = "20:00"
+        };
+
+        // Save or update in DB
+        ShopInfoAccess.UpdateShopInfo(defaultShopInfo);
 
         
         var categoryProducts = new Dictionary<string, List<string>>
