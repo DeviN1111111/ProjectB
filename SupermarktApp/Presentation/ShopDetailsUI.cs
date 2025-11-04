@@ -15,26 +15,46 @@ public static class ShopDetails
         table.AddColumn(new TableColumn("[bold #00014d]Date[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Opening Hours[/]").Centered());
 
-        var OpeningHour = UpdateShopInfo.PassOpeningHours().Item1;
-        var ClosingHour = UpdateShopInfo.PassOpeningHours().Item2;
-        if (OpeningHour == null || ClosingHour == null)
-        {
-            OpeningHour = "07:00";
-            ClosingHour = "22:00";
-        }
-        var OpeningHourSunday = UpdateShopInfo.PassOpeningHoursSunday().Item1;
-        var ClosingHourSunday = UpdateShopInfo.PassOpeningHoursSunday().Item2;
-        if (OpeningHourSunday == null || ClosingHourSunday == null)
-        {
-            OpeningHourSunday = "12:00";
-            ClosingHourSunday = "19:00";
-        }
-        
+        var OpeningHourMonday = UpdateShopInfo.PassOpeningHours("Monday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Monday").Item1 : "07:00";
+        var ClosingHourMonday = UpdateShopInfo.PassOpeningHours("Monday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Monday").Item2 : "22:00";
+        var OpeningHourTuesday = UpdateShopInfo.PassOpeningHours("Tuesday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Tuesday").Item1 : "07:00";
+        var ClosingHourTuesday = UpdateShopInfo.PassOpeningHours("Tuesday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Tuesday").Item2 : "22:00";
+        var OpeningHourWednesday = UpdateShopInfo.PassOpeningHours("Wednesday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Wednesday").Item1 : "07:00";
+        var ClosingHourWednesday = UpdateShopInfo.PassOpeningHours("Wednesday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Wednesday").Item2 : "22:00";
+        var OpeningHourThursday = UpdateShopInfo.PassOpeningHours("Thursday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Thursday").Item1 : "07:00";
+        var ClosingHourThursday = UpdateShopInfo.PassOpeningHours("Thursday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Thursday").Item2 : "22:00";
+        var OpeningHourFriday = UpdateShopInfo.PassOpeningHours("Friday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Friday").Item1 : "07:00";
+        var ClosingHourFriday = UpdateShopInfo.PassOpeningHours("Friday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Friday").Item2 : "22:00";
+        var OpeningHourSaturday = UpdateShopInfo.PassOpeningHours("Saturday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Saturday").Item1 : "08:00";
+        var ClosingHourSaturday = UpdateShopInfo.PassOpeningHours("Saturday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Saturday").Item2 : "20:00";
+        var OpeningHourSunday = UpdateShopInfo.PassOpeningHours("Sunday").Item1 != null ? UpdateShopInfo.PassOpeningHours("Sunday").Item1 : "08:00";
+        var ClosingHourSunday = UpdateShopInfo.PassOpeningHours("Sunday").Item2 != null ? UpdateShopInfo.PassOpeningHours("Sunday").Item2 : "20:00";
+
         foreach (var day in GetDayDate.getDayDate())
         {
-            if (day[0] != "Sunday")
+            if (day[0] == "Monday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHour} - {ClosingHour}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourMonday} - {ClosingHourMonday}[/]");
+            }
+            else if (day[0] == "Tuesday")
+            {
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourTuesday} - {ClosingHourTuesday}[/]");
+            }
+            else if (day[0] == "Wednesday")
+            {
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourWednesday} - {ClosingHourWednesday}[/]");
+            }
+            else if (day[0] == "Thursday")
+            {
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourThursday} - {ClosingHourThursday}[/]");
+            }
+            else if (day[0] == "Friday")
+            {
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourFriday} - {ClosingHourFriday}[/]");
+            }
+            else if (day[0] == "Saturday")
+            {
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourSaturday} - {ClosingHourSaturday}[/]");
             }
             else
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{OpeningHourSunday} - {ClosingHourSunday}[/]");
