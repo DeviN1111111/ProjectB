@@ -5,6 +5,7 @@ public class OrderLogic
     public static void AddToCart(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
         // check if product already in cart
+
         List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartItem != null)
@@ -103,4 +104,23 @@ public class OrderLogic
         }
         return Math.Round(totalDiscount, 2);
     }
+        //create a new order for the current user.
+    public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
+    {
+        // Create a new order and get its ID
+        int orderId = OrderAccess.AddToOrderHistory(SessionManager.CurrentUser.ID);
+        foreach (var cartProduct in cartProducts)
+        {
+            // Find the matching product details
+            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
+            if (matchingProduct != null)
+            {
+                // Add each item to OrderItems with the new orderId
+                OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price);
+            }
+        }
+    }
 }
+
+
+

@@ -11,7 +11,7 @@ public class Order
         Console.Clear();
         double totalAmount = 0;
         List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
-        List<ProductModel> allProducts = ProductAccess.GetAllProducts();  // List of all products dit moet via logic
+        List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
 
         // Title
         AnsiConsole.Write(
@@ -228,22 +228,39 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        AnsiConsole.MarkupLine("Thank you purchase succesful!");
-                        if(rewardPoints > 0)
+                        List<OrderItemModel> allOrderItems = new List<OrderItemModel>();  // List to hold order items
+
+                        foreach (var item in cartProducts)
                         {
-                            AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                allOrderItems.Add(orderItem);
+                            }
                         }
+                        OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
+
+                        AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
-                        AnsiConsole.MarkupLine("Thank you purchase succesful!");
-                        if(rewardPoints > 0)
+                        List<OrderItemModel> allOrderItem = new List<OrderItemModel>();  // List to hold order items
+
+                        foreach (var item in cartProducts)
                         {
-                            AnsiConsole.MarkupLine($"You have earned [green]{rewardPoints}[/] reward points!");
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                allOrderItem.Add(orderItem);
+                            }
                         }
+                        OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
+                        AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -319,4 +336,100 @@ public class Order
     {
         OrderLogic.RemoveFromCart(productId);
     }
+
+public static void DisplayOrderHistory()
+{
+    while (true)
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Order History")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID);
+        if (userOrders.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No order history found.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
+        if (Console.ReadKey(true).Key == ConsoleKey.Escape)
+            return;
+
+        var orderChoices = userOrders
+            .Select(order => $"Order #{order.ID} - {order.Date:yyyy-MM-dd HH:mm}")
+            .ToList();
+
+        string selectedOrderLabel = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Select an order to view details[/]")
+                .AddChoices(orderChoices)
+        );
+
+        var selectedOrderId = int.Parse(
+            selectedOrderLabel
+                .Split(' ')[1]
+                .Replace("#", "")
+        );
+
+        var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId);
+
+        if (orderItems.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[grey]This order has no items.[/]");
+            Console.ReadKey();
+            continue;
+        }
+
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText($"Order #{selectedOrderId}")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        var orderTable = new Table()
+            .BorderColor(AsciiPrimary)
+            .AddColumn("[white]Product[/]")
+            .AddColumn("[white]Quantity[/]")
+            .AddColumn("[white]Price per Unit[/]")
+            .AddColumn("[white]Total Price[/]");
+
+        decimal totalOrderPrice = 0;
+
+        foreach (var item in orderItems)
+        {
+            var product = ProductAccess.GetProductByID(item.ProductId);
+            if (product != null)
+            {
+                decimal itemTotal = (decimal)(item.Quantity * item.Price);
+                totalOrderPrice += itemTotal;
+                orderTable.AddRow(
+                    product?.Name ?? "[red]Unknown Product[/]",
+                    item.Quantity.ToString(),
+                    $"${item.Price:F2}",
+                    $"${itemTotal:F2}"
+                );
+            }
+        }
+        if (totalOrderPrice < 25)
+        {
+            decimal deliveryFee = 5;
+            totalOrderPrice += deliveryFee;
+            orderTable.AddEmptyRow();
+            orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
+        }
+        orderTable.AddEmptyRow();
+        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${totalOrderPrice:F2}[/]");
+
+        AnsiConsole.Write(orderTable);
+        AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
+        Console.ReadKey();
+    }
+}
+
+
 }

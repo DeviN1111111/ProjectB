@@ -1,4 +1,3 @@
-using NUnit.Framework.Constraints;
 using Spectre.Console;
 public static class RewardUI
 {
