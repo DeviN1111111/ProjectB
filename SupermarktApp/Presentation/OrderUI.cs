@@ -145,7 +145,7 @@ public class Order
                     var action = AnsiConsole.Prompt(
                         new SelectionPrompt<string>()
                             .Title("[bold white]What would you like to do with the selected items?[/]")
-                            .AddChoices("Mark as done", "Remove from checklist", "Cancel")
+                            .AddChoices("Clear list", "Remove from checklist", "Cancel")
                     );
 
                     foreach (var i in checkedItems.ToList())
@@ -158,9 +158,9 @@ public class Order
 
                         switch (action)
                         {
-                            case "Mark as done":
+                            case "Clear list":
                                 ChecklistLogic.RemoveFromChecklist(product.ID);
-                                AnsiConsole.MarkupLine($"[green]✔ {safeName} marked as done![/]");
+                                AnsiConsole.MarkupLine($"[green]List has been cleared![/]");
                                 break;
 
                             case "Remove from checklist":

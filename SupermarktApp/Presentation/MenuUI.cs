@@ -69,6 +69,7 @@ public static class MenuUI
                 case "Checklist":
                     Console.Clear();
                     Order.ShowChecklist();
+                    break;
                 case "Order History":
                     Order.DisplayOrderHistory();
                     break;
