@@ -28,10 +28,20 @@ public static class ValidaterLogic
         }
         return false;
     }
-    
+
     public static bool ValidateLocationProduct(int location)
     {
         if (location <= 43 && location > 0)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+    
+    public static bool ValidateQuantityProduct(int quantity)
+    {
+        if (quantity >= 0)
         {
             return true;
         }
