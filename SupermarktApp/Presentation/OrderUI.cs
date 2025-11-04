@@ -28,17 +28,37 @@ public class Order
             .AddColumn("[white]Price[/]")
             .AddColumn("[white]Total[/]");
 
-
-        // Products in cart
         foreach (var cartProduct in allUserProducts)
         {
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
+                WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(Product.ID);
                 if (cartProduct.ProductId == Product.ID)
                 {
-                    cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"${Product.Price}", $"${Product.Price * cartProduct.Quantity}");
-                    totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
+                    if(cartProduct.RewardPrice > 0)
+                    {
+                        string text = Product.Price.ToString();
+                        var struckPrice = $"[strike][red]{text}[/][/]";
+
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"€{struckPrice} [green]FREE![/]", $"[green]FREE![/]");
+                        
+                    }
+                    else if(WeeklyDiscountProduct != null)
+                    {
+                        string text = Product.Price.ToString();
+                        var struckPrice = $"[strike][red]{text}[/][/]";
+
+                        double discountedPrice = Product.Price - WeeklyDiscountProduct.Discount;
+
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"€{struckPrice} [green]€{Math.Round(discountedPrice, 2)}[/]", $"€{Math.Round(discountedPrice * cartProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
+                    }
+                    else
+                    {
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * cartProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
+                    }
                 }
             }
         }
@@ -54,7 +74,7 @@ public class Order
 
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Total price:[/] [white]${Math.Round(totalAmount + deliveryFee - discount, 2)}[/]\n[bold white]Discount:[/] [white]${discount}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]"))
+            new Markup($"[bold white]Discount:[/] [white]€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [white]€{Math.Round(totalAmount + deliveryFee - discount + OrderLogic.returnYang(), 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -410,8 +430,8 @@ public static void DisplayOrderHistory()
                 orderTable.AddRow(
                     product?.Name ?? "[red]Unknown Product[/]",
                     item.Quantity.ToString(),
-                    $"${item.Price:F2}",
-                    $"${itemTotal:F2}"
+                    $"€{item.Price:F2}",
+                    $"€{itemTotal:F2}"
                 );
             }
         }
@@ -420,10 +440,10 @@ public static void DisplayOrderHistory()
             decimal deliveryFee = 5;
             totalOrderPrice += deliveryFee;
             orderTable.AddEmptyRow();
-            orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
+            orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]€{deliveryFee:F2}[/]");
         }
         orderTable.AddEmptyRow();
-        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${totalOrderPrice:F2}[/]");
+        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]€{totalOrderPrice:F2}[/]");
 
         AnsiConsole.Write(orderTable);
         AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");

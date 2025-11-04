@@ -25,7 +25,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Logout", "Exit"});
+                options.AddRange(new[] { "Order", "Discounted Products", "Cart", "Checklist", "Order History", "Rewards", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {

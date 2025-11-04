@@ -5,6 +5,11 @@ public class OrderLogic
     public static void AddToCart(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
         // check if product already in cart
+        WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
+        if(WeeklyDiscountProduct != null)
+        {
+            discount = WeeklyDiscountProduct.Discount;
+        }
 
         List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
@@ -97,13 +102,47 @@ public class OrderLogic
     {
         if (SessionManager.CurrentUser == null) return 0;
         var allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        var allRewardItem = RewardItemsAccess.GetAllRewardItems();
         double totalDiscount = 0;
         foreach (var item in allUserProducts)
         {
-            totalDiscount += item.Discount;
+            totalDiscount += item.Discount * item.Quantity;
         }
+
+        foreach (var item in allUserProducts)
+        {
+            foreach (var RewardItem in allRewardItem)
+            {
+                if (RewardItem.ProductId == item.ProductId)
+                {
+                    totalDiscount -= ProductAccess.GetProductByID(item.ProductId).Price * item.Quantity;
+                }
+            }
+        }
+        totalDiscount = 0;
         return Math.Round(totalDiscount, 2);
     }
+    public static double returnYang()
+    {
+        if (SessionManager.CurrentUser == null) return 0;
+        var allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        var allRewardItem = RewardItemsAccess.GetAllRewardItems();
+        double totalDiscount = 0;
+        foreach (var item in allUserProducts)
+        {
+            foreach (var RewardItem in allRewardItem)
+            {
+                if (RewardItem.ProductId == item.ProductId)
+                {
+                    totalDiscount -= ProductAccess.GetProductByID(item.ProductId).Price * item.Quantity;
+                }
+            }
+        }
+        totalDiscount = 0;
+        return Math.Round(totalDiscount, 2);
+    }
+
+    
         //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {

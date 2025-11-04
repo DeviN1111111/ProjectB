@@ -57,7 +57,20 @@ public static class SearchUI
                 //Vul de table met Namen en prijzen.
                 foreach (ProductModel product in productList)
                 {
-                    table.AddRow(product.Name, product.Price.ToString());
+                    WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
+                    if(WeeklyDiscountProduct != null && product.ID == WeeklyDiscountProduct.ID)
+                    {
+                        string text = product.Price.ToString();
+                        var struckPrice = $"[strike][red]{text}[/][/]";
+
+                        string newPrice = $"{struckPrice} [green]{Math.Round(product.Price - WeeklyDiscountProduct.Discount, 2)}[/]";
+                        table.AddRow(product.Name, newPrice);
+                    }
+                    else
+                    {
+                        string yellowPrice = $"[yellow]{product.Price.ToString()}[/]";
+                        table.AddRow(product.Name, yellowPrice);
+                    }
                 }
 
                 AnsiConsole.Write(table);

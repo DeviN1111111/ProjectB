@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class DatabaseFiller
 {
     private const string ConnectionString = "Data Source=database.db";
-    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems" };
+    public static List<string> allTables = new List<string>() { "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "WeeklyPromotions" };
 
     public static void RunDatabaseMethods(int orderCount = 50)
     {
@@ -64,6 +64,14 @@ public class DatabaseFiller
         ");
 
         db.Execute(@"
+            CREATE TABLE IF NOT EXISTS WeeklyPromotions (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ProductID INTEGER NOT NULL,
+                Discount REAL NOT NULL
+            );
+        ");
+
+        db.Execute(@"
             CREATE TABLE IF NOT EXISTS OrderHistory (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
@@ -94,14 +102,14 @@ public class DatabaseFiller
                  UNIQUE(OrderId, ProductId)
             );
         ");
-      
+        // Change DiscountToTotal discount:
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
-                Discount REAL NOT NULL DEFAULT 0,
+                Discount REAL NOT NULL DEFAULT 0, 
                 RewardPrice REAL NOT NULL DEFAULT 0,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
@@ -135,6 +143,13 @@ public class DatabaseFiller
         string sql = @"INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus) 
                        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);";
         db.Execute(sql, user);
+    }
+    public static void InsertWeeklyPromotions(WeeklyPromotionsModel model)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        string sql = @"INSERT INTO WeeklyPromotions (ProductID, Discount) 
+                       VALUES (@ProductID, @Discount);";
+        db.Execute(sql, model);
     }
 
     public static void InsertProduct(ProductModel product)
@@ -192,7 +207,9 @@ public class DatabaseFiller
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(271, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(272, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(273, 30));
-
+        
+        WeeklyPromotionsModel newPromotedProduct = new WeeklyPromotionsModel(1, 2);
+        InsertWeeklyPromotions(newPromotedProduct);
         
         var categoryProducts = new Dictionary<string, List<string>>
         {
