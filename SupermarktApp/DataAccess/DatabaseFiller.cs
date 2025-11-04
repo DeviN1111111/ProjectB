@@ -33,7 +33,7 @@ public class DatabaseFiller
                 var deleteTask = ctx.AddTask("[red]Deleting tables[/]", maxValue: allTables.Count);
                 var createTask = ctx.AddTask("[green]Creating tables[/]", maxValue: 1);
                 var seedUsersTask = ctx.AddTask("[cyan]Seeding Users[/]", maxValue: 5);
-                var seedProductsTask = ctx.AddTask("[cyan]Seeding Products[/]", maxValue: 459);
+                var seedProductsTask = ctx.AddTask("[cyan]Seeding Products[/]", maxValue: 454);
                 var seedOrdersTask = ctx.AddTask("[cyan]Seeding Orders[/]", maxValue: orderCount);
                 var seedPromotionsTask = ctx.AddTask("[magenta]Seeding Promotions[/]", maxValue: 5);
 
@@ -324,13 +324,13 @@ public class DatabaseFiller
                 "Protein Powder", "Electrolyte Drink", "Herbal Supplements", "Omega 3 Capsules", "Calcium Tablets", "Vitamin C", "Vitamin D", "Magnesium Supplement", "Zinc Tablets", "Pain Relief Gel", "Heating Pad", "Cold Pack", "Face Mask", "Sanitary Pads"
             },
 
-            ["Rewards"] = new List<string> 
+            ["Rewards"] = new List<string>
             { 
-                "Efteling Ticket", "Blijdorp Ticket", "Walibi Ticket", "Cinema Voucher", "Dinner Voucher", "Theme Park Pass", "Museum Entry", "Gift Card"
+                "Efteling Ticket", "Blijdorp Ticket", "Walibi Ticket"
             }
         };
 
-        int totalProducts = categories.Values.Sum(list => list.Count); // 459 products in total IF U ADD ANY OTHER PRODUCTS UPDATE THE seedProductsTask MAX VALUE IN RunDatabaseMethods :D
+        int totalProducts = categories.Values.Sum(list => list.Count); // 454 products in total IF U ADD ANY OTHER PRODUCTS UPDATE THE seedProductsTask MAX VALUE IN RunDatabaseMethods :D
 
         var products = new List<ProductModel>();
         foreach (var entry in categories)
@@ -385,9 +385,9 @@ public class DatabaseFiller
         }
 
         // REWARD ITEMS
-        RewardItemsAccess.AddRewardItem(new RewardItemsModel(1, 50));
-        RewardItemsAccess.AddRewardItem(new RewardItemsModel(2, 60));
-        RewardItemsAccess.AddRewardItem(new RewardItemsModel(3, 30));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(452, 50));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(453, 60));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(454, 30));
 
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
