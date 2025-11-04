@@ -17,6 +17,7 @@ public static class LoginUI
         {
             SessionManager.CurrentUser = Account;
             AnsiConsole.MarkupLine("[green]Login successful![/]");
+            SessionManager.CurrentUser.AccountPoints = 100000; // For testing purposes
             AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
         }
         else
@@ -77,18 +78,6 @@ public static class LoginUI
                 Console.ReadKey();
                 break;
             }
-            // else
-            // {
-            //     AnsiConsole.MarkupLine("[red]Registration unsuccessful![/]");
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     foreach (string errorLine in Errors)
-            //     {
-            //         AnsiConsole.MarkupLine($"[yellow]{errorLine}[/]");
-            //     }
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     Console.ReadKey();
-            //     break;
-            // }
         }
     }
 }
