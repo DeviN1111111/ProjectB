@@ -20,7 +20,7 @@ public static class MenuUI
             if (SessionManager.CurrentUser == null)
             {
                 // Options when you're not logged in
-                options.AddRange(new[] { "Login", "Register", "Continue as Guest", "Exit" });
+                options.AddRange(new[] { "Login", "Register", "Continue as Guest", "Shop Details", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
@@ -75,6 +75,9 @@ public static class MenuUI
                     break;
                 case "Continue as Guest":
                     SessionManager.CurrentUser = new UserModel { ID = 0, Name = "Guest", LastName = "Guest", Email = "Guest@gmail.com", Password = "Guest", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Guest", AccountStatus = "Guest" };
+                    break;
+                case "Shop Details":
+                    ShopDetails.Show();
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
