@@ -50,6 +50,11 @@ public class ProductLogic
     {
         return ProductAccess.GetProductByIDinWeeklyPromotions(id);
     }
+
+    public static List<WeeklyPromotionsModel> GetAllWeeklyPromotions()
+    {
+        return WeeklyPromotionsAccess.GetAllProducts();
+    }
 }
 
 

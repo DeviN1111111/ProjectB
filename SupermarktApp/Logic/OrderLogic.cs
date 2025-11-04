@@ -22,7 +22,7 @@ public class OrderLogic
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
             RewardPrice = CartItem.RewardPrice + RewardPrice;
-            discount = CartItem.Discount;
+            discount = CartItem.Discount + discount;
             CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount, RewardPrice);
             return;
         }
@@ -102,18 +102,17 @@ public class OrderLogic
     {
         if (SessionManager.CurrentUser == null) return 0;
         var allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        var allRewardItem = RewardItemsAccess.GetAllRewardItems();
         double totalDiscount = 0;
         foreach (var item in allUserProducts)
         {
-            if (item.RewardPrice == 0)
-            {
-                totalDiscount += item.Discount * item.Quantity;
-            }
+            totalDiscount += item.Discount * item.Quantity;
         }
+
         return Math.Round(totalDiscount, 2);
     }
     
-    //create a new order for the current user.
+        //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {
         // Create a new order and get its ID
@@ -130,6 +129,3 @@ public class OrderLogic
         }
     }
 }
-
-
-
