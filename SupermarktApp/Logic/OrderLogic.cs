@@ -104,12 +104,11 @@ public class OrderLogic
         }
         return Math.Round(totalDiscount, 2);
     }
-
-    //create a new order for the current user.
+        //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {
         // Create a new order and get its ID
-        int orderId = OrderAccess.AddToOrders(SessionManager.CurrentUser.ID);
+        int orderId = OrderAccess.AddToOrderHistory(SessionManager.CurrentUser.ID);
         foreach (var cartProduct in cartProducts)
         {
             // Find the matching product details
@@ -122,3 +121,6 @@ public class OrderLogic
         }
     }
 }
+
+
+

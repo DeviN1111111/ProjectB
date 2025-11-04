@@ -12,11 +12,11 @@ public static class OrderAccess
         using var db = new SqliteConnection(ConnectionString);
         return db.Query<OrdersModel>("SELECT * FROM Orders");
     }
-    public static int AddToOrders(int userId)
+    public static int AddToOrderHistory(int userId)
     {
         using var db = new SqliteConnection(ConnectionString);
-        var order = new OrdersModel(userId);
-        var sql = "INSERT INTO Orders (UserID, Date) VALUES (@UserID, @Date); SELECT last_insert_rowid();";
+        var order = new OrderHistoryModel(userId);
+        var sql = "INSERT INTO OrderHistory (UserId, Date) VALUES (@UserId, @Date); SELECT last_insert_rowid();";
         int orderId = db.ExecuteScalar<int>(sql, order);  // Get the last inserted ID
         return orderId;
     }
@@ -153,7 +153,7 @@ public static class OrderAccess
     public static List<OrdersModel> GetOrdersByUserId(int userId)
     {
         using var connection = new SqliteConnection(ConnectionString);
-        var query = "SELECT * FROM Orders WHERE UserId = @UserId ORDER BY Date ASC;";
+        var query = "SELECT * FROM OrderHistory WHERE UserId = @UserId ORDER BY Date DESC;";
         return connection.Query<OrdersModel>(query, new { UserId = userId }).AsList();
     }
 

@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
 using Spectre.Console;
-public class Order
+public static class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
 
@@ -217,7 +219,7 @@ public class Order
         OrderLogic.RemoveFromCart(productId);
     }
 
- public static void DisplayOrderHistory()
+public static void DisplayOrderHistory()
 {
     while (true)
     {
@@ -227,7 +229,6 @@ public class Order
                 .Centered()
                 .Color(AsciiPrimary));
 
-        // Get all orders for the current user
         var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID);
         if (userOrders.Count == 0)
         {
@@ -237,14 +238,10 @@ public class Order
             return;
         }
 
-        // ESC instruction
         AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
-
-        // Let user choose to exit before showing the menu
         if (Console.ReadKey(true).Key == ConsoleKey.Escape)
             return;
 
-        // Create a selection menu per order
         var orderChoices = userOrders
             .Select(order => $"Order #{order.ID} - {order.Date:yyyy-MM-dd HH:mm}")
             .ToList();
@@ -255,16 +252,14 @@ public class Order
                 .AddChoices(orderChoices)
         );
 
-        // Extract the order ID from the selected label
         var selectedOrderId = int.Parse(
             selectedOrderLabel
                 .Split(' ')[1]
                 .Replace("#", "")
         );
 
-        // Get items from that order
         var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId);
-    
+
         if (orderItems.Count == 0)
         {
             AnsiConsole.MarkupLine("[grey]This order has no items.[/]");
@@ -272,7 +267,6 @@ public class Order
             continue;
         }
 
-        // Display order details
         Console.Clear();
         AnsiConsole.Write(
             new FigletText($"Order #{selectedOrderId}")
@@ -286,24 +280,38 @@ public class Order
             .AddColumn("[white]Price per Unit[/]")
             .AddColumn("[white]Total Price[/]");
 
+        decimal totalOrderPrice = 0;
+
         foreach (var item in orderItems)
         {
             var product = ProductAccess.GetProductByID(item.ProductId);
             if (product != null)
             {
+                decimal itemTotal = (decimal)(item.Quantity * item.Price);
+                totalOrderPrice += itemTotal;
                 orderTable.AddRow(
                     product?.Name ?? "[red]Unknown Product[/]",
                     item.Quantity.ToString(),
                     $"${item.Price:F2}",
-                    $"${item.Quantity * item.Price:F2}"
-);
+                    $"${itemTotal:F2}"
+                );
             }
         }
+        if (totalOrderPrice < 25)
+        {
+            decimal deliveryFee = 5;
+            totalOrderPrice += deliveryFee;
+            orderTable.AddEmptyRow();
+            orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
+        }
+        orderTable.AddEmptyRow();
+        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${totalOrderPrice:F2}[/]");
 
         AnsiConsole.Write(orderTable);
         AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
         Console.ReadKey();
     }
 }
+
 
 }
