@@ -23,19 +23,4 @@ public static class LoginAccess
               Password = @Password",
             new { Email, Password });
     }
-
-    public static void ChangeAccountDetails(UserModel user)
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"UPDATE Users 
-            SET Name = @Name,
-            LastName = @LastName,
-            Email = @Email,
-            Password = @Password
-            Address = @Address,
-            Zipcode = @Zipcode,
-            PhoneNumber = @PhoneNumber,
-            City = @City
-            WHERE ID = @ID", user);
-    }
 }

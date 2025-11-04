@@ -1,14 +1,17 @@
+using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
+
+using System.Threading;
 public class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-
+    private static string Safe(string text) => Markup.Escape(text);
     public static void ShowCart()
     {
         Console.Clear();
         double totalAmount = 0;
         List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
-        List<ProductModel> allProducts = ProductAccess.GetAllProducts();  // List of all products dit moet via logic
+        List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
 
         // Title
         AnsiConsole.Write(
@@ -46,10 +49,12 @@ public class Order
         // Calculate delivery fee
         double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
 
+        // Calculate total discount
+        double discount = OrderLogic.CalculateTotalDiscount();
+
         // Summary box
         var panel = new Panel(
-
-            new Markup($"[bold white]Total:[/] [white]${Math.Round(totalAmount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]\n[bold white]Total:[/] [white]${Math.Round(totalAmount + deliveryFee, 2)}[/]"))
+            new Markup($"[bold white]Total price:[/] [white]${Math.Round(totalAmount + deliveryFee - discount, 2)}[/]\n[bold white]Discount:[/] [white]${discount}[/]\n[bold white]Delivery Fee:[/] [white]${Math.Round(deliveryFee, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -57,10 +62,129 @@ public class Order
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
+        double finalAmount = totalAmount + deliveryFee - discount;
 
-        Checkout(allUserProducts, allProducts);
+        Checkout(allUserProducts, allProducts, finalAmount);
     }
-    public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+
+    public static void ShowChecklist()
+    {
+        int selectedIndex = 0;
+        var checkedItems = new HashSet<int>();
+
+        while (true)
+        {
+            Console.Clear();
+
+            var allUserProducts = ChecklistLogic.AllUserProducts();
+            var allProducts = ProductAccess.GetAllProducts();
+
+            AnsiConsole.Write(
+                new FigletText("Checklist")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            if (allUserProducts.Count == 0)
+            {
+                AnsiConsole.MarkupLine("\n[red]Your checklist is empty![/]");
+                AnsiConsole.MarkupLine("[grey]──────────────────────────────[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to go back.");
+                Console.ReadKey(true);
+                return;
+            }
+
+            AnsiConsole.MarkupLine("\n[grey]──────────────────────────────[/]");
+
+            for (int i = 0; i < allUserProducts.Count; i++)
+            {
+                var checklistItem = allUserProducts[i];
+                var product = allProducts.FirstOrDefault(p => p.ID == checklistItem.ProductId);
+                if (product == null) continue;
+
+                bool isSelected = (i == selectedIndex);
+                bool isChecked = checkedItems.Contains(i);
+
+                string checkbox = isChecked ? "[green][[X]][/]" : "[grey][[ ]][/]";
+                string selector = isSelected ? "[cyan]>[/]" : " ";
+
+                string safeName = Markup.Escape(product.Name);
+
+                AnsiConsole.MarkupLine($"{selector} {checkbox} [white]{safeName}[/] (x{checklistItem.Quantity})");
+            }
+
+            AnsiConsole.MarkupLine("[grey]──────────────────────────────[/]");
+
+            AnsiConsole.MarkupLine("[grey][[↑/↓]] Navigate  [[Space]] Toggle  [[Enter]] Confirm  [[Esc]] Back[/]");
+
+            var key = Console.ReadKey(true).Key;
+
+            switch (key)
+            {
+                case ConsoleKey.UpArrow:
+                    selectedIndex = (selectedIndex - 1 + allUserProducts.Count) % allUserProducts.Count;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    selectedIndex = (selectedIndex + 1) % allUserProducts.Count;
+                    break;
+
+                case ConsoleKey.Spacebar:
+                    if (checkedItems.Contains(selectedIndex))
+                        checkedItems.Remove(selectedIndex);
+                    else
+                        checkedItems.Add(selectedIndex);
+                    break;
+
+                case ConsoleKey.Enter:
+                    if (checkedItems.Count == 0)
+                    {
+                        AnsiConsole.MarkupLine("[yellow]No items selected.[/]");
+                        continue;
+                    }
+
+                    var action = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("[bold white]What would you like to do with the selected items?[/]")
+                            .AddChoices("Clear list", "Remove from checklist", "Cancel")
+                    );
+
+                    foreach (var i in checkedItems.ToList())
+                    {
+                        var checklistItem = allUserProducts[i];
+                        var product = allProducts.FirstOrDefault(p => p.ID == checklistItem.ProductId);
+                        if (product == null) continue;
+
+                        string safeName = Markup.Escape(product.Name);
+
+                        switch (action)
+                        {
+                            case "Clear list":
+                                ChecklistLogic.RemoveFromChecklist(product.ID);
+                                AnsiConsole.MarkupLine($"[green]List has been cleared![/]");
+                                break;
+
+                            case "Remove from checklist":
+                                ChecklistLogic.RemoveFromChecklist(product.ID);
+                                AnsiConsole.MarkupLine($"[red]- {safeName} removed from checklist.[/]");
+                                break;
+                        }
+                    }
+
+                    if (action == "Cancel")
+                        AnsiConsole.MarkupLine("[grey]No changes made.[/]");
+
+                    checkedItems.Clear();
+                    break;
+
+                case ConsoleKey.Escape:
+                    return;
+            }
+        }
+    }
+
+
+
+    public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount)
     {
         // Checkout or go back options
         var options = AnsiConsole.Prompt(
@@ -76,7 +200,6 @@ public class Order
         switch (options)
         {
             case "Checkout":
-                Console.Clear();
                 // check if cart is empty
                 if (cartProducts.Count == 0)
                 {
@@ -85,7 +208,11 @@ public class Order
                     Console.ReadKey();
                     return;
                 }
+                // Add reward points to user
+                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
+                RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
+                Console.Clear();
                 AnsiConsole.Write(
                     new FigletText("Checkout")
                         .Centered()
@@ -101,6 +228,19 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
+                        List<OrderItemModel> allOrderItems = new List<OrderItemModel>();  // List to hold order items
+
+                        foreach (var item in cartProducts)
+                        {
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                allOrderItems.Add(orderItem);
+                            }
+                        }
+                        OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
+
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -108,6 +248,18 @@ public class Order
                         OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
+                        List<OrderItemModel> allOrderItem = new List<OrderItemModel>();  // List to hold order items
+
+                        foreach (var item in cartProducts)
+                        {
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                allOrderItem.Add(orderItem);
+                            }
+                        }
+                        OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -184,4 +336,100 @@ public class Order
     {
         OrderLogic.RemoveFromCart(productId);
     }
+
+public static void DisplayOrderHistory()
+{
+    while (true)
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Order History")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID);
+        if (userOrders.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No order history found.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
+        if (Console.ReadKey(true).Key == ConsoleKey.Escape)
+            return;
+
+        var orderChoices = userOrders
+            .Select(order => $"Order #{order.ID} - {order.Date:yyyy-MM-dd HH:mm}")
+            .ToList();
+
+        string selectedOrderLabel = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Select an order to view details[/]")
+                .AddChoices(orderChoices)
+        );
+
+        var selectedOrderId = int.Parse(
+            selectedOrderLabel
+                .Split(' ')[1]
+                .Replace("#", "")
+        );
+
+        var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId);
+
+        if (orderItems.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[grey]This order has no items.[/]");
+            Console.ReadKey();
+            continue;
+        }
+
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText($"Order #{selectedOrderId}")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        var orderTable = new Table()
+            .BorderColor(AsciiPrimary)
+            .AddColumn("[white]Product[/]")
+            .AddColumn("[white]Quantity[/]")
+            .AddColumn("[white]Price per Unit[/]")
+            .AddColumn("[white]Total Price[/]");
+
+        decimal totalOrderPrice = 0;
+
+        foreach (var item in orderItems)
+        {
+            var product = ProductAccess.GetProductByID(item.ProductId);
+            if (product != null)
+            {
+                decimal itemTotal = (decimal)(item.Quantity * item.Price);
+                totalOrderPrice += itemTotal;
+                orderTable.AddRow(
+                    product?.Name ?? "[red]Unknown Product[/]",
+                    item.Quantity.ToString(),
+                    $"${item.Price:F2}",
+                    $"${itemTotal:F2}"
+                );
+            }
+        }
+        if (totalOrderPrice < 25)
+        {
+            decimal deliveryFee = 5;
+            totalOrderPrice += deliveryFee;
+            orderTable.AddEmptyRow();
+            orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
+        }
+        orderTable.AddEmptyRow();
+        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${totalOrderPrice:F2}[/]");
+
+        AnsiConsole.Write(orderTable);
+        AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
+        Console.ReadKey();
+    }
+}
+
+
 }
