@@ -342,7 +342,7 @@ public class DatabaseFiller
             // Ensure discount does not exceed product price
             if (discount >= product.Price)
             {
-                discount = Math.Max(0.01, product.Price - 0.01);
+                discount = Math.Max(0.5, product.Price - 0.5);
             }
             discount = Math.Round(discount, 2);
             var promo = new WeeklyPromotionsModel(product.ID, discount);

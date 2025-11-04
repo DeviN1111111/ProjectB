@@ -27,7 +27,7 @@ public class DiscountedProductsUI
                 case "Go back":
                     return;
 
-                case "Weekly discounts":
+                case "Weekly Discounts":
                     DisplayDiscountedProducts();
                     break;
 
@@ -43,18 +43,24 @@ public class DiscountedProductsUI
 
     public static void DisplayDiscountedProducts()
     {
+        Console.Clear();
         AnsiConsole.Write(
         new FigletText("Weekly Discounted Products")
             .Centered()
             .Color(AsciiPrimary));
-        Console.ReadKey();
+
         List<WeeklyPromotionsModel> list = ProductLogic.GetAllWeeklyPromotions();
+        var table = new Table();
+        table.AddColumn("Name");
+        table.AddColumn("Original Price");
+        table.AddColumn("Discounted Price");
         foreach (WeeklyPromotionsModel item in list)
         {
             ProductModel Product = ProductLogic.GetProductById(item.ProductID);
-            Console.WriteLine($"{Product.Name}\n");
-            Console.ReadKey();
+            table.AddRow(Product.Name, $"[strike][red]{Product.Price}[/][/]", $"[green]{Math.Round(Product.Price - item.Discount, 2)}[/]");
         }
+        AnsiConsole.Write(table);
+        AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
         Console.ReadKey();
     }
 }
