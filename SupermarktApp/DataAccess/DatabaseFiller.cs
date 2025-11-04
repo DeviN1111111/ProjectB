@@ -94,7 +94,7 @@ public class DatabaseFiller
                  UNIQUE(OrderId, ProductId)
             );
         ");
-
+      
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,6 +106,15 @@ public class DatabaseFiller
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
                 UNIQUE(UserId, ProductId) -- Ensure one entry per user-product pair
+            );
+        ");
+
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Checklist (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId INTEGER NOT NULL,
+                ProductId INTEGER NOT NULL,
+                Quantity INTEGER NOT NULL
             );
         ");
 

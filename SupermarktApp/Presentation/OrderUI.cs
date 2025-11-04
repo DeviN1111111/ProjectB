@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
-public static class Order
+
+using System.Threading;
+public class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-
-
+    private static string Safe(string text) => Markup.Escape(text);
     public static void ShowCart()
     {
         Console.Clear();
@@ -66,6 +66,124 @@ public static class Order
 
         Checkout(allUserProducts, allProducts, finalAmount);
     }
+
+    public static void ShowChecklist()
+    {
+        int selectedIndex = 0;
+        var checkedItems = new HashSet<int>();
+
+        while (true)
+        {
+            Console.Clear();
+
+            var allUserProducts = ChecklistLogic.AllUserProducts();
+            var allProducts = ProductAccess.GetAllProducts();
+
+            AnsiConsole.Write(
+                new FigletText("Checklist")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            if (allUserProducts.Count == 0)
+            {
+                AnsiConsole.MarkupLine("\n[red]Your checklist is empty![/]");
+                AnsiConsole.MarkupLine("[grey]──────────────────────────────[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to go back.");
+                Console.ReadKey(true);
+                return;
+            }
+
+            AnsiConsole.MarkupLine("\n[grey]──────────────────────────────[/]");
+
+            for (int i = 0; i < allUserProducts.Count; i++)
+            {
+                var checklistItem = allUserProducts[i];
+                var product = allProducts.FirstOrDefault(p => p.ID == checklistItem.ProductId);
+                if (product == null) continue;
+
+                bool isSelected = (i == selectedIndex);
+                bool isChecked = checkedItems.Contains(i);
+
+                string checkbox = isChecked ? "[green][[X]][/]" : "[grey][[ ]][/]";
+                string selector = isSelected ? "[cyan]>[/]" : " ";
+
+                string safeName = Markup.Escape(product.Name);
+
+                AnsiConsole.MarkupLine($"{selector} {checkbox} [white]{safeName}[/] (x{checklistItem.Quantity})");
+            }
+
+            AnsiConsole.MarkupLine("[grey]──────────────────────────────[/]");
+
+            AnsiConsole.MarkupLine("[grey][[↑/↓]] Navigate  [[Space]] Toggle  [[Enter]] Confirm  [[Esc]] Back[/]");
+
+            var key = Console.ReadKey(true).Key;
+
+            switch (key)
+            {
+                case ConsoleKey.UpArrow:
+                    selectedIndex = (selectedIndex - 1 + allUserProducts.Count) % allUserProducts.Count;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    selectedIndex = (selectedIndex + 1) % allUserProducts.Count;
+                    break;
+
+                case ConsoleKey.Spacebar:
+                    if (checkedItems.Contains(selectedIndex))
+                        checkedItems.Remove(selectedIndex);
+                    else
+                        checkedItems.Add(selectedIndex);
+                    break;
+
+                case ConsoleKey.Enter:
+                    if (checkedItems.Count == 0)
+                    {
+                        AnsiConsole.MarkupLine("[yellow]No items selected.[/]");
+                        continue;
+                    }
+
+                    var action = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("[bold white]What would you like to do with the selected items?[/]")
+                            .AddChoices("Clear list", "Remove from checklist", "Cancel")
+                    );
+
+                    foreach (var i in checkedItems.ToList())
+                    {
+                        var checklistItem = allUserProducts[i];
+                        var product = allProducts.FirstOrDefault(p => p.ID == checklistItem.ProductId);
+                        if (product == null) continue;
+
+                        string safeName = Markup.Escape(product.Name);
+
+                        switch (action)
+                        {
+                            case "Clear list":
+                                ChecklistLogic.RemoveFromChecklist(product.ID);
+                                AnsiConsole.MarkupLine($"[green]List has been cleared![/]");
+                                break;
+
+                            case "Remove from checklist":
+                                ChecklistLogic.RemoveFromChecklist(product.ID);
+                                AnsiConsole.MarkupLine($"[red]- {safeName} removed from checklist.[/]");
+                                break;
+                        }
+                    }
+
+                    if (action == "Cancel")
+                        AnsiConsole.MarkupLine("[grey]No changes made.[/]");
+
+                    checkedItems.Clear();
+                    break;
+
+                case ConsoleKey.Escape:
+                    return;
+            }
+        }
+    }
+
+
+
     public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount)
     {
         // Checkout or go back options

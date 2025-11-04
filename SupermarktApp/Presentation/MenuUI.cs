@@ -21,7 +21,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart","Order History", "Rewards", "Logout", "Exit" });
+                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -31,7 +31,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             {
                 // Options when you're logged in as a guest
-                options.AddRange(new[] { "Order", "Cart", "Login", "Register", "Go back", "Exit" });
+                options.AddRange(new[] { "Order", "Cart", "Checklist", "Login", "Register", "Go back", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
@@ -57,7 +57,7 @@ public static class MenuUI
                     LoginUI.Register();
                     break;
                 case "Continue as Guest":
-                    SessionManager.CurrentUser = new UserModel { Name = "Guest", LastName = "Guest", Email = "Guest@gmail.com", Password = "Guest", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Guest", AccountStatus = "Guest" };
+                    SessionManager.CurrentUser = new UserModel { ID = 0, Name = "Guest", LastName = "Guest", Email = "Guest@gmail.com", Password = "Guest", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Guest", AccountStatus = "Guest" };
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
@@ -65,6 +65,10 @@ public static class MenuUI
                 case "Cart":
                     Console.Clear();
                     Order.ShowCart();
+                    break;
+                case "Checklist":
+                    Console.Clear();
+                    Order.ShowChecklist();
                     break;
                 case "Order History":
                     Order.DisplayOrderHistory();
