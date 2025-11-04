@@ -33,7 +33,7 @@ public class DatabaseFiller
                 var deleteTask = ctx.AddTask("[red]Deleting tables[/]", maxValue: allTables.Count);
                 var createTask = ctx.AddTask("[green]Creating tables[/]", maxValue: 1);
                 var seedUsersTask = ctx.AddTask("[cyan]Seeding Users[/]", maxValue: 5);
-                var seedProductsTask = ctx.AddTask("[cyan]Seeding Products[/]", maxValue: 454);
+                var seedProductsTask = ctx.AddTask("[cyan]Seeding Products[/]", maxValue: 453);
                 var seedOrdersTask = ctx.AddTask("[cyan]Seeding Orders[/]", maxValue: orderCount);
                 var seedPromotionsTask = ctx.AddTask("[magenta]Seeding Promotions[/]", maxValue: 5);
 
@@ -290,7 +290,7 @@ public class DatabaseFiller
             ["Personal Care"] = new List<string>
             {
                 "Shampoo", "Conditioner", "Soap", "Body Wash", "Toothpaste", "Toothbrush", "Deodorant", "Hand Sanitizer",
-                "Face Wash", "Lotion", "Shaving Cream", "Razor", "Mouthwash", "Perfume", "Cotton Swabs", "Wet Wipes",
+                "Face Wash", "Lotion", "Shaving Cream", "Razor", "Mouthwash", "Perfume", "Cotton Swabs",
                 "Hair Gel", "Hair Spray", "Face Cream", "Sunscreen", "Lip Balm", "Nail Polish", "Makeup Remover", "Toilet Paper",
                 "Tissues", "Body Spray", "Hand Cream", "Bath Salts", "Foot Cream", "Aftershave"
             },
@@ -330,7 +330,7 @@ public class DatabaseFiller
             }
         };
 
-        int totalProducts = categories.Values.Sum(list => list.Count); // 454 products in total IF U ADD ANY OTHER PRODUCTS UPDATE THE seedProductsTask MAX VALUE IN RunDatabaseMethods :D
+        int totalProducts = categories.Values.Sum(list => list.Count); // 453 products in total IF U ADD ANY OTHER PRODUCTS UPDATE THE seedProductsTask MAX VALUE IN RunDatabaseMethods :D
 
         var products = new List<ProductModel>();
         foreach (var entry in categories)

@@ -123,10 +123,16 @@ public class OrderLogic
         {
             // Find the matching product details
             var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
+            var WeeklyPromotionProduct = ProductAccess.GetProductByIDinWeeklyPromotions(matchingProduct.ID);
             if (matchingProduct != null)
             {
                 // Add each item to OrderItems with the new orderId
-                OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price);
+                if (WeeklyPromotionProduct != null)
+                {
+                    OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price - WeeklyPromotionProduct.Discount);
+                }
+                else
+                    OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price);
             }
         }
     }
