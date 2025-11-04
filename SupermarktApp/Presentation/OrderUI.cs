@@ -38,10 +38,7 @@ public class Order
                 {
                     if(cartProduct.RewardPrice > 0)
                     {
-                        string text = Product.Price.ToString();
-                        var struckPrice = $"[strike][red]{text}[/][/]";
-
-                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"€{struckPrice} [green]FREE![/]", $"[green]FREE![/]");
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
                         
                     }
                     else if(WeeklyDiscountProduct != null)
@@ -66,15 +63,18 @@ public class Order
         AnsiConsole.Write(cartTable);
         AnsiConsole.WriteLine();
 
-        // Calculate delivery fee
-        double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
 
         // Calculate total discount
         double discount = OrderLogic.CalculateTotalDiscount();
 
+        // Calculate delivery fee
+        double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
+
+       
+
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [white]€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [white]€{Math.Round(totalAmount + deliveryFee - discount + OrderLogic.returnYang(), 2)}[/]"))
+            new Markup($"[bold white]Discount:[/] [white]€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [white]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
