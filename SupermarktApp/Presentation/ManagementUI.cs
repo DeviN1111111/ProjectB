@@ -37,10 +37,10 @@ public static class ManagementUI
                 ChangeProductDetails();
                 break;
             case "Edit Shop Description":
-                UpdateShopInfo.UpdateDescription();
+                ShopDetailsUI.PromptDescription();
                 break;
             case "Edit Opening Hours":
-                UpdateShopInfo.UpdateOpeningHours();
+                ShopDetailsUI.PromptOpeningHours();
                 break;
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");

@@ -77,7 +77,7 @@ public static class MenuUI
                     SessionManager.CurrentUser = new UserModel { ID = 0, Name = "Guest", LastName = "Guest", Email = "Guest@gmail.com", Password = "Guest", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Guest", AccountStatus = "Guest" };
                     break;
                 case "Shop Details":
-                    ShopDetails.Show();
+                    ShopDetailsUI.Show();
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
@@ -117,9 +117,6 @@ public static class MenuUI
                 case "Exit":
                     return;
             }
-
-
-
         }
     }
 }

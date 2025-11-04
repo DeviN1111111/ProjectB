@@ -119,10 +119,20 @@ public class DatabaseFiller
         ");
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS ShopInfo (
-                Id INTEGER PRIMARY KEY,
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Description TEXT,
-                OpeningHour TEXT,
-                ClosingHour TEXT,
+                OpeningHourMonday TEXT,
+                ClosingHourMonday TEXT,
+                OpeningHourTuesday TEXT,
+                ClosingHourTuesday TEXT,
+                OpeningHourWednesday TEXT,
+                ClosingHourWednesday TEXT,
+                OpeningHourThursday TEXT,
+                ClosingHourThursday TEXT,
+                OpeningHourFriday TEXT,
+                ClosingHourFriday TEXT,
+                OpeningHourSaturday TEXT,
+                ClosingHourSaturday TEXT,
                 OpeningHourSunday TEXT,
                 ClosingHourSunday TEXT
             );
