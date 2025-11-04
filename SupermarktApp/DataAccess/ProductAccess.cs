@@ -45,7 +45,7 @@ public static class ProductAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.QueryFirstOrDefault<WeeklyPromotionsModel>(
-            "SELECT * FROM WeeklyPromotions WHERE Id = @Id",
+            "SELECT * FROM WeeklyPromotions WHERE ProductID = @Id",
             new { Id = id }
         );
     }

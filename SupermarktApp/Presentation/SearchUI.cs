@@ -58,7 +58,7 @@ public static class SearchUI
                 foreach (ProductModel product in productList)
                 {
                     WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
-                    if(WeeklyDiscountProduct != null && product.ID == WeeklyDiscountProduct.ID)
+                    if(WeeklyDiscountProduct != null)
                     {
                         string text = product.Price.ToString();
                         var struckPrice = $"[strike][red]{text}[/][/]";

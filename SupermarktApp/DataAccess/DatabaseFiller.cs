@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class DatabaseFiller
 {
@@ -14,6 +15,7 @@ public class DatabaseFiller
         DeleteTables();
         CreateTables();
         SeedData(orderCount);
+        SeedWeeklyPromotions();
     }
 
     public static void DeleteTables()
@@ -25,8 +27,6 @@ public class DatabaseFiller
             db.Execute($"DROP TABLE IF EXISTS {table};");
         }
         db.Execute("PRAGMA foreign_keys = ON;");
-
-
     }
 
     public static void CreateTables()
@@ -79,7 +79,8 @@ public class DatabaseFiller
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );
         ");
-                db.Execute(@"
+
+        db.Execute(@"
             CREATE TABLE IF NOT EXISTS Orders (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
@@ -99,10 +100,10 @@ public class DatabaseFiller
                 Price REAL NOT NULL,
                 FOREIGN KEY (OrderId) REFERENCES OrderHistory(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
-                 UNIQUE(OrderId, ProductId)
+                UNIQUE(OrderId, ProductId)
             );
         ");
-        // Change DiscountToTotal discount:
+        
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,7 +114,7 @@ public class DatabaseFiller
                 RewardPrice REAL NOT NULL DEFAULT 0,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
-                UNIQUE(UserId, ProductId) -- Ensure one entry per user-product pair
+                UNIQUE(UserId, ProductId)
             );
         ");
 
@@ -133,8 +134,6 @@ public class DatabaseFiller
                 PriceInPoints INTEGER NOT NULL
             );
         ");
-
-
     }
 
     public static void InsertUser(UserModel user)
@@ -144,6 +143,7 @@ public class DatabaseFiller
                        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);";
         db.Execute(sql, user);
     }
+
     public static void InsertWeeklyPromotions(WeeklyPromotionsModel model)
     {
         using var db = new SqliteConnection(ConnectionString);
@@ -160,13 +160,14 @@ public class DatabaseFiller
         db.Execute(sql, product);
     }
 
-        public static void InsertOrder(OrdersModel order)
+    public static void InsertOrder(OrdersModel order)
     {
         using var db = new SqliteConnection(ConnectionString);
         string sql = @"INSERT INTO Orders (UserID, ProductID, Date) 
         VALUES (@UserID, @ProductID, @Date);";
         db.Execute(sql, order);
     }
+
     public static int InsertOrderHistory(OrderHistoryModel order)
     {
         using var db = new SqliteConnection(ConnectionString);
@@ -193,7 +194,7 @@ public class DatabaseFiller
                 Quantity = excluded.Quantity,
                 Price = excluded.Price;",
             new { OrderId = orderId, ProductId = productId, Quantity = quantity, Price = price }
-    );
+        );
     }
 
     public static void SeedData(int orderCount)
@@ -208,26 +209,10 @@ public class DatabaseFiller
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(272, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(273, 30));
         
-        WeeklyPromotionsModel newPromotedProduct = new WeeklyPromotionsModel(1, 2);
-        InsertWeeklyPromotions(newPromotedProduct);
-        
-        var categoryProducts = new Dictionary<string, List<string>>
-        {
-            ["Fruits"] = new List<string> { "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango", "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime", "Nectarine", "Apricot", "Fig", "Pomegranate", "Tangerine", "Clementine", "Dragonfruit", "Passionfruit", "Guava", "Lychee" },
-            ["Vegetables"] = new List<string> { "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant", "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale", "Leek", "Brussels Sprouts", "Chard", "Artichoke", "Parsnip", "Turnip", "Okra", "Fennel", "Cabbage", "Rutabaga" },
-            ["Beverages"] = new List<string> { "Orange Juice", "Cola", "Water", "Milkshake", "Coffee", "Tea", "Beer", "Wine", "Apple Juice", "Lemonade", "Smoothie", "Iced Tea", "Hot Chocolate", "Energy Drink", "Sparkling Water", "Ginger Ale", "Soda", "Cider", "Tonic Water", "Protein Shake", "Mango Juice", "Berry Smoothie", "Coconut Water", "Herbal Tea", "Kombucha", "Sports Drink", "Apple Cider", "Chocolate Milk", "Matcha Latte", "Iced Coffee" },
-            ["Bakery"] = new List<string> { "Bread", "Croissant", "Muffin", "Baguette", "Bagel", "Donut", "Cake", "Pie", "Scone", "Pretzel", "Roll", "Brownie", "Cupcake", "Focaccia", "Brioche", "Pita", "Danish", "Strudel", "Tart", "Panettone", "Challah", "Ciabatta", "Eclair", "Madeleine", "Shortbread", "Macaron", "Kolache", "Crumpet", "Stollen", "Kouign-Amann" },
-            ["Dairy"] = new List<string> { "Milk", "Cheese", "Yogurt", "Butter", "Cream", "Cottage Cheese", "Ice Cream", "Sour Cream", "Cream Cheese", "Ghee", "Kefir", "Buttermilk", "Mascarpone", "Paneer", "Whey", "Ricotta", "Clotted Cream", "Quark", "Yogurt Drink", "Skyr", "Labneh", "Evaporated Milk", "Condensed Milk", "Goat Cheese", "Feta", "Halloumi", "Mascarpone Cheese", "Provolone", "Blue Cheese", "Cheddar" },
-            ["Meat"] = new List<string> { "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin", "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver", "Goose Breast", "Rabbit Meat", "Bison Steak", "Pork Belly", "Lamb Shoulder", "Beef Tenderloin", "Turkey Leg", "Chicken Drumstick", "Kielbasa", "Mortadella" },
-            ["Seafood"] = new List<string> { "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout", "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn", "Halibut", "Pollock", "Swordfish", "Mussels", "Catfish", "Anchovy Fillet", "Sea Bass", "Clam Chowder", "Caviar", "King Crab" },
-            ["Frozen"] = new List<string> { "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries", "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli", "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry", "Frozen Tater Tots", "Frozen Burrito", "Frozen Ravioli", "Frozen Fish Sticks", "Frozen Spring Rolls", "Frozen Edamame", "Frozen Peaches", "Frozen Cherries", "Frozen Cauliflower" },
-            ["Snacks"] = new List<string> { "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel" },
-            ["Rewards"] = new List<string> { "Efteling ticket", "Blijdorp ticket", "Walibi ticket"}
-        };
+        var categoryProducts = new Dictionary<string, List<string>> { ["Fruits"] = new List<string> { "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango", "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime", "Nectarine", "Apricot", "Fig", "Pomegranate", "Tangerine", "Clementine", "Dragonfruit", "Passionfruit", "Guava", "Lychee" }, ["Vegetables"] = new List<string> { "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant", "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale", "Leek", "Brussels Sprouts", "Chard", "Artichoke", "Parsnip", "Turnip", "Okra", "Fennel", "Cabbage", "Rutabaga" }, ["Beverages"] = new List<string> { "Orange Juice", "Cola", "Water", "Milkshake", "Coffee", "Tea", "Beer", "Wine", "Apple Juice", "Lemonade", "Smoothie", "Iced Tea", "Hot Chocolate", "Energy Drink", "Sparkling Water", "Ginger Ale", "Soda", "Cider", "Tonic Water", "Protein Shake", "Mango Juice", "Berry Smoothie", "Coconut Water", "Herbal Tea", "Kombucha", "Sports Drink", "Apple Cider", "Chocolate Milk", "Matcha Latte", "Iced Coffee" }, ["Bakery"] = new List<string> { "Bread", "Croissant", "Muffin", "Baguette", "Bagel", "Donut", "Cake", "Pie", "Scone", "Pretzel", "Roll", "Brownie", "Cupcake", "Focaccia", "Brioche", "Pita", "Danish", "Strudel", "Tart", "Panettone", "Challah", "Ciabatta", "Eclair", "Madeleine", "Shortbread", "Macaron", "Kolache", "Crumpet", "Stollen", "Kouign-Amann" }, ["Dairy"] = new List<string> { "Milk", "Cheese", "Yogurt", "Butter", "Cream", "Cottage Cheese", "Ice Cream", "Sour Cream", "Cream Cheese", "Ghee", "Kefir", "Buttermilk", "Mascarpone", "Paneer", "Whey", "Ricotta", "Clotted Cream", "Quark", "Yogurt Drink", "Skyr", "Labneh", "Evaporated Milk", "Condensed Milk", "Goat Cheese", "Feta", "Halloumi", "Mascarpone Cheese", "Provolone", "Blue Cheese", "Cheddar" }, ["Meat"] = new List<string> { "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin", "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver", "Goose Breast", "Rabbit Meat", "Bison Steak", "Pork Belly", "Lamb Shoulder", "Beef Tenderloin", "Turkey Leg", "Chicken Drumstick", "Kielbasa", "Mortadella" }, ["Seafood"] = new List<string> { "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout", "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn", "Halibut", "Pollock", "Swordfish", "Mussels", "Catfish", "Anchovy Fillet", "Sea Bass", "Clam Chowder", "Caviar", "King Crab" }, ["Frozen"] = new List<string> { "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries", "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli", "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry", "Frozen Tater Tots", "Frozen Burrito", "Frozen Ravioli", "Frozen Fish Sticks", "Frozen Spring Rolls", "Frozen Edamame", "Frozen Peaches", "Frozen Cherries", "Frozen Cauliflower" }, ["Snacks"] = new List<string> { "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel" }, ["Rewards"] = new List<string> { "Efteling ticket", "Blijdorp ticket", "Walibi ticket"} };
 
         List<ProductModel> products = new List<ProductModel>();
         Random random = new Random();
-        int id = 1;
 
         foreach (var category in categoryProducts.Keys)
         {
@@ -250,13 +235,12 @@ public class DatabaseFiller
                 };
 
                 products.Add(product);
-                id++;
             }
         }
+
         using var db = new SqliteConnection("Data Source=database.db");
         db.Open();
 
-        // Reset autoincrement counters and clear tables for a clean reseed
         db.Execute("DELETE FROM sqlite_sequence WHERE name = 'OrderHistory';");
         db.Execute("DELETE FROM sqlite_sequence WHERE name = 'OrderItem';");
         db.Execute("DELETE FROM OrderItem;");
@@ -269,11 +253,10 @@ public class DatabaseFiller
             {
                 UserId = (i % 3) + 1,
                 Date = DateTime.Today.AddDays(-i)
-
             });
         }
 
-         List<OrdersModel> orders = new List<OrdersModel>();
+        List<OrdersModel> orders = new List<OrdersModel>();
         for (int i = 0; i < orderCount; i++)
         {
             int productIndex = random.Next(products.Count);
@@ -322,23 +305,52 @@ public class DatabaseFiller
                     for (int j = 0; j < itemCount; j++)
                     {
                         var product = products[random.Next(products.Count)];
-                        var orderItem = new OrderItemModel
-                        {
-                            OrderId = orderID,
-                            ProductId = products.IndexOf(product) + 1,
-                            Quantity = random.Next(1, 5),
-                            Price = product.Price
-                        };
-                        InsertOrderItem(orderItem.OrderId, orderItem.ProductId, orderItem.Quantity, orderItem.Price);
+                        InsertOrderItem(orderID, products.IndexOf(product) + 1, random.Next(1, 5), product.Price);
                         orderTask.Increment(1);
                     }
-
                 }
-                 foreach (var order in orders)
+
+                foreach (var order in orders)
                 {
                     InsertOrder(order);
                     orderTask.Increment(1);
                 }
             });
     }
+
+    public static void SeedWeeklyPromotions()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Open();
+
+        var products = ProductAccess.GetAllProducts();
+        if (products.Count < 5)
+            return;
+
+        Random random = new Random();
+
+        // Shuffle products properly using Guid
+        var selectedProducts = products
+            .OrderBy(p => Guid.NewGuid())
+            .Take(5)
+            .ToList();
+
+        foreach (var product in selectedProducts)
+        {
+            double discount = random.Next(1, 7); // 1–6 euros
+
+            // Ensure discount does not exceed product price
+            if (discount >= product.Price)
+            {
+                discount = Math.Max(0.01, product.Price - 0.01);
+            }
+            discount = Math.Round(discount, 2);
+            var promo = new WeeklyPromotionsModel(product.ID, discount);
+            InsertWeeklyPromotions(promo);
+        }
+    }
+
+
+
+
 }
