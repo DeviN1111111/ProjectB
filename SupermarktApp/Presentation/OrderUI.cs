@@ -68,7 +68,7 @@ public class Order
         double discount = OrderLogic.CalculateTotalDiscount();
 
         // Calculate delivery fee
-        double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
+        double deliveryFee = OrderLogic.DeliveryFee(totalAmount - discount);
 
        
 
