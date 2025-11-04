@@ -12,5 +12,3 @@ class Program
     }
 }
 
-// Als out of stock laten zien op search menu dat die out of search is.
-// Product details gelijk laten zien als je product selecteert.
