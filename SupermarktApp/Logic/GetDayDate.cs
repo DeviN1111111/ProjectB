@@ -24,7 +24,7 @@ static class GetDayDate
         DateTime today = DateTime.Today;
         List<string[]> dayDate = new();
 
-        for (int i = 0; i <= 7; i++)
+        for (int i = 0; i <= 6; i++)
         {
             DateTime date = today.AddDays(i);
             string day = date.ToString("dddd");   // e.g. "Monday"

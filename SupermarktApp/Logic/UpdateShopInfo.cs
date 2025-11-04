@@ -1,6 +1,6 @@
 using Spectre.Console;
 using System.Text.RegularExpressions;
-public static class UpdateShopInfo
+public static class ShopInfoLogic
 {
     public static void UpdateDescription(string description)
     {

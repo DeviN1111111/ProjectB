@@ -6,7 +6,8 @@ public static class ShopDetailsUI
 {
     public static void Show()
     {
-        ShopInfoModel shopInfo = UpdateShopInfo.GetShopInfo();
+        Console.Clear();
+        ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
         Color AsciiPrimary = Color.FromHex("#247BA0");
         AnsiConsole.Write(
             new FigletText("Welcome to our Supermarket!")
@@ -64,8 +65,13 @@ public static class ShopDetailsUI
             Border = BoxBorder.Heavy,
             Header = new PanelHeader($"[bold #1B98E0]Info[/]").Centered()
         };
-        var columns = new Columns(table, panel);
-        AnsiConsole.Write(columns);
+        table.Expand = true;
+
+        panel.Expand = true;
+        panel.Header = new PanelHeader("[bold #1B98E0]Info[/]").Centered();
+
+        var rows = new Rows(table, panel);
+        AnsiConsole.Write(rows);
         AnsiConsole.WriteLine();
         Console.ReadLine();
     }
@@ -78,14 +84,14 @@ public static class ShopDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
         string description = AnsiConsole.Ask<string>("Enter the new [green]shop description[/]:");
-        UpdateShopInfo.UpdateDescription(description);
+        ShopInfoLogic.UpdateDescription(description);
         AnsiConsole.MarkupLine("[green]Shop description updated successfully![/]");
         Console.ReadLine();
     }
     public static void PromptOpeningHours()
     {
         string openingHour, closingHour;
-        ShopInfoModel shopInfo = UpdateShopInfo.GetShopInfo();
+        ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
 
         Console.Clear();
         Color AsciiPrimary = Color.FromHex("#247BA0");
@@ -116,7 +122,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourMonday = openingHour; shopInfo.ClosingHourMonday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop opening hours updated successfully![/]");
             Console.ReadLine();
         }
@@ -138,7 +144,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourTuesday = openingHour; shopInfo.ClosingHourTuesday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop Tuesday opening hours updated successfully![/]");
             Console.ReadLine();
         }
@@ -160,7 +166,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourWednesday = openingHour; shopInfo.ClosingHourWednesday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop Wednesday opening hours updated successfully![/]");
             Console.ReadLine();
         }
@@ -182,7 +188,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourThursday = openingHour; shopInfo.ClosingHourThursday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop Thursday opening hours updated successfully![/]");
             Console.ReadLine();
         }
@@ -204,7 +210,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourFriday = openingHour; shopInfo.ClosingHourFriday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop Friday opening hours updated successfully![/]");
             Console.ReadLine();
         }
@@ -226,7 +232,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourSaturday = openingHour; shopInfo.ClosingHourSaturday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop Saturday opening hours updated successfully![/]");
             Console.ReadLine();
         }
@@ -248,7 +254,7 @@ public static class ShopDetailsUI
                 AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
             }
             shopInfo.OpeningHourSunday = openingHour; shopInfo.ClosingHourSunday = closingHour;
-            UpdateShopInfo.UpdateOpeningHours(shopInfo);
+            ShopInfoLogic.UpdateOpeningHours(shopInfo);
             AnsiConsole.MarkupLine("[green]Shop Sunday opening hours updated successfully![/]");
             Console.ReadLine();
         }
