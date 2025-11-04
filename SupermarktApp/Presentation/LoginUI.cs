@@ -4,6 +4,7 @@ using Spectre.Console;
 
 public static class LoginUI
 {
+    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static void Login()
     {
         string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
@@ -22,6 +23,10 @@ public static class LoginUI
         }
         else
         {
+            AnsiConsole.Write(
+            new FigletText("Error")
+                .Centered()
+                .Color(AsciiPrimary));
             AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
             Console.ReadKey();
         }
