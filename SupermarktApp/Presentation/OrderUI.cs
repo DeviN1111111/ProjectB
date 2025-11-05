@@ -321,7 +321,7 @@ public class Order
                     int newQuantity = AnsiConsole.Prompt(
                         new TextPrompt<int>($"Enter new quantity for [yellow]{selectedProduct.Name}[/]:")
                             .Validate(
-                                quantity => { return quantity < 1 && quantity > 99 ? ValidationResult.Error("[red]Quantity must be at least 1.[/]") : ValidationResult.Success(); }
+                                quantity => { return quantity < 1 || quantity > 99 ? ValidationResult.Error("[red]Quantity must be at least 1 and less than 100.[/]") : ValidationResult.Success(); }
                                 )
                     );
 
