@@ -18,7 +18,7 @@ public static class ManagementUI
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Go back" }));
+                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours", "Go back" }));
 
         switch (period)
         {
@@ -37,6 +37,14 @@ public static class ManagementUI
                 ChangeProductDetails();
                 break;
 
+            case "Edit Shop Description":
+                ShopDetailsUI.PromptDescription();
+                break;
+
+            case "Edit Opening Hours":
+                ShopDetailsUI.PromptOpeningHours();
+                break;
+                
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;

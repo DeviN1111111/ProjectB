@@ -10,7 +10,7 @@ public class DatabaseFiller
     private const string ConnectionString = "Data Source=database.db";
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "WeeklyPromotions"
+        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "WeeklyPromotions", "ShopInfo"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -191,6 +191,27 @@ public class DatabaseFiller
                 ProductId INTEGER NOT NULL,
                 PriceInPoints INTEGER NOT NULL
             );");
+
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS ShopInfo (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Description TEXT,
+                OpeningHourMonday TEXT,
+                ClosingHourMonday TEXT,
+                OpeningHourTuesday TEXT,
+                ClosingHourTuesday TEXT,
+                OpeningHourWednesday TEXT,
+                ClosingHourWednesday TEXT,
+                OpeningHourThursday TEXT,
+                ClosingHourThursday TEXT,
+                OpeningHourFriday TEXT,
+                ClosingHourFriday TEXT,
+                OpeningHourSaturday TEXT,
+                ClosingHourSaturday TEXT,
+                OpeningHourSunday TEXT,
+                ClosingHourSunday TEXT
+            );
+        ");
     }
 
     public static void SeedData(
@@ -412,6 +433,39 @@ public class DatabaseFiller
                 InsertOrderItem(orderHistoryId, products.IndexOf(product) + 1, random.Next(1, 5), product.Price);
             }
         }
+
+        // Seed default shop info
+        var defaultShopInfo = new ShopInfoModel
+        {
+            Description = @"
+            Welcome to our supermarket — where freshness comes first.
+            Our bakery opens early with warm, freshly baked bread, and all our vegetables are kept perfectly cooled throughout the day.
+            Most restocking takes place in the evening, so the shelves are full and ready for you every morning.",
+
+            OpeningHourMonday = "07:00",
+            ClosingHourMonday = "22:00",
+
+            OpeningHourTuesday = "07:00",
+            ClosingHourTuesday = "22:00",
+
+            OpeningHourWednesday = "07:00",
+            ClosingHourWednesday = "22:00",
+
+            OpeningHourThursday = "07:00",
+            ClosingHourThursday = "22:00",
+
+            OpeningHourFriday = "07:00",
+            ClosingHourFriday = "22:00",
+
+            OpeningHourSaturday = "08:00",
+            ClosingHourSaturday = "20:00",
+
+            OpeningHourSunday = "08:00",
+            ClosingHourSunday = "20:00"
+        };
+
+        // Save or update in DB
+        ShopInfoAccess.UpdateShopInfo(defaultShopInfo);
     }
 
     public static void InsertUser(UserModel user)

@@ -25,7 +25,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Discounted Products", "Cart", "Checklist", "Order History", "Rewards", "Logout", "Exit"});
+                options.AddRange(new[] { "Order", "Discounted Products", "Cart", "Checklist", "Order History", "Rewards", "Shop Details", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -34,7 +34,7 @@ public static class MenuUI
                     AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
                 else
                     AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
             }
             // else if (SessionManager.CurrentUser.AccountStatus == "Guest")
             // {
@@ -48,7 +48,7 @@ public static class MenuUI
                     AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
                 else
                     AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage admin", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage admin", "Shop Details", "Logout", "Exit" });
             }
             else
             {
@@ -73,11 +73,8 @@ public static class MenuUI
                 case "Register":
                     LoginUI.Register();
                     break;
-                // case "Continue as Guest":
-                //     SessionManager.CurrentUser = new UserModel { ID = 0, Name = "Guest", LastName = "Guest", Email = "Guest@gmail.com", Password = "Guest", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Guest", AccountStatus = "Guest" };
-                //     break;
                 case "Shop Details":
-                    ShopDetails.Show();
+                    ShopDetailsUI.Show();
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
