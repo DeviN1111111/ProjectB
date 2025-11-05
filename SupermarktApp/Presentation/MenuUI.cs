@@ -48,7 +48,7 @@ public static class MenuUI
                     AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
                 else
                     AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage admin", "Shop Details", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage Users", "Shop Details", "Logout", "Exit" });
             }
             else
             {
@@ -102,7 +102,7 @@ public static class MenuUI
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
                     break;
-                case "Manage admin":
+                case "Manage Users":
                     ManageAdminUI.DisplayMenu();
                     break;
                 case "Logout":
