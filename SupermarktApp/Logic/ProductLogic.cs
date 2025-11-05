@@ -36,4 +36,25 @@ public class ProductLogic
     {
         return ProductAccess.GetProductByName(name);
     }
+
+    public static ProductModel GetProductById(int id)
+    {
+        return ProductAccess.GetProductByID(id);
+    }
+    public static List<ProductModel> GetAllProducts()
+    {
+        return ProductAccess.GetAllProducts();
+    }
+
+    public static WeeklyPromotionsModel GetProductByIDinWeeklyPromotions(int id)
+    {
+        return ProductAccess.GetProductByIDinWeeklyPromotions(id);
+    }
+
+    public static List<WeeklyPromotionsModel> GetAllWeeklyPromotions()
+    {
+        return WeeklyPromotionsAccess.GetAllProducts();
+    }
 }
+
+

@@ -12,6 +12,14 @@ public static class OrderAccess
         using var db = new SqliteConnection(ConnectionString);
         return db.Query<OrdersModel>("SELECT * FROM Orders");
     }
+    public static int AddToOrderHistory(int userId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var order = new OrderHistoryModel(userId);
+        var sql = "INSERT INTO OrderHistory (UserId, Date) VALUES (@UserId, @Date); SELECT last_insert_rowid();";
+        int orderId = db.ExecuteScalar<int>(sql, order);  // Get the last inserted ID
+        return orderId;
+    }
 
     public static DateTime GetDateOfFirstOrder()
     {
@@ -52,7 +60,7 @@ public static class OrderAccess
         );
         return count;
     }
-    
+
     public static List<(int ProductID, int SoldCount)> GetTop5MostSoldProductsUpToDate(DateTime startDate, DateTime endDate)
     {
         using var db = new SqliteConnection(ConnectionString);
@@ -141,4 +149,12 @@ public static class OrderAccess
             UserID = orderData.UserID
         };
     }
+
+    public static List<OrdersModel> GetOrdersByUserId(int userId)
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        var query = "SELECT * FROM OrderHistory WHERE UserId = @UserId ORDER BY Date DESC;";
+        return connection.Query<OrdersModel>(query, new { UserId = userId }).AsList();
+    }
+
 }

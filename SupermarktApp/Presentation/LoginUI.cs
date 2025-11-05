@@ -4,6 +4,7 @@ using Spectre.Console;
 
 public static class LoginUI
 {
+    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static void Login()
     {
         string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
@@ -17,10 +18,15 @@ public static class LoginUI
         {
             SessionManager.CurrentUser = Account;
             AnsiConsole.MarkupLine("[green]Login successful![/]");
+            SessionManager.CurrentUser.AccountPoints = 10000; // For testing purposes
             AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
         }
         else
         {
+            AnsiConsole.Write(
+            new FigletText("Error")
+                .Centered()
+                .Color(AsciiPrimary));
             AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
             Console.ReadKey();
         }
@@ -77,18 +83,6 @@ public static class LoginUI
                 Console.ReadKey();
                 break;
             }
-            // else
-            // {
-            //     AnsiConsole.MarkupLine("[red]Registration unsuccessful![/]");
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     foreach (string errorLine in Errors)
-            //     {
-            //         AnsiConsole.MarkupLine($"[yellow]{errorLine}[/]");
-            //     }
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     Console.ReadKey();
-            //     break;
-            // }
         }
     }
 }
