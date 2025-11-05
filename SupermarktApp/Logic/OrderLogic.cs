@@ -76,6 +76,10 @@ public class OrderLogic
             }
         }
     }
+    public static void ChangeQuantity(int productId, int newQuantity)
+    {
+        CartAccess.UpdateProductQuantity(SessionManager.CurrentUser.ID, productId, newQuantity);
+    }
 
     // remove a product from cart by product id
     public static void RemoveFromCart(int productId)
