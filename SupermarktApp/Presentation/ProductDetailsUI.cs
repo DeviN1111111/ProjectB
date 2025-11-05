@@ -12,21 +12,32 @@ public static class ProductDetailsUI
         {
             product.Price = product.Price - WeeklyDiscountProduct.Discount;
         }
-            
+
 
         AnsiConsole.Write(
             new FigletText("Product Details")
                 .Centered()
                 .Color(AsciiPrimary));
-
-        var body =
-            $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
-            $"[bold #00014d]Price:[/] [#5dabcf]${Math.Round(product.Price, 2)}[/]\n" +
-            $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
-            $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
-            $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
-            $"[bold #00014d]Location:[/] [#5dabcf]{product.Location}[/]\n" +
-            $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{product.Quantity}[/]";
+        var body = string.Empty;
+        if (SessionManager.CurrentUser.AccountStatus == "User" || SessionManager.CurrentUser.AccountStatus == "Guest")
+        {
+            body =
+                $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
+                $"[bold #00014d]Price:[/] [#5dabcf]€{Math.Round(product.Price, 2)}[/]\n" +
+                $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
+                $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
+                $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
+                $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{product.Quantity}[/]";
+        }
+        else
+            body =
+                $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
+                $"[bold #00014d]Price:[/] [#5dabcf]€{Math.Round(product.Price, 2)}[/]\n" +
+                $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
+                $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
+                $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
+                $"[bold #00014d]Location:[/] [#5dabcf]{product.Location}[/]\n" +
+                $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{product.Quantity}[/]";
 
         var panel = new Panel(body)
         {

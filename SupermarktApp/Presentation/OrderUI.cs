@@ -71,7 +71,10 @@ public class Order
         double deliveryFee = OrderLogic.DeliveryFee(totalAmount - discount);
 
        
-
+        if (totalAmount + deliveryFee - discount == 0)
+        {
+            deliveryFee = 5;
+        }
         // Summary box
         var panel = new Panel(
             new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
@@ -213,9 +216,9 @@ public class Order
 
             "Checkout",
             "Remove items",
+            "Change quantity",
             "Go back"
-        })
-);
+        }));
 
         switch (options)
         {
@@ -229,7 +232,7 @@ public class Order
                     return;
                 }
                 // Add reward points to user
-                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
+                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 Console.Clear();
@@ -262,6 +265,7 @@ public class Order
                         OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -281,6 +285,7 @@ public class Order
                         }
                         OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -291,6 +296,45 @@ public class Order
 
             case "Remove items":
                 RemoveFromCart(cartProducts, allProducts);
+                break;
+            case "Change quantity":
+                var productNames = new List<string>();
+                foreach (var item in cartProducts)
+                {
+                    var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                    if (product != null)
+                        productNames.Add($"{product.Name} (x{item.Quantity})");
+                }
+                if (productNames.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                    return;
+                }
+                string selectProduct = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[white]Select a product to change its quantity:[/]")
+                        .AddChoices(productNames)
+                );
+
+                var selectedProductName = selectProduct.Split(" (x")[0];
+                var selectedProduct = allProducts.FirstOrDefault(Product => Product.Name == selectedProductName);
+                if (selectedProduct != null)
+                {
+                    int newQuantity = AnsiConsole.Prompt(
+                        new TextPrompt<int>($"Enter new quantity for [yellow]{selectedProduct.Name}[/]:")
+                            .Validate(
+                                quantity => { return quantity < 1 || quantity > 99 ? ValidationResult.Error("[red]Quantity must be at least 1 and less than 100.[/]") : ValidationResult.Success(); }
+                                )
+                    );
+
+                    OrderLogic.ChangeQuantity(selectedProduct.ID, newQuantity);
+                    AnsiConsole.MarkupLine($"[green]Quantity for [yellow]{selectedProduct.Name}[/] updated to [yellow]{newQuantity}[/].[/]");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                    ShowCart();
+                }
                 break;
 
             case "Go back":
@@ -336,8 +380,6 @@ public class Order
             return;
         }
 
-
-        // Actually remove items
         foreach (var choice in itemsToRemove)
         {
             var productName = choice.Split(" (x")[0];
@@ -349,8 +391,6 @@ public class Order
         AnsiConsole.MarkupLine("[green]Selected items have been removed![/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
-
-        // Refresh cart view
         ShowCart();
     }
     private static void RemoveItemFromCart(int productId)

@@ -39,4 +39,11 @@ public class CartAccess
         var sql = $"DELETE FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
         db.Execute(sql, new { UserId = userId, ProductId = productId });
     }
+    
+    public static void UpdateProductQuantity(int userId, int productId, int newQuantity)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"UPDATE {Table} SET Quantity = @Quantity WHERE UserId = @UserId AND ProductId = @ProductId";
+        db.Execute(sql, new { Quantity = newQuantity, UserId = userId, ProductId = productId });
+    }
 }

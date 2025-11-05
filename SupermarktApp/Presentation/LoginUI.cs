@@ -66,7 +66,8 @@ public static class LoginUI
     {
         while (true)
         {
-            AnsiConsole.Markup("[yellow]Press escape to return.[/]");
+            AnsiConsole.MarkupLine("[yellow]Press escape to return.[/]");
+            AnsiConsole.MarkupLine("[green]Press any key to continue[/]");
             if (Console.ReadKey().Key == ConsoleKey.Escape)
             {
                 break;
@@ -141,6 +142,7 @@ public static class LoginUI
             if (Errors.Count == 0)
             {
                 AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
+                AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
                 Console.ReadKey();
                 break;
             }
