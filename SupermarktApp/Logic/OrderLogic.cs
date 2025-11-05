@@ -38,14 +38,6 @@ public class OrderLogic
 
     public static void ClearCart()
     {
-        foreach (var item in AllUserProducts())
-        {
-            if(item.RewardPrice > 0)
-            {
-                RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints + (int)(item.RewardPrice * item.Quantity));
-                SessionManager.CurrentUser.AccountPoints += (int)(item.RewardPrice * item.Quantity);
-            }
-        }
         CartAccess.ClearCart();
     }
     public static double DeliveryFee(double totalAmount)

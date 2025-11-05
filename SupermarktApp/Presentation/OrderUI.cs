@@ -217,8 +217,7 @@ public class Order
             "Checkout",
             "Remove items",
             "Go back"
-        })
-);
+        }));
 
         switch (options)
         {
@@ -232,9 +231,7 @@ public class Order
                     return;
                 }
                 // Add reward points to user
-                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
-                Console.WriteLine(rewardPoints);
-                Console.ReadKey();
+                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 Console.Clear();
@@ -267,6 +264,7 @@ public class Order
                         OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -286,6 +284,7 @@ public class Order
                         }
                         OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
