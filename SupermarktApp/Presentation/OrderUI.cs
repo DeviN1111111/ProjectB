@@ -74,7 +74,7 @@ public class Order
 
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [white]€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [white]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
+            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -292,7 +292,7 @@ public class Order
             case "Remove items":
                 RemoveFromCart(cartProducts, allProducts);
                 break;
-                
+
             case "Go back":
                 break;
 

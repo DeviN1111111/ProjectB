@@ -407,9 +407,14 @@ public class DatabaseFiller
         }
 
         // REWARD ITEMS
-        RewardItemsAccess.AddRewardItem(new RewardItemsModel(452, 50));
-        RewardItemsAccess.AddRewardItem(new RewardItemsModel(453, 60));
-        RewardItemsAccess.AddRewardItem(new RewardItemsModel(454, 30));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(451, 50));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(452, 60));
+        RewardItemsAccess.AddRewardItem(new RewardItemsModel(453, 30));
+
+        // MAKE REWARD ITEMS NON VISIBLE IN ORDER SEARCH
+        ProductAccess.SetProductVisibility(451, false);
+        ProductAccess.SetProductVisibility(452, false);
+        ProductAccess.SetProductVisibility(453, false);
 
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
