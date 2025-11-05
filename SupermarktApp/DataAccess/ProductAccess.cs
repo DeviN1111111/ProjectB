@@ -9,21 +9,25 @@ public static class ProductAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Products 
-            (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
-            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity)", product);
+            (Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible)
+            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
     }
 
-    public static List<ProductModel> SearchProductByName(string name)
+    public static List<ProductModel> SearchProductByName(string name, bool includeHidden = false)
         {
             using var db = new SqliteConnection(ConnectionString);
             string pattern = $"{name}%";
-            return db.Query<ProductModel>(
-                @"SELECT * FROM Products 
-                WHERE Name LIKE @Name
-                OR
-                Category LIKE @Category
-                LIMIT 10",
-                new { Name = pattern, Category = pattern }).ToList();
+            string sql = includeHidden
+                    ? @"SELECT * FROM Products 
+                        WHERE Name LIKE @Name
+                        OR Category LIKE @Category
+                        LIMIT 10"
+                    : @"SELECT * FROM Products 
+                        WHERE (Name LIKE @Name
+                        OR Category LIKE @Category)
+                        AND Visible = 1
+                        LIMIT 10";
+                return db.Query<ProductModel>(sql,new { Name = pattern, Category = pattern }).ToList();
         }
 
     public static List<ProductModel> GetAllProducts()
@@ -37,6 +41,15 @@ public static class ProductAccess
         using var db = new SqliteConnection(ConnectionString);
         return db.QueryFirstOrDefault<ProductModel>(
             "SELECT * FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
+    }
+
+    public static WeeklyPromotionsModel? GetProductByIDinWeeklyPromotions(int id)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<WeeklyPromotionsModel>(
+            "SELECT * FROM WeeklyPromotions WHERE ProductID = @Id",
             new { Id = id }
         );
     }
@@ -70,7 +83,8 @@ public static class ProductAccess
             Description = @Description,
             Category = @Category,
             Location = @Location,
-            Quantity = @Quantity
+            Quantity = @Quantity,
+            Visible = @Visible
             WHERE 
             ID = @ID", newProduct);
     }
@@ -78,8 +92,15 @@ public static class ProductAccess
     public static void DeleteProductByID(int ID)
     {
         using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"DELETE FROM PRODUCTS
+        db.Execute(@"UPDATE Products SET Visible = 0
             WHERE
             ID = @ID", new { ID });
+    }
+
+        public static void SetProductVisibility(int productId, bool isVisible)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute("UPDATE Products SET Visible = @Visible WHERE Id = @Id;",
+            new { Visible = isVisible ? 1 : 0, Id = productId });
     }
 }

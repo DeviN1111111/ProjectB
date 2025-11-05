@@ -18,7 +18,7 @@ public static class ManagementUI
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Go back" }));
+                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours", "Go back" }));
 
         switch (period)
         {
@@ -37,6 +37,14 @@ public static class ManagementUI
                 ChangeProductDetails();
                 break;
 
+            case "Edit Shop Description":
+                ShopDetailsUI.PromptDescription();
+                break;
+
+            case "Edit Opening Hours":
+                ShopDetailsUI.PromptOpeningHours();
+                break;
+                
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
@@ -67,6 +75,7 @@ public static class ManagementUI
             location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)").DefaultValue(EditProduct.Location));
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
         var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:").DefaultValue(EditProduct.Quantity));
+        var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(EditProduct.Visible));
 
         Console.Clear();
         AnsiConsole.Write(
@@ -74,7 +83,7 @@ public static class ManagementUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-        ProductDetailsUI.CompareTwoProducts(EditProduct, new ProductModel(name, price, nutritionDetails, description, category, location, quantity));
+        ProductDetailsUI.CompareTwoProducts(EditProduct, new ProductModel(name, price, nutritionDetails, description, category, location, quantity , visible));
         AnsiConsole.MarkupLine($"Are you sure you want to save changes to [red]{EditProduct.Name}[/]?");
 
         var confirm = AnsiConsole.Prompt(
@@ -89,7 +98,7 @@ public static class ManagementUI
                 new FigletText("Edit Product")
                     .Centered()
                     .Color(AsciiPrimary));
-                ProductLogic.ChangeProductDetails(EditProduct.ID, name, price, nutritionDetails, description, category, location, quantity);
+                ProductLogic.ChangeProductDetails(EditProduct.ID, name, price, nutritionDetails, description, category, location, quantity, visible);
                 break;
             case "Cancel":
                 return;
@@ -115,10 +124,11 @@ public static class ManagementUI
             location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)"));
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
         var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
+        var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(1));
 
-        if (ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity))
+        if (ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity, visible))
         {
-            ProductDetailsUI.ShowProductDetails(new ProductModel(name, price, nutritionDetails, description, category, location, quantity));
+            ProductDetailsUI.ShowProductDetails(new ProductModel(name, price, nutritionDetails, description, category, location, quantity, visible: 1));
             AnsiConsole.MarkupLine($"[green]Succesfully added [red]{name}[/], press enter to continue.[/]");
             Console.ReadKey();
         }

@@ -4,6 +4,7 @@ using Spectre.Console;
 
 public static class LoginUI
 {
+    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static void Login()
     {
         string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
@@ -21,6 +22,10 @@ public static class LoginUI
         }
         else
         {
+            AnsiConsole.Write(
+            new FigletText("Error")
+                .Centered()
+                .Color(AsciiPrimary));
             AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
             Console.ReadKey();
         }
@@ -30,7 +35,8 @@ public static class LoginUI
     {
         while (true)
         {
-            AnsiConsole.Markup("[yellow]Press escape to return.[/]");
+            AnsiConsole.MarkupLine("[yellow]Press escape to return.[/]");
+            AnsiConsole.MarkupLine("[green]Press any key to continue[/]");
             if (Console.ReadKey().Key == ConsoleKey.Escape)
             {
                 break;
@@ -74,21 +80,10 @@ public static class LoginUI
             if (Errors.Count == 0)
             {
                 AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
+                AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
                 Console.ReadKey();
                 break;
             }
-            // else
-            // {
-            //     AnsiConsole.MarkupLine("[red]Registration unsuccessful![/]");
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     foreach (string errorLine in Errors)
-            //     {
-            //         AnsiConsole.MarkupLine($"[yellow]{errorLine}[/]");
-            //     }
-            //     AnsiConsole.MarkupLine("[red]------------------------------------------------------------------------------------------------------[/]");
-            //     Console.ReadKey();
-            //     break;
-            // }
         }
     }
 }

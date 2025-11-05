@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using NUnit.Framework.Constraints;
 using Spectre.Console;
 
 class Program
 {
     static void Main()
     {
-        DatabaseFiller.RunDatabaseMethods(50000);
+        //DatabaseFiller.RunDatabaseMethods(50);
         // StartScreen.ShowMainMenu();
         // StatisticsUI.DisplayMenu();
         MenuUI.ShowMainMenu();
