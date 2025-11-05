@@ -71,10 +71,13 @@ public class Order
         double deliveryFee = OrderLogic.DeliveryFee(totalAmount - discount);
 
        
-
+        if (totalAmount + deliveryFee - discount == 0)
+        {
+            deliveryFee = 5;
+        }
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [white]€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [white]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [white]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
+            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -215,8 +218,7 @@ public class Order
             "Remove items",
             "Change quantity",
             "Go back"
-        })
-);
+        }));
 
         switch (options)
         {
@@ -230,7 +232,7 @@ public class Order
                     return;
                 }
                 // Add reward points to user
-                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
+                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 Console.Clear();
@@ -263,6 +265,7 @@ public class Order
                         OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -282,6 +285,7 @@ public class Order
                         }
                         OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();

@@ -38,14 +38,6 @@ public class OrderLogic
 
     public static void ClearCart()
     {
-        foreach (var item in AllUserProducts())
-        {
-            if(item.RewardPrice > 0)
-            {
-                RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints + (int)(item.RewardPrice * item.Quantity));
-                SessionManager.CurrentUser.AccountPoints += (int)(item.RewardPrice * item.Quantity);
-            }
-        }
         CartAccess.ClearCart();
     }
     public static double DeliveryFee(double totalAmount)
@@ -128,12 +120,17 @@ public class OrderLogic
             // Find the matching product details
             var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
             var WeeklyPromotionProduct = ProductAccess.GetProductByIDinWeeklyPromotions(matchingProduct.ID);
+            var RewardItem = RewardItemsAccess.GetRewardItemByProductId(matchingProduct.ID);
             if (matchingProduct != null)
             {
                 // Add each item to OrderItems with the new orderId
                 if (WeeklyPromotionProduct != null)
                 {
                     OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price - WeeklyPromotionProduct.Discount);
+                }
+                else if (RewardItem != null)
+                {
+                    OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, 0.0);
                 }
                 else
                     OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price);
