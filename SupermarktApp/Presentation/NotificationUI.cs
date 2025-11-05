@@ -87,7 +87,7 @@ public class NotificationUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-        int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(100));
+        int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(50));
         List<ProductModel> AllLowQuantityProducts = NotificationLogic.GetAllLowQuantityProducts(QuantityThreshold);
 
         if (AllLowQuantityProducts.Count == 0)
