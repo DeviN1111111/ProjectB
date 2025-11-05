@@ -13,7 +13,7 @@ public static class MenuUI
                     .Color(AsciiPrimary));
             var options = new List<string>();
 
-            List<ProductModel> products = NotificationLogic.GetAllLowQuantityProducts(100);
+            List<ProductModel> products = NotificationLogic.GetAllLowQuantityProducts(50);
             int lowStockCount = products.Count;
 
 
