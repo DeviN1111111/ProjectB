@@ -110,7 +110,10 @@ public class DatabaseFiller
                 PhoneNumber TEXT,
                 City TEXT,
                 AccountStatus TEXT,
-                AccountPoints INTEGER DEFAULT 0
+                AccountPoints INTEGER DEFAULT 0,
+                TWOFAEnabled INTEGER DEFAULT 0,
+                TWOFACode TEXT,
+                TWOFAExpiry DATETIME
             );");
 
         db.Execute(@"
@@ -225,11 +228,11 @@ public class DatabaseFiller
         // USERS
         var users = new List<UserModel>
         {
-            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
-            new() { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
+            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
             new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "SuperAdmin" }
+            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
         };
 
         // PRODUCT CATEGORIES
@@ -476,8 +479,8 @@ public class DatabaseFiller
     public static void InsertUser(UserModel user)
     {
         using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus)
-                     VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);", user);
+        db.Execute(@"INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, TWOFAEnabled, AccountStatus)
+                     VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @TwoFAEnabled, @AccountStatus);", user);
     }
 
     public static void InsertProduct(ProductModel product)

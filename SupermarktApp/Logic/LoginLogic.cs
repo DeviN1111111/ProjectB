@@ -8,15 +8,14 @@ public class LoginLogic
 
         if (Account != null)
         {
-            SessionManager.CurrentUser = Account;
             return Account;
         }
         return null!;
     }
 
-    public static List<string> Register(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city, string AccountStatus = "User")
+    public static List<string> Register(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string city, bool is2FAEnabled, string AccountStatus = "User")
     {
-        UserModel user = new UserModel(name, lastName, email, password, address, zipcode, phoneNumber, city, AccountStatus);
+        UserModel user = new UserModel(name, lastName, email, password, address, zipcode, phoneNumber, city, is2FAEnabled, AccountStatus);
 
         List<string> Errors = [];
 
