@@ -1,27 +1,58 @@
 using System.Net;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
 
 public static class LoginUI
 {
+    public static readonly Color Hover = Color.FromHex("#006494");
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static void Login()
     {
-        string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
+        string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your [green]email[/]?:"));
         string password = AnsiConsole.Prompt(
-            new TextPrompt<string>("What's your password?")
+            new TextPrompt<string>("What's your [green]password[/]?:")
                 .Secret());
 
-        Console.Clear();
         UserModel Account = LoginLogic.Login(email, password);
         if (Account != null)
         {
-            SessionManager.CurrentUser = Account;
-            AnsiConsole.MarkupLine("[green]Login successful![/]");
-            AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
+            if (TwoFALogic.Is2FAEnabled(Account.ID))
+            {
+                TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
+                AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
+                while(true)
+                {
+                    string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                    if (inputCode.ToUpper() == "EXIT")
+                    {
+                        return;
+                    }
+                    if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
+                    {
+                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
+                    }
+                    else
+                    {
+                        SessionManager.CurrentUser = Account;
+                        AnsiConsole.MarkupLine("[green]Login successful![/]");
+                        AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
+                        Console.ReadKey();
+                        break;
+                    }  
+                }
+            }
+            else
+            {
+                SessionManager.CurrentUser = Account;
+                AnsiConsole.MarkupLine("[green]Login successful![/]");
+                AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
+            }
+
         }
         else
         {
+            Console.Clear();
             AnsiConsole.Write(
             new FigletText("Error")
                 .Centered()
@@ -76,7 +107,38 @@ public static class LoginUI
             } while (ValidaterLogic.ValidatePhoneNumber(PhoneNumber) == false);
             string City = AnsiConsole.Prompt(new TextPrompt<string>("What's your city?"));
 
-            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City);
+            AnsiConsole.MarkupLine($"Do you want to [green]ENABLE[/] [yellow]2FA[/] for your account?");
+
+            bool is2FAEnabled = false;
+            var wantToEnable2FA = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Yes", "No" }));
+
+            if (wantToEnable2FA == "Yes")
+            {
+                AnsiConsole.MarkupLine($"[italic yellow]A 2FA code has been sent to your email([italic green]{email}[/])![/]");
+                string Register2FACode;
+                string correct2FACode = TwoFALogic.Register2FAEmail(email).Result;
+                do
+                {
+                    Register2FACode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                    if (Register2FACode.ToLower() == "exit")
+                    {
+                        return;
+                    }
+                    else if (Register2FACode != correct2FACode)
+                    {
+                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code[/]");
+                    }
+                } while (Register2FACode != correct2FACode);
+                
+                is2FAEnabled = true;
+                AnsiConsole.MarkupLine("[green]2FA has been enabled for your account![/]");
+            }
+
+            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City, is2FAEnabled);
+            
             if (Errors.Count == 0)
             {
                 AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
