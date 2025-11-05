@@ -71,7 +71,10 @@ public class Order
         double deliveryFee = OrderLogic.DeliveryFee(totalAmount - discount);
 
        
-
+        if (totalAmount + deliveryFee - discount == 0)
+        {
+            deliveryFee = 5;
+        }
         // Summary box
         var panel = new Panel(
             new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
@@ -230,6 +233,8 @@ public class Order
                 }
                 // Add reward points to user
                 int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);
+                Console.WriteLine(rewardPoints);
+                Console.ReadKey();
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 Console.Clear();
