@@ -64,6 +64,7 @@ public static class ProductDetailsUI
         beforeEditTable.AddRow("Category", product1.Category);
         beforeEditTable.AddRow("Location", product1.Location.ToString());
         beforeEditTable.AddRow("Quantity", product1.Quantity.ToString());
+        beforeEditTable.AddRow("Visible", product1.Visible.ToString());
 
         var afterTable = new Table()
             .Title("[green]After EDIT:[/]")
@@ -77,6 +78,7 @@ public static class ProductDetailsUI
         afterTable.AddRow("Category", product2.Category);
         afterTable.AddRow("Location", product2.Location.ToString());
         afterTable.AddRow("Quantity", product2.Quantity.ToString());
+        afterTable.AddRow("Visible", product2.Visible.ToString());
 
         var grid = new Grid();
         grid.AddColumn();
