@@ -36,6 +36,12 @@ public static class LoginUI
     {
         while (true)
         {
+            AnsiConsole.MarkupLine("[yellow]Press escape to return.[/]");
+            AnsiConsole.MarkupLine("[green]Press any key to continue[/]");
+            if (Console.ReadKey().Key == ConsoleKey.Escape)
+            {
+                break;
+            }
             Console.Clear();
             AnsiConsole.Write(
                 new FigletText("Supermarket App")
