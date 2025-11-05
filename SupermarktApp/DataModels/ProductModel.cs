@@ -8,8 +8,9 @@ public class ProductModel
     public string Category { get; set; }
     public int Location { get; set; }
     public int Quantity { get; set; }
+    public int Visible { get; set; } = 1;
 
-    public ProductModel(string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    public ProductModel(string name, double price, string nutritionDetails, string description, string category, int location, int quantity, int visible)
     {
         Name = name;
         Price = price;
@@ -18,9 +19,10 @@ public class ProductModel
         Category = category;
         Location = location;
         Quantity = quantity;
+        Visible = visible;
     }
 
-    public ProductModel(int id, string name, double price, string nutritionDetails, string description, string category, int location, int quantity)
+    public ProductModel(int id, string name, double price, string nutritionDetails, string description, string category, int location, int quantity, int visible)
     {
         ID = id;
         Name = name;
@@ -30,6 +32,7 @@ public class ProductModel
         Category = category;
         Location = location;
         Quantity = quantity;
+        Visible = visible;
     }
 
     public ProductModel() { }

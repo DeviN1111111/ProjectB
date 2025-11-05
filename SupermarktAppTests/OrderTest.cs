@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Dapper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace SupermarktAppTests
 {
     [TestClass]
