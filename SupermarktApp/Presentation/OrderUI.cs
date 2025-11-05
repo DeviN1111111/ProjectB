@@ -213,6 +213,7 @@ public class Order
 
             "Checkout",
             "Remove items",
+            "Change quantity",
             "Go back"
         })
 );
@@ -292,6 +293,45 @@ public class Order
             case "Remove items":
                 RemoveFromCart(cartProducts, allProducts);
                 break;
+            case "Change quantity":
+                var productNames = new List<string>();
+                foreach (var item in cartProducts)
+                {
+                    var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                    if (product != null)
+                        productNames.Add($"{product.Name} (x{item.Quantity})");
+                }
+                if (productNames.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                    return;
+                }
+                string selectProduct = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[white]Select a product to change its quantity:[/]")
+                        .AddChoices(productNames)
+                );
+
+                var selectedProductName = selectProduct.Split(" (x")[0];
+                var selectedProduct = allProducts.FirstOrDefault(Product => Product.Name == selectedProductName);
+                if (selectedProduct != null)
+                {
+                    int newQuantity = AnsiConsole.Prompt(
+                        new TextPrompt<int>($"Enter new quantity for [yellow]{selectedProduct.Name}[/]:")
+                            .Validate(
+                                quantity => { return quantity < 1 ? ValidationResult.Error("[red]Quantity must be at least 1.[/]") : ValidationResult.Success(); }
+                                )
+                    );
+
+                    OrderLogic.ChangeQuantity(selectedProduct.ID, newQuantity);
+                    AnsiConsole.MarkupLine($"[green]Quantity for [yellow]{selectedProduct.Name}[/] updated to [yellow]{newQuantity}[/].[/]");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                    ShowCart();
+                }
+                break;
 
             case "Go back":
                 break;
@@ -336,7 +376,6 @@ public class Order
             return;
         }
 
-        // Actually remove items
         foreach (var choice in itemsToRemove)
         {
             var productName = choice.Split(" (x")[0];
@@ -348,8 +387,6 @@ public class Order
         AnsiConsole.MarkupLine("[green]Selected items have been removed![/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
-
-        // Refresh cart view
         ShowCart();
     }
     private static void RemoveItemFromCart(int productId)

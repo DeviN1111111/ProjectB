@@ -61,14 +61,14 @@ public static class SearchUI
                     if(WeeklyDiscountProduct != null)
                     {
                         string text = product.Price.ToString();
-                        var struckPrice = $"[strike][red]{text}[/][/]";
+                        var struckPrice = $"[strike][red]€{text}[/][/]";
 
-                        string newPrice = $"{struckPrice} [green]{Math.Round(product.Price - WeeklyDiscountProduct.Discount, 2)}[/]";
+                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price - WeeklyDiscountProduct.Discount, 2)}[/]";
                         table.AddRow(product.Name, newPrice);
                     }
                     else
                     {
-                        string yellowPrice = $"[yellow]{product.Price.ToString()}[/]";
+                        string yellowPrice = $"[yellow]€{product.Price.ToString()}[/]";
                         table.AddRow(product.Name, yellowPrice);
                     }
                 }

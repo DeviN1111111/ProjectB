@@ -57,7 +57,7 @@ public class DiscountedProductsUI
         foreach (WeeklyPromotionsModel item in list)
         {
             ProductModel Product = ProductLogic.GetProductById(item.ProductID);
-            table.AddRow(Product.Name, $"[strike][red]{Product.Price}[/][/]", $"[green]{Math.Round(Product.Price - item.Discount, 2)}[/]");
+            table.AddRow(Product.Name, $"[strike][red]€{Product.Price}[/][/]", $"[green]€{Math.Round(Product.Price - item.Discount, 2)}[/]");
         }
         AnsiConsole.Write(table);
         AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
