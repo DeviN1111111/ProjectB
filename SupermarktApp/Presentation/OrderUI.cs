@@ -292,7 +292,7 @@ public class Order
             case "Remove items":
                 RemoveFromCart(cartProducts, allProducts);
                 break;
-
+                
             case "Go back":
                 break;
 
@@ -335,6 +335,7 @@ public class Order
             Console.ReadKey();
             return;
         }
+
 
         // Actually remove items
         foreach (var choice in itemsToRemove)
