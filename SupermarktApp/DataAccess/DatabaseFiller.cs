@@ -8,6 +8,8 @@ using System.Linq;
 public class DatabaseFiller
 {
     private const string ConnectionString = "Data Source=database.db";
+    private static SqliteConnection? _sharedConnection;
+
     public static List<string> allTables = new List<string>()
     {
         "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "WeeklyPromotions", "ShopInfo"
@@ -17,6 +19,9 @@ public class DatabaseFiller
     {
         Console.Clear();
         AnsiConsole.MarkupLine("[bold yellow]Starting database setup...[/]");
+
+        _sharedConnection = new SqliteConnection(ConnectionString);
+        _sharedConnection.Open();
 
         AnsiConsole.Progress()
             .AutoClear(false)
@@ -35,7 +40,6 @@ public class DatabaseFiller
                 var seedUsersTask = ctx.AddTask("[cyan]Seeding Users[/]", maxValue: 5);
                 var seedProductsTask = ctx.AddTask("[cyan]Seeding Products[/]", maxValue: 453);
                 var seedOrdersTask = ctx.AddTask("[cyan]Seeding Orders[/]", maxValue: orderCount);
-                var seedPromotionsTask = ctx.AddTask("[magenta]Seeding Promotions[/]", maxValue: 5);
 
                 // Delete tables
                 DeleteTables(_ => deleteTask.Increment(1));
@@ -58,7 +62,7 @@ public class DatabaseFiller
                 seedProductsTask.StopTask();
                 seedOrdersTask.StopTask();
 
-                // Seed weekly promotions with progress
+
                 var products = ProductAccess.GetAllProducts();
                 Random random = new Random();
                 var selectedProducts = products.OrderBy(p => Guid.NewGuid()).Take(5).ToList();
@@ -70,13 +74,14 @@ public class DatabaseFiller
                     discount = Math.Round(discount, 2);
 
                     InsertWeeklyPromotions(new WeeklyPromotionsModel(product.ID, discount));
-                    seedPromotionsTask.Increment(1); // increment progress
                 }
 
-                seedPromotionsTask.StopTask();
             });
 
         AnsiConsole.MarkupLine("[bold green]✅ Database setup complete![/]");
+        _sharedConnection.Close();
+        _sharedConnection.Dispose();
+        _sharedConnection = null;
     }
 
     public static void DeleteTables(Action<int>? reportProgress = null)
@@ -490,51 +495,47 @@ public class DatabaseFiller
 
     public static void InsertUser(UserModel user)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, TWOFAEnabled, AccountStatus)
-                     VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @TwoFAEnabled, @AccountStatus);", user);
+        _sharedConnection.Execute(@"
+        INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus)
+        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);", user);
     }
 
     public static void InsertProduct(ProductModel product)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
-                     VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);", product);
+        _sharedConnection.Execute(@"
+        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
+        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);", product);
     }
 
     public static void InsertOrder(OrdersModel order)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Orders (UserID, ProductID, Date)
-                     VALUES (@UserID, @ProductID, @Date);", order);
+        _sharedConnection.Execute(@"
+        INSERT INTO Orders (UserID, ProductID, Date)
+        VALUES (@UserID, @ProductID, @Date);", order);
     }
 
     public static void InsertWeeklyPromotions(WeeklyPromotionsModel model)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO WeeklyPromotions (ProductID, Discount) 
-                     VALUES (@ProductID, @Discount);", model);
+        _sharedConnection.Execute(@"
+        INSERT INTO WeeklyPromotions (ProductID, Discount) 
+        VALUES (@ProductID, @Discount);", model);
     }
 
     public static int InsertOrderHistory(OrderHistoryModel order)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Open();
-        db.Execute("PRAGMA foreign_keys = ON;");
+        _sharedConnection.Execute("PRAGMA foreign_keys = ON;");
         string sql = @" 
             INSERT INTO OrderHistory (UserId, Date)
             VALUES (@UserId, @Date);
             SELECT last_insert_rowid();
         ";
-        int orderId = db.ExecuteScalar<int>(sql, order);
+        int orderId = _sharedConnection.ExecuteScalar<int>(sql, order);
         return orderId;
     }
 
     public static void InsertOrderItem(int orderId, int productId, int quantity, double price)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Open();
-        db.Execute(@"
+        _sharedConnection.Execute(@"
             INSERT INTO OrderItem (OrderId, ProductId, Quantity, Price)
             VALUES (@OrderId, @ProductId, @Quantity, @Price)
             ON CONFLICT(OrderId, ProductId)
