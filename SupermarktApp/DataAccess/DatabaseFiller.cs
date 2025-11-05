@@ -122,7 +122,8 @@ public class DatabaseFiller
                 Description TEXT,
                 Category TEXT,
                 Location INTEGER,
-                Quantity INTEGER NOT NULL DEFAULT 0
+                Quantity INTEGER NOT NULL DEFAULT 0,
+                Visible INTEGER NOT NULL DEFAULT 1
             );");
 
         db.Execute(@"
