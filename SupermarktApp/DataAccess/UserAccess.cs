@@ -28,7 +28,7 @@ public static class UserAccess
             WHERE ID = @ID", new { TwoFACode = code, TwoFAExpiry = expiry, ID = userId });
     }
 
-    public static string Get2FACode(int userId)
+    public static string? Get2FACode(int userId)
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.QuerySingleOrDefault<string?>(@"SELECT TWOFACode
@@ -52,7 +52,7 @@ public static class UserAccess
             WHERE ID = @ID", new { ID = userId });
     }
 
-    public static string GetUserEmail(int userId)
+    public static string? GetUserEmail(int userId)
     {
         using var db = new SqliteConnection(ConnectionString);
         return db.QuerySingleOrDefault<string>(@"SELECT Email 
@@ -67,4 +67,13 @@ public static class UserAccess
             SET TWOFAEnabled = @TWOFAEnabled 
             WHERE ID = @ID", new { TWOFAEnabled = isEnabled, ID = userId });
     }
+
+    public static UserModel? GetUserByID(int userId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QuerySingleOrDefault<UserModel>(@"SELECT * 
+            FROM Users 
+            WHERE ID = @ID", new { ID = userId });
+    }
+
 }

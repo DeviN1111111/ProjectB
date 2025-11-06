@@ -77,7 +77,7 @@ public static class SettingsUI
 
             AnsiConsole.MarkupLine($"[italic yellow]Changing 2FA settings for: [/][bold green]{SessionManager.CurrentUser.Name}[/]");
             Console.WriteLine();
-            AnsiConsole.MarkupLine($"[italic yellow]Current 2FA Status: [/][blue]{SessionManager.CurrentUser.TwoFAEnabled.ToString()}[/]");
+            AnsiConsole.MarkupLine($"[italic yellow]Current 2FA Status: [/][blue]{TwoFALogic.Is2FAEnabled(SessionManager.CurrentUser.ID).ToString()}[/]");
             Console.WriteLine();
 
             var options = new List<string> { "Enable 2FA", "Disable 2FA", "Go back" };
@@ -102,13 +102,12 @@ public static class SettingsUI
 
     public static void Enable2FA()
     {
-        if(SessionManager.CurrentUser.TwoFAEnabled)
+        if(TwoFALogic.Is2FAEnabled(SessionManager.CurrentUser.ID))
         {
             AnsiConsole.MarkupLine("[italic yellow]2FA Already enabled press [green]ANY KEY[/] to continue[/]");
             Console.ReadKey();
             return;
         }
-        bool is2FAEnabled = false;
         AnsiConsole.MarkupLine("Are you sure you want to enable 2FA?");
         var wantToEnable2FA = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -122,7 +121,7 @@ public static class SettingsUI
             string correct2FACode = TwoFALogic.Register2FAEmail(SessionManager.CurrentUser.Email).Result;
             do
             {
-                Register2FACode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                Register2FACode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email to [green]enable[/] 2FA(or '[bold red]EXIT[/]' to [red]exit[/]):"));
                 if (Register2FACode.ToLower() == "exit")
                 {
                     AnsiConsole.MarkupLine("[italic yellow]2FA Settings have not been changed press [green]ANY KEY[/] to continue[/]");
@@ -136,7 +135,9 @@ public static class SettingsUI
             } while (Register2FACode != correct2FACode);
 
             TwoFALogic.Enable2FA(SessionManager.CurrentUser.ID);
+            SessionManager.UpdateCurrentUser(SessionManager.CurrentUser.ID);
             AnsiConsole.MarkupLine("[green]2FA has been enabled for your account![/]");
+            Console.ReadKey();
         }
         else
         {
@@ -161,6 +162,7 @@ public static class SettingsUI
         if (wantToEnable2FA == "Yes")
         {
             TwoFALogic.Disable2FA(SessionManager.CurrentUser.ID);
+            SessionManager.UpdateCurrentUser(SessionManager.CurrentUser.ID);
             AnsiConsole.MarkupLine("[green] 2FA [red]Disabled[/] succesfully[/]");
             Console.ReadKey();
         }
