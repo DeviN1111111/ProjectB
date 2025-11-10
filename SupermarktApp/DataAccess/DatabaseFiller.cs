@@ -230,41 +230,6 @@ public class DatabaseFiller
             new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
         };
 
-        // SEED DISCOUNTS
-        var weeklyDiscounts = new List<DiscountsModel>
-        {
-            new DiscountsModel(1, 10, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
-            new DiscountsModel(2, 15, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
-            new DiscountsModel(3, 20, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
-            new DiscountsModel(4, 5, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
-            new DiscountsModel(5, 12, "Weekly", DateTime.Now, DateTime.Now.AddDays(7))
-        };
-
-        // Voeg Weekly kortingen toe
-        foreach (var discount in weeklyDiscounts)
-        {
-            DiscountsAccess.AddDiscount(discount);
-        }
-
-        // Lijst van 5 Personal kortingen van 09-09-2025 tot 31-12-2030
-        var personalStart = new DateTime(2025, 9, 9);
-        var personalEnd = new DateTime(2030, 12, 31);
-
-        var personalDiscounts = new List<DiscountsModel>
-        {
-            new DiscountsModel(10, 10, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(20, 15, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(30, 20, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(40, 5, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(50, 12, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1)
-        };
-
-        // Voeg Personal kortingen toe
-        foreach (var discount in personalDiscounts)
-        {
-            DiscountsAccess.AddDiscount(discount);
-        }
-
         // PRODUCT CATEGORIES
         var categories = new Dictionary<string, List<string>>
         {
@@ -460,6 +425,41 @@ public class DatabaseFiller
         ProductAccess.SetProductVisibility(451, false);
         ProductAccess.SetProductVisibility(452, false);
         ProductAccess.SetProductVisibility(453, false);
+
+        // SEED DISCOUNTS
+        var weeklyDiscounts = new List<DiscountsModel>
+        {
+            new DiscountsModel(1, 10, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(2, 15, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(3, 20, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(4, 5, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(5, 12, "Weekly", DateTime.Now, DateTime.Now.AddDays(7))
+        };
+
+        // Voeg Weekly kortingen toe
+        foreach (var discount in weeklyDiscounts)
+        {
+            DiscountsAccess.AddDiscount(discount);
+        }
+
+        // Lijst van 5 Personal kortingen van 09-09-2025 tot 31-12-2030
+        var personalStart = new DateTime(2025, 9, 9);
+        var personalEnd = new DateTime(2030, 12, 31);
+
+        var personalDiscounts = new List<DiscountsModel>
+        {
+            new DiscountsModel(10, 10, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
+            new DiscountsModel(20, 15, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
+            new DiscountsModel(30, 20, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
+            new DiscountsModel(40, 5, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
+            new DiscountsModel(50, 12, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1)
+        };
+
+        // Voeg Personal kortingen toe
+        foreach (var discount in personalDiscounts)
+        {
+            DiscountsAccess.AddDiscount(discount);
+        }
 
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
