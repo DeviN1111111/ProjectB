@@ -12,7 +12,8 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "WeeklyPromotions", "ShopInfo"
+        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems",
+        "Checklist", "OrderHistory", "WeeklyPromotions", "ShopInfo", "ShopReviews"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -215,6 +216,16 @@ public class DatabaseFiller
                 ClosingHourSaturday TEXT,
                 OpeningHourSunday TEXT,
                 ClosingHourSunday TEXT
+            );");
+
+        db.Execute(@"
+            CREATE TABLE IS NOT EXISTS ShopReviews (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                UserId INTEGER NOT NULL,
+                Stars INTEGER NOT NULL,
+                Text TEXT, 
+                CreatedAt DATETIME NOT NULL DEFAULT (datetime('now)),
+                FOREIGN KEY(UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );
         ");
     }
@@ -541,6 +552,14 @@ public class DatabaseFiller
                 Price = excluded.Price;",
             new { OrderId = orderId, ProductId = productId, Quantity = quantity, Price = price }
         );
+    }
+
+    public static void InsertShopReview(ShopReviewModel review)
+    {
+        _sharedConnection.Execute(@"
+            INSERT INTO ShopReviews (UserId, Stars, Text)
+            VALUES (@UserId, @Stars, @Text);
+        ", review);
     }
 
     public static void SeedWeeklyPromotions()
