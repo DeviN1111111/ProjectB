@@ -20,7 +20,7 @@ public static class UserAccess
             WHERE ID = @ID", new { ID = userId });
     }
 
-    public static void Insert2FACode(int userId, string code, DateTime expiry)
+    public static void Insert2FACode(int userId, string code, DateTime expiry) 
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"UPDATE Users 

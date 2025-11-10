@@ -5,11 +5,6 @@ public class OrderLogic
     public static void AddToCart(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
         // check if product already in cart
-        WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
-        if(WeeklyDiscountProduct != null)
-        {
-            discount = WeeklyDiscountProduct.Discount;
-        }
 
         List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
@@ -22,7 +17,7 @@ public class OrderLogic
             }
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
             RewardPrice = CartItem.RewardPrice + RewardPrice;
-            discount = CartItem.Discount;
+            discount = CartItem.Discount + discount;
             CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount, RewardPrice);
             return;
         }
@@ -101,15 +96,10 @@ public class OrderLogic
         double totalDiscount = 0;
         foreach (var item in allUserProducts)
         {
-            if (item.RewardPrice == 0)
-            {
-                totalDiscount += item.Discount * item.Quantity;
-            }
+            totalDiscount += item.Discount;
         }
-
         return Math.Round(totalDiscount, 2);
     }
-    
         //create a new order for the current user.
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {
@@ -119,16 +109,11 @@ public class OrderLogic
         {
             // Find the matching product details
             var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
-            var WeeklyPromotionProduct = ProductAccess.GetProductByIDinWeeklyPromotions(matchingProduct.ID);
             var RewardItem = RewardItemsAccess.GetRewardItemByProductId(matchingProduct.ID);
             if (matchingProduct != null)
             {
                 // Add each item to OrderItems with the new orderId
-                if (WeeklyPromotionProduct != null)
-                {
-                    OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price - WeeklyPromotionProduct.Discount);
-                }
-                else if (RewardItem != null)
+                if (RewardItem != null)
                 {
                     OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, 0.0);
                 }
@@ -138,3 +123,6 @@ public class OrderLogic
         }
     }
 }
+
+
+

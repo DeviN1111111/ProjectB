@@ -12,7 +12,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "WeeklyPromotions", "ShopInfo"
+        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -61,21 +61,6 @@ public class DatabaseFiller
                 seedUsersTask.StopTask();
                 seedProductsTask.StopTask();
                 seedOrdersTask.StopTask();
-
-
-                var products = ProductAccess.GetAllProducts();
-                Random random = new Random();
-                var selectedProducts = products.OrderBy(p => Guid.NewGuid()).Take(5).ToList();
-
-                foreach (var product in selectedProducts)
-                {
-                    double discount = random.Next(1, 7);
-                    if (discount >= product.Price) discount = Math.Max(0.5, product.Price - 0.5);
-                    discount = Math.Round(discount, 2);
-
-                    InsertWeeklyPromotions(new WeeklyPromotionsModel(product.ID, discount));
-                }
-
             });
 
         AnsiConsole.MarkupLine("[bold green]✅ Database setup complete![/]");
@@ -134,13 +119,6 @@ public class DatabaseFiller
                 Visible INTEGER NOT NULL DEFAULT 1
             );");
 
-        db.Execute(@"
-            CREATE TABLE IF NOT EXISTS WeeklyPromotions (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                ProductID INTEGER NOT NULL,
-                Discount REAL NOT NULL
-            );
-        ");
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS OrderHistory (
@@ -514,13 +492,6 @@ public class DatabaseFiller
         VALUES (@UserID, @ProductID, @Date);", order);
     }
 
-    public static void InsertWeeklyPromotions(WeeklyPromotionsModel model)
-    {
-        _sharedConnection.Execute(@"
-        INSERT INTO WeeklyPromotions (ProductID, Discount) 
-        VALUES (@ProductID, @Discount);", model);
-    }
-
     public static int InsertOrderHistory(OrderHistoryModel order)
     {
         _sharedConnection.Execute("PRAGMA foreign_keys = ON;");
@@ -544,30 +515,5 @@ public class DatabaseFiller
                 Price = excluded.Price;",
             new { OrderId = orderId, ProductId = productId, Quantity = quantity, Price = price }
         );
-    }
-
-    public static void SeedWeeklyPromotions()
-    {
-        var products = ProductAccess.GetAllProducts();
-        if (products.Count < 5)
-            return;
-
-        Random random = new Random();
-
-        var selectedProducts = products
-            .OrderBy(p => Guid.NewGuid())
-            .Take(5)
-            .ToList();
-
-        foreach (var product in selectedProducts)
-        {
-            double discount = random.Next(1, 7); // 1–6 euros
-            if (discount >= product.Price)
-            {
-                discount = Math.Max(0.5, product.Price - 0.5);
-            }
-            discount = Math.Round(discount, 2);
-            InsertWeeklyPromotions(new WeeklyPromotionsModel(product.ID, discount));
-        }
     }
 }

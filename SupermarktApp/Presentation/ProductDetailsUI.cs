@@ -7,12 +7,6 @@ public static class ProductDetailsUI
     public static void ShowProductDetails(ProductModel product)
     {
         Console.Clear();
-        WeeklyPromotionsModel WeeklyDiscountProduct = ProductLogic.GetProductByIDinWeeklyPromotions(product.ID);
-        if(WeeklyDiscountProduct != null)
-        {
-            product.Price = product.Price - WeeklyDiscountProduct.Discount;
-        }
-
 
         AnsiConsole.Write(
             new FigletText("Product Details")

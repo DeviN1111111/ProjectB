@@ -83,9 +83,6 @@ public static class MenuUI
                     Console.Clear();
                     Order.ShowCart();
                     break;
-                case "Discounted Products":
-                    DiscountedProductsUI.DisplayMenu();
-                    break;
                 case "Checklist":
                     Console.Clear();
                     Order.ShowChecklist();
