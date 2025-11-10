@@ -47,8 +47,8 @@ public static class OrderItemsAccess
                 "SELECT * FROM Discounts WHERE ProductId = @ProductId",
                 new { ProductId = item.ProductId }
             );
-
-            if (discount == null) // so if its NOT already a discount
+            var checkReward = RewardItemsAccess.GetRewardItemByProductId(item.ProductId);
+            if (discount == null && checkReward == null) // so if its NOT already a discount or reward item
             {
                 var product = db.QueryFirstOrDefault<ProductModel>(
                 "SELECT * FROM Products WHERE Id = @Id",
