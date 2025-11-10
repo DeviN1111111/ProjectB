@@ -405,7 +405,7 @@ public static void DisplayOrderHistory()
                 .Centered()
                 .Color(AsciiPrimary));
 
-        var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID); // geen access aanroepen in de presentation layer
+        var userOrders = OrderHistoryAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID); // geen access aanroepen in de presentation layer
         if (userOrders.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No order history found.[/]");

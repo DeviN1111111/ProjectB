@@ -144,9 +144,12 @@ public class DatabaseFiller
             CREATE TABLE IF NOT EXISTS Orders (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
+                OrderId INTEGER NOT NULL,
                 ProductID INTEGER NOT NULL,
+                Price REAL NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
                 FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
             );");
 
@@ -460,7 +463,7 @@ public class DatabaseFiller
             for (int j = 0; j < itemCount; j++)
             {
                 var product = products[random.Next(products.Count)];
-                InsertOrderItem(orderHistoryId, products.IndexOf(product) + 1, random.Next(1, 5), product.Price);
+                InsertOrderItem(history.UserId, orderHistoryId, products.IndexOf(product) + 1, product.Price);
             }
         }
 
@@ -531,16 +534,15 @@ public class DatabaseFiller
         return orderId;
     }
 
-    public static void InsertOrderItem(int orderId, int productId, int quantity, double price)
+    public static void InsertOrderItem(int UserID, int orderId, int productId, double price)
     {
         _sharedConnection.Execute(@"
-            INSERT INTO OrderItem (OrderId, ProductId, Quantity, Price)
-            VALUES (@OrderId, @ProductId, @Quantity, @Price)
+            INSERT INTO Order (UserID, OrderId, ProductId, Quantity, Price)
+            VALUES (@UserID, @OrderId, @ProductId, @Quantity, @Price)
             ON CONFLICT(OrderId, ProductId)
             DO UPDATE SET
-                Quantity = excluded.Quantity,
                 Price = excluded.Price;",
-            new { OrderId = orderId, ProductId = productId, Quantity = quantity, Price = price }
+            new { userID = UserID, OrderId = orderId, ProductId = productId, Price = price }
         );
     }
 }

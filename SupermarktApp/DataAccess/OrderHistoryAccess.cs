@@ -1,27 +1,21 @@
-// using Dapper;
-// using Microsoft.Data.Sqlite;
-// public class OrderHistoryAccess
-// {
-//     private const string ConnectionString = "Data Source=database.db";
+using Dapper;
+using Microsoft.Data.Sqlite;
+public static class OrderHistoryAccess
+{
+    private const string ConnectionString = "Data Source=database.db";
+    public static int AddToOrderHistory(int userId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var order = new OrderHistoryModel(userId);
+        var sql = "INSERT INTO OrderHistory (UserId, Date) VALUES (@UserId, @Date); SELECT last_insert_rowid();";
+        int orderId = db.ExecuteScalar<int>(sql, order);  // Get the last inserted ID
+        return orderId;
+    }
 
-//     // All order history 
-//     public static IEnumerable<OrderHistoryModel> GetAllOrders()
-//     {
-//         using var db = new SqliteConnection(ConnectionString);
-//         return db.Query<OrderHistoryModel>("SELECT * FROM OrderHistory");
-//     }
-
-//     // Add to order history after checkout
-//     public static void AddToOrderHistory(OrderHistoryModel order)
-//     {
-//         using var db = new SqliteConnection(ConnectionString);
-//         db.Execute("INSERT INTO OrderHistory (UserId, ProductId, Quantity, OrderDate) VALUES (@UserId, @ProductId, @Quantity, @OrderDate)", order);
-//     }
-
-//     // Get all order history for a user
-//     public static IEnumerable<OrderHistoryModel> GetOrderHistoryByUserId(int userId)
-//     {
-//         using var db = new SqliteConnection(ConnectionString);
-//         return db.Query<OrderHistoryModel>("SELECT * FROM OrderHistory WHERE UserId = @UserId", new { UserId = userId });
-//     }
-// }
+        public static List<OrdersModel> GetOrdersByUserId(int userId)
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        var query = "SELECT * FROM OrderHistory WHERE UserId = @UserId ORDER BY Date DESC;";
+        return connection.Query<OrdersModel>(query, new { UserId = userId }).AsList();
+    }
+}

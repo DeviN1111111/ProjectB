@@ -104,7 +104,7 @@ public class OrderLogic
     public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
     {
         // Create a new order and get its ID
-        int orderId = OrderAccess.AddToOrderHistory(SessionManager.CurrentUser.ID);
+        int orderId = OrderHistoryAccess.AddToOrderHistory(SessionManager.CurrentUser.ID);
         foreach (var cartProduct in cartProducts)
         {
             // Find the matching product details
