@@ -19,4 +19,28 @@ public static class DiscountsAccess
         DiscountType = @DiscountType
         WHERE Id = @ProductID", Discount);
     }
+
+    public static List<ProductModel> GetWeeklyDiscounts()
+    {
+        var products = _sharedConnection.Query<ProductModel>(
+        "SELECT *FROM Products WHERE DiscountType = @DiscountType",
+        new { DiscountType = "Weekly" }).ToList();
+
+        return products;
+    }
+
+    public static List<DiscountsModel> GetPersonalDiscounts(int userID)
+    {
+        var products = _sharedConnection.Query<DiscountsModel>(
+        "SELECT * FROM Discounts WHERE UserId = @UserID",
+        new { UserID = userID }).ToList();
+
+        return products;
+    }
+    public static DiscountsModel? GetDiscountsByProductID(int productID)
+    {
+        return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID });
+    }
 }

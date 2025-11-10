@@ -5,11 +5,11 @@ public class CartAccess
     private const string ConnectionString = "Data Source=database.db";
     public static string Table = "Cart";
 
-    public static void AddToCart(int userId, int productId, int quantity, double discount = 0, double rewardPrice = 0)
+    public static void AddToCart(int userId, int productId, int quantity, double rewardPrice = 0)
     {
         using var db = new SqliteConnection(ConnectionString);
-        var sql = $"INSERT INTO {Table} (UserId, ProductId, Quantity, Discount, RewardPrice) VALUES (@UserId, @ProductId, @Quantity, @Discount, @RewardPrice)";
-        db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity, Discount = discount, RewardPrice = rewardPrice });
+        var sql = $"INSERT INTO {Table} (UserId, ProductId, Quantity, RewardPrice) VALUES (@UserId, @ProductId, @Quantity, @RewardPrice)";
+        db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity, RewardPrice = rewardPrice });
     }
 
     public static List<CartModel> GetAllUserProducts(int userId)

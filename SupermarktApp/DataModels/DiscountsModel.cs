@@ -17,4 +17,5 @@ public class DiscountsModel
         EndDate = endDate;
         UserID = userId;
     }
+    public DiscountsModel(){}
 }

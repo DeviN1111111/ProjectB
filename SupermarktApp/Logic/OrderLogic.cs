@@ -18,11 +18,11 @@ public class OrderLogic
             CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
             RewardPrice = CartItem.RewardPrice + RewardPrice;
             discount = CartItem.Discount + discount;
-            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, discount, RewardPrice);
+            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, RewardPrice);
             return;
         }
         // add new item to cart
-        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity, discount, RewardPrice);
+        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity, RewardPrice);
     }
 
     public static List<CartModel> AllUserProducts()

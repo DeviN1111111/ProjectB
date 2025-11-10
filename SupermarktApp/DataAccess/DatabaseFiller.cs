@@ -168,7 +168,6 @@ public class DatabaseFiller
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
-                Discount REAL NOT NULL DEFAULT 0,
                 RewardPrice REAL NOT NULL DEFAULT 0,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
@@ -441,26 +440,7 @@ public class DatabaseFiller
         {
             DiscountsAccess.AddDiscount(discount);
         }
-
-        // Lijst van 5 Personal kortingen van 09-09-2025 tot 31-12-2030
-        var personalStart = new DateTime(2025, 9, 9);
-        var personalEnd = new DateTime(2030, 12, 31);
-
-        var personalDiscounts = new List<DiscountsModel>
-        {
-            new DiscountsModel(10, 10, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(20, 15, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(30, 20, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(40, 5, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1),
-            new DiscountsModel(50, 12, "Personal", DateTime.Now, DateTime.Now.AddDays(7), 1)
-        };
-
-        // Voeg Personal kortingen toe
-        foreach (var discount in personalDiscounts)
-        {
-            DiscountsAccess.AddDiscount(discount);
-        }
-
+        
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
         for (int i = 0; i < orderCount; i++)

@@ -57,22 +57,27 @@ public static class SearchUI
                 //Vul de table met Namen en prijzen.
                 foreach (ProductModel product in productList)
                 {
-                    string yellowPrice = $"[yellow]€{product.Price.ToString()}[/]";
-                    table.AddRow(product.Name, yellowPrice);
-                    // FIX LATER
-                    // if(WeeklyDiscountProduct != null)
-                    // {
-                    //     string text = product.Price.ToString();
-                    //     var struckPrice = $"[strike][red]€{text}[/][/]";
+                    if(product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID))
+                    {
+                        string text = product.Price.ToString();
+                        var struckPrice = $"[strike][red]€{text}[/][/]";
 
-                    //     string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price - WeeklyDiscountProduct.Discount, 2)}[/]";
-                    //     table.AddRow(product.Name, newPrice);
-                    // }
-                    // else
-                    // {
-                    //     string yellowPrice = $"[yellow]€{product.Price.ToString()}[/]";
-                    //     table.AddRow(product.Name, yellowPrice);
-                    // }
+                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (product.DiscountPercentage / 100)), 2)}[/]";
+                        table.AddRow(product.Name, newPrice);            
+                    }
+                    else if(product.DiscountType == "Weekly")
+                    {
+                        string text = product.Price.ToString();
+                        var struckPrice = $"[strike][red]€{text}[/][/]";
+
+                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (product.DiscountPercentage / 100)), 2)}[/]";
+                        table.AddRow(product.Name, newPrice);
+                    }
+                    else
+                    {
+                        string yellowPrice = $"[yellow]€{product.Price.ToString()}[/]";
+                        table.AddRow(product.Name, yellowPrice);
+                    }
                 }
 
                 AnsiConsole.Write(table);

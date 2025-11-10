@@ -10,6 +10,7 @@ public class Order
     {
         Console.Clear();
         double totalAmount = 0;
+        double totalDiscount = 0;
         List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
         List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
 
@@ -37,8 +38,25 @@ public class Order
             {
                 if (cartProduct.ProductId == Product.ID)
                 {
-                    cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"${Product.Price}", $"${Product.Price * cartProduct.Quantity}");
-                    totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
+                    if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
+                    {
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
+                    }
+                    else if (Product.DiscountType == "Weekly" || Product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(Product.ID))
+                    {
+                        double priceAfterDiscount = Math.Round((Product.Price * (1 - Product.DiscountPercentage / 100)), 2);
+                        double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
+
+                        totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
+
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * cartProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (priceAfterDiscount * cartProduct.Quantity);
+                    }
+                    else
+                    {
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * cartProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
+                    }
                 }
             }
         }
@@ -46,20 +64,17 @@ public class Order
         AnsiConsole.Write(cartTable);
         AnsiConsole.WriteLine();
 
-        // Calculate total discount
-        double discount = OrderLogic.CalculateTotalDiscount();
-
         // Calculate delivery fee
-        double deliveryFee = OrderLogic.DeliveryFee(totalAmount - discount);
+        double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
 
        
-        if (totalAmount + deliveryFee - discount == 0)
+        if (totalAmount + deliveryFee - totalDiscount == 0)
         {
             deliveryFee = 5;
         }
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(discount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee - discount, 2)}[/]"))
+            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -67,7 +82,7 @@ public class Order
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
-        double finalAmount = totalAmount + deliveryFee - discount;
+        double finalAmount = totalAmount + deliveryFee - totalDiscount;
 
         Checkout(allUserProducts, allProducts, finalAmount);
     }
@@ -390,7 +405,7 @@ public static void DisplayOrderHistory()
                 .Centered()
                 .Color(AsciiPrimary));
 
-        var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID);
+        var userOrders = OrderAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID); // geen access aanroepen in de presentation layer
         if (userOrders.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No order history found.[/]");
@@ -419,7 +434,7 @@ public static void DisplayOrderHistory()
                 .Replace("#", "")
         );
 
-        var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId);
+        var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId); // geen access aanroepen in de presentation layer
 
         if (orderItems.Count == 0)
         {
@@ -441,26 +456,34 @@ public static void DisplayOrderHistory()
             .AddColumn("[white]Price per Unit[/]")
             .AddColumn("[white]Total Price[/]");
 
-        decimal totalOrderPrice = 0;
+        double totalOrderPrice = 0;
 
         foreach (var item in orderItems)
         {
-            var product = ProductAccess.GetProductByID(item.ProductId);
+            var product = ProductAccess.GetProductByID(item.ProductId); // geen access aanroepen in de presentation layer
             if (product != null)
             {
-                decimal itemTotal = (decimal)(item.Quantity * item.Price);
+                double price = product.Price;
+                if (product.DiscountType == "Weekly" || product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID))
+                {
+                    price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
+                    // HIER MOETEN WE NOG DE PRIJS IN DE ORDERHISTORY DATABASE AANPASSEN!!
+                }
+                
+                double itemTotal = item.Quantity * price;
                 totalOrderPrice += itemTotal;
+                
                 orderTable.AddRow(
                     product?.Name ?? "[red]Unknown Product[/]",
                     item.Quantity.ToString(),
-                    $"${item.Price:F2}",
+                    $"${price:F2}",
                     $"${itemTotal:F2}"
                 );
             }
         }
         if (totalOrderPrice < 25)
         {
-            decimal deliveryFee = 5;
+            double deliveryFee = 5;
             totalOrderPrice += deliveryFee;
             orderTable.AddEmptyRow();
             orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
