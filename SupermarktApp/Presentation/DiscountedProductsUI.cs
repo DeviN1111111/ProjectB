@@ -28,6 +28,7 @@ public class DiscountedProductsUI
                     return;
 
                 case "Weekly Discounts":
+                    DisplayWeeklyDiscounts();
                     break;
 
                 case "Personal Discounts}":
@@ -38,5 +39,10 @@ public class DiscountedProductsUI
                     break;
             }
         }
+    }
+
+    public static void DisplayWeeklyDiscounts()
+    {
+        
     }
 }
