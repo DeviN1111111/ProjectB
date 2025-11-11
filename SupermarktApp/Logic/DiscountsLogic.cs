@@ -76,7 +76,7 @@ public class DiscountsLogic
             return;
         }
 
-        List<ProductModel> top5Products = OrderItemsAccess.GetTop5MostBoughtProducts(userID);
+        List<ProductModel> top5Products = OrderAccess.GetTop5MostBoughtProducts(userID);
 
         if (top5Products.Count < 5)
             return;
