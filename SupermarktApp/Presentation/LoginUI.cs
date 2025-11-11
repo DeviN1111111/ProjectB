@@ -35,6 +35,7 @@ public static class LoginUI
                     else
                     {
                         SessionManager.CurrentUser = Account;
+                        DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
                         AnsiConsole.MarkupLine("[green]Login successful![/]");
                         AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
                         Console.ReadKey();
@@ -45,6 +46,7 @@ public static class LoginUI
             else
             {
                 SessionManager.CurrentUser = Account;
+                DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
                 AnsiConsole.MarkupLine("[green]Login successful![/]");
                 AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
             }
