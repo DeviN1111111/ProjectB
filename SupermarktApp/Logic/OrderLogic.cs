@@ -6,7 +6,7 @@ public class OrderLogic
     {
         // check if product already in cart
 
-        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
         var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartItem != null)
         {
@@ -27,7 +27,7 @@ public class OrderLogic
 
     public static List<CartModel> AllUserProducts()
     {
-        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
         return allUserProducts;
     }
 
@@ -73,21 +73,21 @@ public class OrderLogic
     }
     public static void ChangeQuantity(int productId, int newQuantity)
     {
-        CartAccess.UpdateProductQuantity(SessionManager.CurrentUser.ID, productId, newQuantity);
+        CartAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
 
     // remove a product from cart by product id
     public static void RemoveFromCart(int productId)
     {
-        double rewardPrice = CartAccess.GetUserProductByProductId(SessionManager.CurrentUser.ID, productId).RewardPrice;
-        string rewardItemName = ProductAccess.GetProductByID(productId).Name;
+        double rewardPrice = CartAccess.GetUserProductByProductId(SessionManager.CurrentUser!.ID, productId)!.RewardPrice;
+        string rewardItemName = ProductAccess.GetProductByID(productId)!.Name;
         if(rewardPrice > 0)
         {
             SessionManager.CurrentUser.AccountPoints += (int)rewardPrice;
-            RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints);
+            RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser!.ID, SessionManager.CurrentUser.AccountPoints);
             AnsiConsole.MarkupLine($"[white]You have been refunded [/][green]{rewardPrice}[/] reward points for [yellow1]{rewardItemName}[/]!");
         }
-        CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, productId);
+        CartAccess.RemoveFromCart(SessionManager.CurrentUser!.ID, productId);
     }
     public static double CalculateTotalDiscount()
     {
@@ -100,27 +100,31 @@ public class OrderLogic
         }
         return Math.Round(totalDiscount, 2);
     }
-        //create a new order for the current user.
-    public static void AddOrderWithItems(List<OrderItemModel> cartProducts, List<ProductModel> allProducts)
+    //create a new order for the current user.
+    public static void AddOrderWithItems(List<OrdersModel> cartProducts, List<ProductModel> allProducts)
     {
         // Create a new order and get its ID
-        int orderId = OrderAccess.AddToOrderHistory(SessionManager.CurrentUser.ID);
+        int orderId = OrderHistoryAccess.AddToOrderHistory(SessionManager.CurrentUser!.ID);
         foreach (var cartProduct in cartProducts)
         {
             // Find the matching product details
-            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
-            var RewardItem = RewardItemsAccess.GetRewardItemByProductId(matchingProduct.ID);
+            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductID);
+            var RewardItem = RewardItemsAccess.GetRewardItemByProductId(matchingProduct!.ID);
             if (matchingProduct != null)
             {
                 // Add each item to OrderItems with the new orderId
                 if (RewardItem != null)
                 {
-                    OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, 0.0);
+                    OrderAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, 0.0);
                 }
                 else
-                    OrderItemsAccess.AddToOrderItems(orderId, matchingProduct.ID, cartProduct.Quantity, matchingProduct.Price);
+                    OrderAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, matchingProduct.Price);
             }
         }
+    }
+    public static List<OrdersModel> GetOrderssByOrderId(int orderId)
+    {
+        return OrderAccess.GetOrderssByOrderId(orderId);
     }
 }
 
