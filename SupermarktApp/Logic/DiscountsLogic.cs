@@ -79,8 +79,8 @@ public class DiscountsLogic
         foreach (ProductModel product in top5Products)
         {
             double discountPercentage = rand.Next(5, 41); 
-            DateTime startDate = DateTime.Now;
-            DateTime endDate = startDate.AddDays(7);
+            DateTime startDate = DateTime.MinValue;
+            DateTime endDate = DateTime.MaxValue;
 
             DiscountsModel discount = new DiscountsModel(
                 productId: product.ID,

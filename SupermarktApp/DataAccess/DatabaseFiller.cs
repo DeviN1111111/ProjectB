@@ -128,8 +128,8 @@ public class DatabaseFiller
             UserId INT NULL,
             DiscountPercentage REAL NOT NULL,
             DiscountType TEXT NOT NULL,
-            StartDate DATETIME NOT NULL,
-            EndDate DATETIME NOT NULL
+            StartDate DATETIME NULL,
+            EndDate DATETIME NULL
             );");
 
         db.Execute(@"
