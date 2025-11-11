@@ -248,18 +248,30 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        List<OrderItemModel> allOrderItems = new List<OrderItemModel>();  // List to hold order items
+                        // Create an empty list to hold all "flattened" order entries
+                        List<OrdersModel> allOrderEntries = new List<OrdersModel>();
 
                         foreach (var item in cartProducts)
                         {
-                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
                             if (product != null)
                             {
-                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
-                                allOrderItems.Add(orderItem);
-                            }
-                        }
-                        OrderLogic.AddOrderWithItems(allOrderItems, allProducts);  // Create order with items
+                                        // Repeat per quantity — since each product is stored as a separate row
+                                        for (int i = 0; i < item.Quantity; i++)
+                                        {
+                                            var newOrder = new OrdersModel
+                                            {
+                                                UserID = SessionManager.CurrentUser!.ID,       
+                                                ProductID = product.ID,
+                                                Price = product.Price     
+                                            };
+                                            allOrderEntries.Add(newOrder);
+                                        }
+                                    }
+                                }
+
+                                // Save them to the database — all products share one OrderHistory entry (OrderId)
+                                OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -269,18 +281,31 @@ public class Order
                         OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
-                        List<OrderItemModel> allOrderItem = new List<OrderItemModel>();  // List to hold order items
+                                                // Create an empty list to hold all "flattened" order entries
+                        List<OrdersModel> allOrderEntrie= new List<OrdersModel>();
 
                         foreach (var item in cartProducts)
                         {
-                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
                             if (product != null)
                             {
-                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
-                                allOrderItem.Add(orderItem);
-                            }
-                        }
-                        OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
+                                        // Repeat per quantity — since each product is stored as a separate row
+                                        for (int i = 0; i < item.Quantity; i++)
+                                        {
+                                            var newOrder = new OrdersModel
+                                            {
+                                                UserID = SessionManager.CurrentUser!.ID,     
+                                                ProductID = product.ID,
+                                                Price = product.Price     
+                                            };
+                                            allOrderEntrie.Add(newOrder);
+                                        }
+                                    }
+                                }
+
+                                // Save them to the database — all products share one OrderHistory entry (OrderId)
+                                OrderLogic.AddOrderWithItems(allOrderEntrie, allProducts);
+
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -405,7 +430,7 @@ public static void DisplayOrderHistory()
                 .Centered()
                 .Color(AsciiPrimary));
 
-        var userOrders = OrderHistoryAccess.GetOrdersByUserId(SessionManager.CurrentUser.ID); // geen access aanroepen in de presentation layer
+        var userOrders = OrderHistoryAccess.GetOrdersByUserId(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
         if (userOrders.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No order history found.[/]");
@@ -434,7 +459,7 @@ public static void DisplayOrderHistory()
                 .Replace("#", "")
         );
 
-        var orderItems = OrderItemsAccess.GetOrderItemsByOrderId(selectedOrderId); // geen access aanroepen in de presentation layer
+        var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId); // geen access aanroepen in de presentation layer
 
         if (orderItems.Count == 0)
         {
@@ -458,38 +483,64 @@ public static void DisplayOrderHistory()
 
         double totalOrderPrice = 0;
 
+        // Dictionary to count how many times each product appears
+        var productCounts = new Dictionary<int, int>();
+
+        // First pass: count how many of each ProductID there are
         foreach (var item in orderItems)
         {
-            var product = ProductAccess.GetProductByID(item.ProductId); // geen access aanroepen in de presentation layer
+            if (productCounts.ContainsKey(item.ProductID))
+                productCounts[item.ProductID]++;
+            else
+                productCounts[item.ProductID] = 1;
+        }
+
+        double TotalOrderPrice = 0;
+
+        // Second pass: build the table using the counted quantities
+        foreach (var keyValuePair in productCounts)
+        {
+            int productId = keyValuePair.Key;
+            int quantity = keyValuePair.Value;
+
+            var product = ProductAccess.GetProductByID(productId);
             if (product != null)
             {
                 double price = product.Price;
-                if (product.DiscountType == "Weekly" || product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID))
+
+                // Apply discounts if needed
+                if (product.DiscountType == "Weekly" ||
+                    (product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
                 {
                     price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
-                    // HIER MOETEN WE NOG DE PRIJS IN DE ORDERHISTORY DATABASE AANPASSEN!!
+                    // TODO: update the price in OrderHistory database if needed
                 }
-                
-                double itemTotal = item.Quantity * price;
+
+                double itemTotal = quantity * price;
                 totalOrderPrice += itemTotal;
-                
+
                 orderTable.AddRow(
                     product?.Name ?? "[red]Unknown Product[/]",
-                    item.Quantity.ToString(),
+                    quantity.ToString(),
                     $"${price:F2}",
                     $"${itemTotal:F2}"
                 );
             }
         }
-        if (totalOrderPrice < 25)
+
+        // Add total row
+        orderTable.AddEmptyRow();
+        orderTable.AddRow("Total", "", "", $"${TotalOrderPrice:F2}");
+
+        if (TotalOrderPrice < 25)
         {
             double deliveryFee = 5;
-            totalOrderPrice += deliveryFee;
+            TotalOrderPrice += deliveryFee;
             orderTable.AddEmptyRow();
             orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
         }
         orderTable.AddEmptyRow();
-        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${totalOrderPrice:F2}[/]");
+        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${TotalOrderPrice:F2}[/]");
 
         AnsiConsole.Write(orderTable);
         AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");

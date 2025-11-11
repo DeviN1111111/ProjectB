@@ -12,7 +12,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo"
+        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -150,20 +150,10 @@ public class DatabaseFiller
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
                 FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
-                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
+                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE,
+                FOREIGN KEY (OrderId) REFERENCES OrderHistory(Id) ON DELETE CASCADE
             );");
 
-        db.Execute(@"
-            CREATE TABLE IF NOT EXISTS OrderItem (
-                Id INTEGER PRIMARY KEY,
-                OrderId INTEGER NOT NULL,
-                ProductId INTEGER NOT NULL,
-                Quantity INTEGER NOT NULL,
-                Price REAL NOT NULL,
-                FOREIGN KEY (OrderId) REFERENCES OrderHistory(Id) ON DELETE CASCADE,
-                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
-                UNIQUE(OrderId, ProductId)
-            );");
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
@@ -373,18 +363,6 @@ public class DatabaseFiller
             }
         }
 
-        // ORDERS
-        var orders = new List<OrdersModel>();
-        for (int i = 0; i < orderCount; i++)
-        {
-            orders.Add(new OrdersModel
-            {
-                UserID = (i % users.Count) + 1,
-                ProductID = random.Next(products.Count) + 1,
-                Date = DateTime.Today.AddDays(-i)
-            });
-        }
-
         // INSERT USERS
         foreach (var user in users)
         {
@@ -399,21 +377,15 @@ public class DatabaseFiller
             reportProductProgress?.Invoke(1);
         }
 
-        // INSERT ORDERS
-        foreach (var order in orders)
-        {
-            InsertOrder(order);
-            reportOrderProgress?.Invoke(1);
-        }
 
         // REWARD ITEMS
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(451, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(452, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(453, 30));
 
-        ProductModel RewardItem1 = ProductAccess.GetProductByID(451);
-        ProductModel RewardItem2 = ProductAccess.GetProductByID(452);
-        ProductModel RewardItem3 = ProductAccess.GetProductByID(453);
+        ProductModel RewardItem1 = ProductAccess.GetProductByID(451)!;
+        ProductModel RewardItem2 = ProductAccess.GetProductByID(452)!;
+        ProductModel RewardItem3 = ProductAccess.GetProductByID(453)!;
 
         RewardItem1.Price = 0;
         RewardItem2.Price = 0;
@@ -446,26 +418,28 @@ public class DatabaseFiller
         
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
-        for (int i = 0; i < orderCount; i++)
+        for (int i = 0; i < orderCount/15; i++)
         {
-            // Create a corresponding OrderHistory entry for each order
             var history = new OrderHistoryModel
             {
                 UserId = (i % users.Count) + 1,
-                Date = DateTime.Today.AddDays(-i)
+                Date = DateTime.Today.AddDays(-i * (36500 / orderCount))
             };
 
-            int orderHistoryId = InsertOrderHistory(history); // insert into DB and get the ID
+            int orderHistoryId = InsertOrderHistory(history);
             orderHistoryList.Add(history);
 
-            // OPTIONAL: Add random OrderItems for this OrderHistory
-            int itemCount = random.Next(1, 4); // 1–3 items per order
+            int itemCount = random.Next(1,3); // 1–2 items per order
             for (int j = 0; j < itemCount; j++)
             {
                 var product = products[random.Next(products.Count)];
-                InsertOrderItem(history.UserId, orderHistoryId, products.IndexOf(product) + 1, product.Price);
+                InsertOrderItem(history.UserId, orderHistoryId, products.IndexOf(product) + 1, product.Price, history.Date);
             }
+
+            // ✅ increment once per order
+            reportOrderProgress?.Invoke(1);
         }
+
 
         // Seed default shop info
         var defaultShopInfo = new ShopInfoModel
@@ -503,46 +477,43 @@ public class DatabaseFiller
 
     public static void InsertUser(UserModel user)
     {
-        _sharedConnection.Execute(@"
+        _sharedConnection!.Execute(@"
         INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus)
         VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);", user);
     }
 
     public static void InsertProduct(ProductModel product)
     {
-        _sharedConnection.Execute(@"
+        _sharedConnection!.Execute(@"
         INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
         VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);", product);
     }
 
-    public static void InsertOrder(OrdersModel order)
-    {
-        _sharedConnection.Execute(@"
-        INSERT INTO Orders (UserID, ProductID, Date)
-        VALUES (@UserID, @ProductID, @Date);", order);
-    }
+    // public static void InsertOrder(OrdersModel order)
+    // {
+    //     _sharedConnection.Execute(@"
+    //     INSERT INTO Orders (UserID, ProductID, Date)
+    //     VALUES (@UserID, @ProductID, @Date);", order);
+    // }
 
     public static int InsertOrderHistory(OrderHistoryModel order)
     {
-        _sharedConnection.Execute("PRAGMA foreign_keys = ON;");
+        _sharedConnection!.Execute("PRAGMA foreign_keys = ON;");
         string sql = @" 
             INSERT INTO OrderHistory (UserId, Date)
             VALUES (@UserId, @Date);
             SELECT last_insert_rowid();
         ";
-        int orderId = _sharedConnection.ExecuteScalar<int>(sql, order);
+        int orderId = _sharedConnection!.ExecuteScalar<int>(sql, order);
         return orderId;
     }
 
-    public static void InsertOrderItem(int UserID, int orderId, int productId, double price)
+    public static void InsertOrderItem(int UserID, int orderId, int productId, double price, DateTime date)
     {
-        _sharedConnection.Execute(@"
-            INSERT INTO Order (UserID, OrderId, ProductId, Quantity, Price)
-            VALUES (@UserID, @OrderId, @ProductId, @Quantity, @Price)
-            ON CONFLICT(OrderId, ProductId)
-            DO UPDATE SET
-                Price = excluded.Price;",
-            new { userID = UserID, OrderId = orderId, ProductId = productId, Price = price }
+        _sharedConnection!.Execute(@"
+            INSERT INTO Orders (UserID, OrderId, ProductId, Price, Date)
+            VALUES (@UserID, @OrderId, @ProductId, @Price, @Date);",
+            new { UserID = UserID, OrderId = orderId, ProductId = productId, Price = price, Date = date }
         );
     }
 }
