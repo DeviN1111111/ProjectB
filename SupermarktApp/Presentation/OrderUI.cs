@@ -246,6 +246,7 @@ public class Order
                 .AddChoices(new[]{
                             "Pay now",
                             "Pay on pickup",
+                            "Pay Later"
                 }));
 
                 switch (option1)
@@ -285,6 +286,27 @@ public class Order
                         }
                         OrderLogic.AddOrderWithItems(allOrderItem, allProducts);  // Create order with items
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                        OrderLogic.UpdateStock();
+                        OrderLogic.ClearCart();
+                        break;
+                    case "Pay Later":
+                        List<OrderItemModel> OrderedItems = new List<OrderItemModel>();  // List to hold order items
+
+                        foreach (var item in cartProducts)
+                        {
+                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            if (product != null)
+                            {
+                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
+                                OrderedItems.Add(orderItem);
+                            }
+                        }
+                        OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
+                        AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        AnsiConsole.WriteLine("You have 30 days to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
