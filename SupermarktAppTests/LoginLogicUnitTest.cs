@@ -13,6 +13,7 @@ namespace SupermarktAppTests
         public void ValidateLogin_CorrectLogin_ReturnsUserModel(string email, string password, bool expected)
         {
             //Arrange
+            DatabaseFiller.RunDatabaseMethods();
             UserModel user = new UserModel("Test", "User", email, password, "Test Address", "1234AB", "1234567890", "Test City");
             LoginAccess.Register(user);
 
@@ -27,8 +28,8 @@ namespace SupermarktAppTests
         }
 
         [TestMethod]
-        [DataRow("test@gmail.com", "password1", false)]
-        [DataRow("Cheng@gmail.com", "abc123", false)]
+        [DataRow("test@gmail.com", "password123", false)]
+        [DataRow("Cheng@gmail.com", "abc12345", false)]
         public void ValidateLogin_InCorrectLogin_ReturnsNull(string email, string password, bool expected)
         {
             //Act
