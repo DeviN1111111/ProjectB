@@ -45,15 +45,6 @@ public static class ProductAccess
         );
     }
 
-    public static WeeklyPromotionsModel? GetProductByIDinWeeklyPromotions(int id)
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.QueryFirstOrDefault<WeeklyPromotionsModel>(
-            "SELECT * FROM WeeklyPromotions WHERE ProductID = @Id",
-            new { Id = id }
-        );
-    }
-
     public static ProductModel? GetProductByName(string name)
     {
         using var db = new SqliteConnection(ConnectionString);

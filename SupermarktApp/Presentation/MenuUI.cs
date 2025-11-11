@@ -16,6 +16,19 @@ public static class MenuUI
             List<ProductModel> products = NotificationLogic.GetAllLowQuantityProducts(50);
             int lowStockCount = products.Count;
 
+            if (SessionManager.CurrentUser != null)
+            {
+                if(SessionManager.CurrentUser.AccountStatus == "Admin" || SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
+                {   // Notification for the Admins based on stock count
+                    if (lowStockCount > 0)
+                        AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
+                    else
+                        AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
+                }
+                
+
+            }
+            
 
             if (SessionManager.CurrentUser == null)
             {
@@ -25,29 +38,16 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounted Products", "Shop Details", "Settings", "Logout", "Exit"});
+                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounts", "Shop Details", "Settings", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
                 // Options when you're logged in as an admin
-                if (lowStockCount > 0)
-                    AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
-                else
-                    AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
                 options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
             }
-            // else if (SessionManager.CurrentUser.AccountStatus == "Guest")
-            // {
-            //     // Options when you're logged in as a guest
-            //     options.AddRange(new[] { "Order", "Discounted Products", "Cart", "Checklist", "Login", "Register", "Go back", "Exit" });
-            // }
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
-                // Options when you're logged in as a guest
-                if (lowStockCount > 0)
-                    AnsiConsole.MarkupLine($"[red]You have {lowStockCount} low stock notifications![/]");
-                else
-                    AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
+                // Options when you're logged in as a superadmin
                 options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage Users", "Shop Details", "Logout", "Exit" });
             }
             else
@@ -60,10 +60,6 @@ public static class MenuUI
             new SelectionPrompt<string>()
                 .AddChoices(options));
 
-            if (choice == $"Notification[{lowStockCount}]")
-            {   
-                NotificationUI.DisplayMenu();
-            }
 
             switch (choice)
             {
@@ -83,9 +79,6 @@ public static class MenuUI
                     Console.Clear();
                     Order.ShowCart();
                     break;
-                case "Discounted Products":
-                    DiscountedProductsUI.DisplayMenu();
-                    break;
                 case "Checklist":
                     Console.Clear();
                     Order.ShowChecklist();
@@ -98,6 +91,9 @@ public static class MenuUI
                     break;
                 case "Notification":
                     NotificationUI.DisplayMenu();
+                    break;
+                case "Discounts":
+                    DiscountsUI.DisplayMenu();
                     break;
                 case "Statistics":
                     StatisticsUI.DisplayMenu();

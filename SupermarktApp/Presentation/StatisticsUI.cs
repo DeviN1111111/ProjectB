@@ -74,7 +74,7 @@ public static class StatisticsUI
         ProductModel mostSold = StatisticLogic.MostSoldItem(startDate, endDate);
         int count = StatisticLogic.MostSoldItemCount(startDate, endDate);
         List<ProductSalesDto> sales = StatisticLogic.GetProductSalesData(startDate, endDate);
-        int totalProfit = StatisticLogic.TotalProfitSince(startDate, endDate);
+        double totalProfit = StatisticLogic.TotalProfitSince(startDate, endDate);
 
         if (sales != null && sales.Count > 0 && totalProfit > 0)
         {

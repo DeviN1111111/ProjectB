@@ -5,18 +5,18 @@ public static class StatisticLogic
 {
     public static ProductModel MostSoldItem(DateTime startDate, DateTime endDate)
     {
-        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate);
+        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate)!;
 
         if (MostSold == null)
         {
-            return null;
+            return null!;
         }
 
-        ProductModel MostSoldProduct = ProductAccess.GetProductByID(MostSold.ProductID);
+        ProductModel MostSoldProduct = ProductAccess.GetProductByID(MostSold.ProductID)!;
 
         if (MostSoldProduct == null)
         {
-            return null;
+            return null!;
         }
 
         return MostSoldProduct;
@@ -24,7 +24,7 @@ public static class StatisticLogic
 
     public static int MostSoldItemCount(DateTime startDate, DateTime endDate)
     {
-        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate);
+        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate)!;
 
         if (MostSold == null)
         {
@@ -40,7 +40,7 @@ public static class StatisticLogic
         List<ProductSalesDto> sales = OrderAccess.SeedProductSalesDto(startDate, endDate);
         if (sales == null)
         {
-            return null;
+            return null!;
         }
         return sales;
     }
@@ -93,10 +93,10 @@ public static class StatisticLogic
     }
     public static Table CreateBreakdownChartForSingleProduct(ProductModel Product)
     {
-        ProductSalesDto saleDTO = OrderAccess.GetSalesOfSingleProductByID(Product.ID);
+        ProductSalesDto saleDTO = OrderAccess.GetSalesOfSingleProductByID(Product.ID)!;
         if (saleDTO == null)
         {
-            return null;
+            return null!;
         }
         double totalProfit = saleDTO.SoldCount * (double)Product.Price;
         double roundedValue = Math.Round(totalProfit, 2);
@@ -117,7 +117,7 @@ public static class StatisticLogic
         return table;
     }
 
-    public static int TotalProfitSince(DateTime startDate, DateTime endDate)
+    public static double TotalProfitSince(DateTime startDate, DateTime endDate)
     {
         List<ProductSalesDto> sales = GetProductSalesData(startDate, endDate);
         if (sales == null)
@@ -156,7 +156,7 @@ public static class StatisticLogic
             {
                 double totalRevenue = (double)(product.Price * (double)sale.SoldCount);
                 double roundedtotalRevenue = Math.Round(totalRevenue, 2);
-                table.AddRow(product.Name, sale.SoldCount.ToString(), product.Category, $"{product.Price} euro", $"{roundedtotalRevenue} euro");
+                table.AddRow(product.Name, sale.SoldCount.ToString(), product.Category, $"{product.Price:F2} euro", $"{roundedtotalRevenue:F2} euro");
             }
         }
 

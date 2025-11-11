@@ -33,7 +33,7 @@ public class ProductLogic
         if (user == "Admin" || user == "SuperAdmin")
         {
             return ProductAccess.SearchProductByName(name, true);
-        }   
+        }
         return ProductAccess.SearchProductByName(name);
     }
 
@@ -49,16 +49,6 @@ public class ProductLogic
     public static List<ProductModel> GetAllProducts()
     {
         return ProductAccess.GetAllProducts();
-    }
-
-    public static WeeklyPromotionsModel GetProductByIDinWeeklyPromotions(int id)
-    {
-        return ProductAccess.GetProductByIDinWeeklyPromotions(id)!;
-    }
-
-    public static List<WeeklyPromotionsModel> GetAllWeeklyPromotions()
-    {
-        return WeeklyPromotionsAccess.GetAllProducts();
     }
 }
 
