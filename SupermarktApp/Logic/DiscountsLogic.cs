@@ -5,6 +5,7 @@ using Spectre.Console;
 
 public class DiscountsLogic
 {
+    private static bool EmailSent = false;
     private static string DiscountTemplatePath = "EmailTemplates/DiscountTemplate.html";
     private static string DiscountTemplate = File.ReadAllText(DiscountTemplatePath);
     public static void AddDiscount(DiscountsModel Discount)
@@ -76,10 +77,9 @@ public class DiscountsLogic
             return;
         }
 
-        RemovePersonalDiscountsByUserID(SessionManager.CurrentUser!.ID);
+        RemoveAllPersonalDiscountsByUserID(SessionManager.CurrentUser!.ID); 
         List<ProductModel> top5Products = OrderItemsAccess.GetTop5MostBoughtProducts(userID);
         
-
         if (top5Products.Count < 5)
             return;
 
@@ -87,7 +87,7 @@ public class DiscountsLogic
 
         foreach (ProductModel product in top5Products)
         {
-            if (product.DiscountType != "Weekly")
+            if(product.DiscountType != "Weekly")
             {
                 double discountPercentage = rand.Next(1, 5);
                 DateTime startDate = DateTime.MinValue;
@@ -105,16 +105,17 @@ public class DiscountsLogic
                 product.DiscountPercentage = discountPercentage;
                 AddDiscount(discount);
             }
-            else
-            {
-                continue;
-            }
         }
-        SentDiscountEmail(top5Products);
+        top5Products.Clear();
+        if (!EmailSent && top5Products.Count >= 5)
+        {
+            SentDiscountEmail(top5Products);
+        }     
     }
 
     public static async Task SentDiscountEmail(List<ProductModel> Top5List)
     {
+        EmailSent = true;
         for (int i = 0; i < Top5List.Count; i++)
         {
             DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.PRODUCT{i}--", Top5List[i].Name);
@@ -150,12 +151,8 @@ public class DiscountsLogic
         DiscountsAccess.RemoveDiscountByProductID(productID);
     }
     
-    public static void RemovePersonalDiscountsByUserID(int userID)
+    public static void RemoveAllPersonalDiscountsByUserID(int userID)
     {
-        List<DiscountsModel> personalDiscounts = DiscountsAccess.GetPersonalDiscounts(userID);
-        foreach (var discount in personalDiscounts)
-        {
-            DiscountsAccess.RemoveDiscountByProductID(discount.ProductID);
-        }
+        DiscountsAccess.RemoveAllPersonalDiscountsByUserID(userID);
     }
 }

@@ -57,4 +57,13 @@ public static class DiscountsAccess
         DiscountType = @None
         WHERE Id = @ProductID", new { ProductID = productID, None = "None" });
     }
+
+    public static void RemoveAllPersonalDiscountsByUserID(int userID)
+    {
+        _sharedConnection.Execute(
+            "DELETE FROM Discounts WHERE UserId = @userID",
+            new { userID }
+        );
+    }
+
 }

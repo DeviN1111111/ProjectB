@@ -76,19 +76,15 @@ public class DiscountsUI
 
     public static void DisplayPersonalDiscounts()
     {
-        DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
         Console.Clear();
         AnsiConsole.Write(
         new FigletText("Personal Discounted Products")
             .Centered()
             .Color(AsciiPrimary));
 
-        var products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser.ID);
-        if (products.Count == 0)
-        {
-            DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser.ID); // SEED PERSONAL DISCOUNTS
-            products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser.ID);
-        }
+        DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID); // clear previous discounts and seed again based on order history
+        var products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser!.ID); // retrieve the (new) personal discounts
+
         if (products.Count < 5)
         {
             AnsiConsole.MarkupLine("[bold red] NO PERSONAL DISCOUNTS [italic yellow](Place some orders to get personal discounts!)[/][/]");
@@ -109,6 +105,7 @@ public class DiscountsUI
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
             Console.ReadKey();
+            products.Clear();
         }
     }
 }
