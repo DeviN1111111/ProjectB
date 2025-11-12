@@ -60,22 +60,7 @@ public static class DiscountsAccess
 
     public static void RemoveAllPersonalDiscountsByUserID(int userID)
     {
-        var discounts = _sharedConnection.Query<DiscountsModel>(
-            "SELECT * FROM Discounts WHERE UserId = @userID",
-            new { userID }
-        );
-        foreach (var discount in discounts)
-        {
-            _sharedConnection.Execute(@"
-                UPDATE Products
-                SET
-                    DiscountPercentage = 0,
-                    DiscountType = @None
-                WHERE Id = @ProductID AND DiscountType = 'Personal'",
-                new { ProductID = discount.ProductID, None = "None" }
-            );
-        }
-        _sharedConnection.Execute(
+        _sharedConnection.Execute( // delete all Personal discounts in the Discount table 
             "DELETE FROM Discounts WHERE UserId = @userID AND DiscountType = 'Personal'",
             new { userID }
         );
