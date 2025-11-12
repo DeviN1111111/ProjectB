@@ -20,11 +20,13 @@ public class DiscountsLogic
 
         foreach (var product in weeklyProducts)
         {
-            var discount = DiscountsAccess.GetDiscountsByProductID(product.ID);
-
-            if (product != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+            var discounts = DiscountsAccess.GetDiscountsByProductID(product.ID);
+            foreach(var discount in discounts)
             {
-                validWeeklyProducts.Add(product);
+                if (product != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+                {
+                    validWeeklyProducts.Add(product);
+                }
             }
         }
 
@@ -139,12 +141,12 @@ public class DiscountsLogic
 
     public static DiscountsModel GetDiscountsByProductID(int productID)
     {
-        return DiscountsAccess.GetDiscountsByProductID(productID);
+        return DiscountsAccess.GetDiscountByProductID(productID);
     }
 
     public static void RemoveDiscountByProductID(int productID)
     {
-        DiscountsModel discount = DiscountsAccess.GetDiscountsByProductID(productID);
+        DiscountsModel discount = DiscountsAccess.GetDiscountByProductID(productID);
         DiscountsAccess.RemoveDiscountByProductID(productID);
     }
     

@@ -37,11 +37,17 @@ public static class DiscountsAccess
 
         return products;
     }
-    public static DiscountsModel? GetDiscountsByProductID(int productID)
+    public static DiscountsModel? GetDiscountByProductID(int productID)
     {
         return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
             "SELECT * FROM Discounts WHERE ProductId = @ProductID",
             new { ProductID = productID });
+    }
+    public static List<DiscountsModel> GetDiscountsByProductID(int productID)
+    {
+        return _sharedConnection.Query<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID }).ToList();
     }
 
     public static void RemoveDiscountByProductID(int productID)
