@@ -43,12 +43,27 @@ public static class OrderItemsAccess
 
         foreach (var item in productCounts)
         {
-            var discount = db.QueryFirstOrDefault<string>(
+            var discount = db.QueryFirstOrDefault<DiscountsModel>(
                 "SELECT * FROM Discounts WHERE ProductId = @ProductId",
                 new { ProductId = item.ProductId }
             );
             var checkReward = RewardItemsAccess.GetRewardItemByProductId(item.ProductId);
-            if (discount == null && checkReward == null) // so if its NOT already a discount or reward item
+
+            if(discount != null && discount.DiscountType != "Weekly") // so if its NOT already a discount item unless its Personal (You have have multiple personal discount items for multiple users)
+            {
+                var product = db.QueryFirstOrDefault<ProductModel>(
+                "SELECT * FROM Products WHERE Id = @Id",
+                new { Id = item.ProductId });
+                if (product != null)
+                {
+                    topProducts.Add(product);
+                }
+                if (topProducts.Count == 5)
+                {
+                    return topProducts;
+                }
+            }
+            else if (discount == null && checkReward == null) // so if its NOT already a discount or reward item
             {
                 var product = db.QueryFirstOrDefault<ProductModel>(
                 "SELECT * FROM Products WHERE Id = @Id",

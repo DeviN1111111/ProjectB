@@ -77,7 +77,7 @@ public class DiscountsLogic
             return;
         }
 
-        RemoveAllPersonalDiscountsByUserID(SessionManager.CurrentUser!.ID); 
+        RemoveAllPersonalDiscountsByUserID(userID); 
         List<ProductModel> top5Products = OrderItemsAccess.GetTop5MostBoughtProducts(userID);
         
         if (top5Products.Count < 5)
@@ -87,30 +87,27 @@ public class DiscountsLogic
 
         foreach (ProductModel product in top5Products)
         {
-            if(product.DiscountType != "Weekly")
-            {
-                double discountPercentage = rand.Next(1, 5);
-                DateTime startDate = DateTime.MinValue;
-                DateTime endDate = DateTime.MaxValue;
+            double discountPercentage = rand.Next(1, 5);
+            DateTime startDate = DateTime.MinValue;
+            DateTime endDate = DateTime.MaxValue;
 
-                DiscountsModel discount = new DiscountsModel(
-                    productId: product.ID,
-                    discountPercentage: discountPercentage,
-                    discountType: "Personal",
-                    startDate: startDate,
-                    endDate: endDate,
-                    userId: userID
-                );
-                product.DiscountType = "Personal";
-                product.DiscountPercentage = discountPercentage;
-                AddDiscount(discount);
-            }
+            DiscountsModel discount = new DiscountsModel(
+                productId: product.ID,
+                discountPercentage: discountPercentage,
+                discountType: "Personal",
+                startDate: startDate,
+                endDate: endDate,
+                userId: userID
+            );
+            product.DiscountType = "Personal";
+            product.DiscountPercentage = discountPercentage;
+            AddDiscount(discount);
         }
-        top5Products.Clear();
         if (!EmailSent && top5Products.Count >= 5)
         {
             SentDiscountEmail(top5Products);
-        }     
+        }
+        
     }
 
     public static async Task SentDiscountEmail(List<ProductModel> Top5List)
