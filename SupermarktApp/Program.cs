@@ -13,5 +13,7 @@ class Program
         // DatabaseFiller.RunDatabaseMethods(1000);
         MenuUI.ShowMainMenu();
         // ManagementUI.DiscountSpecificDate();
+        // ManagementUI.DiscountSpecificDate();
+        // ManagementUI.DeleteDiscountSpecificDate();
     }
 }

@@ -111,7 +111,6 @@ public static class ManagementUI
                 return;
         }
     }
-
     public static void AddProduct()
     {
         Console.Clear();
@@ -143,7 +142,6 @@ public static class ManagementUI
             AnsiConsole.MarkupLine("[red]Product already exists.[/]");
         Console.ReadKey();
     }
-
     public static void DeleteProduct()
     {
         ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
@@ -172,8 +170,6 @@ public static class ManagementUI
                 return;
         }
     }
-
-
     public static void DiscountSpecificDate()
     {
         Console.Clear();
@@ -183,6 +179,11 @@ public static class ManagementUI
                 .Color(AsciiPrimary));
 
         ProductModel Product = SearchUI.SearchProductByNameOrCategory();
+        if (Product == null)
+        {
+            return;
+        }
+
         double discount;
         do
         {
@@ -241,8 +242,7 @@ public static class ManagementUI
             }
 
             if (intweek < 1 || intweek > 53)
-                // System.Console.WriteLine("Please enter a valid week number (1-53).");
-                continue;
+                AnsiConsole.MarkupLine("[red]Please enter a valid week number (1-53).[/]");
             else if (week == "")
             {
                 continue;
@@ -252,20 +252,31 @@ public static class ManagementUI
                 DateTime start = ISOWeek.ToDateTime(year, intweek, DayOfWeek.Monday);
                 DateTime end = ISOWeek.ToDateTime(year, intweek, DayOfWeek.Sunday);
 
-                System.Console.WriteLine();
+                Console.WriteLine();
                 Console.WriteLine($"Week {week} of {year}");
                 Console.WriteLine($"Starts: {start:dd-MM-yyyy}");
                 Console.WriteLine($"Ends:   {end:dd-MM-yyyy}");
                 if (key.Key == ConsoleKey.Enter)
                 {
+                    List<DiscountsModel> ExistingDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
                     DiscountsModel DiscountProduct = new DiscountsModel(Product.ID, discount, "Weekly", start, end);
+                    foreach (DiscountsModel existing in ExistingDiscounts)
+                    {
+                        if (existing.ProductID == DiscountProduct.ProductID && existing.StartDate == DiscountProduct.StartDate && existing.EndDate == DiscountProduct.EndDate)
+                        {
+                            AnsiConsole.MarkupLine("[red]Error: A discount for this product already exists for the selected week.[/]");
+                            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                            Console.ReadKey();
+                            return;
+                        }
+                    }
                     DiscountsLogic.AddDiscount(DiscountProduct);
-                    break;
+                    AnsiConsole.MarkupLine($"[green]Succesfully added a discount of [red]{discount}%[/] to [blue]{Product.Name}[/] for week [red]{intweek}[/]. Press any key to continue.[/]");
+                    Console.ReadKey();
+                    return;
                 }
             }
         }
-        AnsiConsole.MarkupLine($"[green]Succesfully added a discount of [red]{discount}%[/] to [blue]{Product.Name}[/] for week [red]{intweek}[/]. Press any key to continue.[/]");
-        Console.ReadKey();
     }
 
     public static void DeleteDiscountSpecificDate()
@@ -275,26 +286,40 @@ public static class ManagementUI
             new FigletText("Delete discount on a specific date")
                 .Centered()
                 .Color(AsciiPrimary));
+        
+        List<DiscountsModel> AllDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
+        List<string> DiscountedProductsList = [];
 
-        ProductModel Product = SearchUI.SearchProductByNameOrCategory();
-        if (Product.DiscountType == "None")
+        foreach (DiscountsModel discount in AllDiscounts)
         {
-            AnsiConsole.MarkupLine($"There is no discount to delete for [blue]{Product.Name}[/].");
-            AnsiConsole.MarkupLine("Press any key to continue...");
-            Console.ReadKey();
-            return;
+            ProductModel product = ProductLogic.GetProductById(discount.ProductID);
+            DiscountedProductsList.Add($"{discount.ID} / {discount.StartDate:dd-MM-yyyy} to {discount.EndDate:dd-MM-yyyy} / {product.Name} / {discount.DiscountPercentage}%");
         }
-        else if (Product.DiscountType == "Personal")
+
+        var weeksToDelete = AnsiConsole.Prompt(
+            new MultiSelectionPrompt<string>()
+                .Title("[bold white]Select the weeks you want to delete:[/]")
+                .NotRequired()
+                .PageSize(20)
+                .AddChoiceGroup("Select all", DiscountedProductsList)
+        );
+
+        if (weeksToDelete.Count == 0)
         {
-            AnsiConsole.MarkupLine($"The discount for [blue]{Product.Name}[/] is a personal discount. Personal discounts can not be removed.");
-            AnsiConsole.MarkupLine("Press any key to continue...");
+            AnsiConsole.MarkupLine("[red]No weeks selected.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
             return;
         }
         else
         {
-            DiscountsLogic.RemoveDiscountByProductID(Product.ID);
-            AnsiConsole.MarkupLine($"[green]Succesfully removed the discount from [blue]{Product.Name}[/]. Press any key to continue.[/]");
+            foreach (var week in weeksToDelete)
+            {
+                var weekID = week.Replace(" ", "").Split("/");
+                DiscountsLogic.RemoveDiscountByID(Convert.ToInt32(weekID[0]));
+            }
+            AnsiConsole.MarkupLine("[green]Succesfully deleted selected discounts.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
         }
     }

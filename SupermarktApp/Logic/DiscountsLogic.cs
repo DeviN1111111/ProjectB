@@ -135,6 +135,9 @@ public class DiscountsLogic
 
     public static bool IsDiscountActive(DiscountsModel discount)
     {
+        if (discount == null)
+            return false;
+
         DateTime now = DateTime.Now;
         return now >= discount.StartDate && now <= discount.EndDate;
     }
@@ -146,12 +149,21 @@ public class DiscountsLogic
 
     public static void RemoveDiscountByProductID(int productID)
     {
-        DiscountsModel discount = DiscountsAccess.GetDiscountByProductID(productID);
         DiscountsAccess.RemoveDiscountByProductID(productID);
     }
-    
+
     public static void RemoveAllPersonalDiscountsByUserID(int userID)
     {
         DiscountsAccess.RemoveAllPersonalDiscountsByUserID(userID);
+    }
+
+    public static List<DiscountsModel> GetAllWeeklyDiscounts()
+    {
+        return DiscountsAccess.GetAllWeeklyDiscounts();
+    }
+    
+    public static void RemoveDiscountByID(int discountID)
+    {
+        DiscountsAccess.RemoveDiscountByID(discountID);
     }
 }

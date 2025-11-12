@@ -71,4 +71,19 @@ public static class DiscountsAccess
             new { userID }
         );
     }
+
+    public static List<DiscountsModel> GetAllWeeklyDiscounts()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.Query<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE DiscountType = @DiscountType",
+            new { DiscountType = "Weekly" }).ToList();
+    }
+
+    public static void RemoveDiscountByID(int discountID)
+    {
+        _sharedConnection.Execute(
+            "DELETE FROM Discounts WHERE ID = @DiscountID",
+            new { DiscountID = discountID });
+    }
 }
