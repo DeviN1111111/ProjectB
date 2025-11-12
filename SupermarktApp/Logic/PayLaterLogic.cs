@@ -8,12 +8,13 @@ public static class PayLaterLogic
     {
         var order = OrderHistoryAccess.GetOrderById(orderId);
 
-        order.IsPaid = false;
         DateTime fineDate = order.Date.AddDays(FineDays);
         Random random = new Random();
         int paymentCode = random.Next(100000, 1000000);
+        OrderHistoryAccess.UpdateIsPaidStatus(orderId, fineDate, isPaid: false, paymentCode);
+
         await SendEmail(paymentCode);
-        OrderHistoryAccess.UpdateIsPaidStatus(orderId, fineDate, order.IsPaid, paymentCode);
+        
     }
     public static double ApplyFine() => 50;
     public static double Track(UserModel user)
@@ -37,8 +38,9 @@ public static class PayLaterLogic
     }
     public static async Task SendEmail(int paymentCode)
     {
-        string email = UserAccess.GetUserEmail(SessionManager.CurrentUser.ID);
+        string email = UserAccess.GetUserEmail(SessionManager.CurrentUser!.ID)!;
         await PaymentEmailLogic.SendEmailAsync(email!, paymentCode);
+        
     }
     public static bool Pay(int orderId, int code)
     {

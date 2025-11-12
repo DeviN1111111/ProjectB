@@ -76,7 +76,7 @@ public class Order
         }
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee, 2)}[/]"))
+            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(UnpaidFine, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
