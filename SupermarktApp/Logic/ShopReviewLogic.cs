@@ -1,7 +1,7 @@
 using NUnit.Framework.Constraints;
 using Spectre.Console;
 
-public class ShowReviewLogic
+public class ShopReviewLogic
 {
     public List<ShopReviewModel> GetReviews(int userId)
     {
