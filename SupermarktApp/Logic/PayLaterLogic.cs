@@ -3,6 +3,8 @@ using Spectre.Console;
 
 public static class PayLaterLogic
 {
+    private static readonly string PaymentTemplatePath = "EmailTemplates/PaymentCodeTemplate.html";
+    private static readonly string PaymentTemplate = File.ReadAllText(PaymentTemplatePath);
     public const int FineDays = 30;
     public static async Task Activate(int orderId)
     {
@@ -28,7 +30,7 @@ public static class PayLaterLogic
         {
             if (!order.IsPaid && order.FineDate.HasValue)
             {
-                if (DateTime.Today > order.FineDate.Value.Date)
+                if (DateTime.Now > order.FineDate)
                 {
                     totalFine += ApplyFine();
                 }
@@ -39,7 +41,14 @@ public static class PayLaterLogic
     public static async Task SendEmail(int paymentCode)
     {
         string email = UserAccess.GetUserEmail(SessionManager.CurrentUser!.ID)!;
-        await PaymentEmailLogic.SendEmailAsync(email!, paymentCode);
+        string emailBody = PaymentTemplate.Replace("{{PAYMENT_CODE}}", paymentCode.ToString());
+
+        await EmailLogic.SendEmailAsync(
+            to: email,
+            subject: "Your Payment Code",
+            body: emailBody,
+            isHtml: true
+        );
         
     }
     public static bool Pay(int orderId, int code)

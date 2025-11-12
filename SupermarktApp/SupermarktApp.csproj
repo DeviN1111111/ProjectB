@@ -14,5 +14,10 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="Spectre.Console" Version="0.51.1" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <None Include="EmailTemplates\PaymentCodeTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

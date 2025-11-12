@@ -13,8 +13,6 @@ public static class EmailLogic
 
     public static async Task<bool> SendEmailAsync(string to, string subject, string body, bool isHtml = false)
     {
-        System.Console.WriteLine("We are here");
-        Console.ReadLine();
         EmailModel email = new EmailModel
         {
             From = FromEmail,
