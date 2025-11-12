@@ -66,6 +66,8 @@ public class Order
 
         // Calculate delivery fee
         double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
+        // Calculate fine
+        double UnpaidFine = PayLaterLogic.Track(SessionManager.CurrentUser!);
 
        
         if (totalAmount + deliveryFee - totalDiscount == 0)
@@ -82,7 +84,7 @@ public class Order
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
-        double finalAmount = totalAmount + deliveryFee - totalDiscount;
+        double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
 
         Checkout(allUserProducts, allProducts, finalAmount);
     }
@@ -257,22 +259,22 @@ public class Order
                             var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
                             if (product != null)
                             {
-                                        // Repeat per quantity — since each product is stored as a separate row
-                                        for (int i = 0; i < item.Quantity; i++)
-                                        {
-                                            var newOrder = new OrdersModel
-                                            {
-                                                UserID = SessionManager.CurrentUser!.ID,       
-                                                ProductID = product.ID,
-                                                Price = product.Price     
-                                            };
-                                            allOrderEntries.Add(newOrder);
-                                        }
-                                    }
+                                // Repeat per quantity — since each product is stored as a separate row
+                                for (int i = 0; i < item.Quantity; i++)
+                                {
+                                    var newOrder = new OrdersModel
+                                    {
+                                        UserID = SessionManager.CurrentUser!.ID,       
+                                        ProductID = product.ID,
+                                        Price = product.Price,     
+                                    };
+                                    allOrderEntries.Add(newOrder);
                                 }
+                            }
+                        }
 
-                                // Save them to the database — all products share one OrderHistory entry (OrderId)
-                                OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
+                        // Save them to the database — all products share one OrderHistory entry (OrderId)
+                        OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -295,17 +297,18 @@ public class Order
                                         {
                                             var newOrder = new OrdersModel
                                             {
-                                                UserID = SessionManager.CurrentUser!.ID,     
+                                                UserID = SessionManager.CurrentUser!.ID,
                                                 ProductID = product.ID,
-                                                Price = product.Price     
+                                                Price = product.Price,
+
                                             };
                                             allOrderEntrie.Add(newOrder);
                                         }
                                     }
                                 }
 
-                                // Save them to the database — all products share one OrderHistory entry (OrderId)
-                                OrderLogic.AddOrderWithItems(allOrderEntrie, allProducts);
+                        // Save them to the database — all products share one OrderHistory entry (OrderId)
+                        OrderLogic.AddOrderWithItems(allOrderEntrie, allProducts);
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -315,22 +318,35 @@ public class Order
                         OrderLogic.ClearCart();
                         break;
                     case "Pay Later":
-                        List<OrderItemModel> OrderedItems = new List<OrderItemModel>();  // List to hold order items
+                        List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
 
                         foreach (var item in cartProducts)
                         {
-                            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
                             if (product != null)
                             {
-                                var orderItem = new OrderItemModel(item.ProductId, item.Quantity, product.Price);  // Create OrderItemModel
-                                OrderedItems.Add(orderItem);
+                                for (int i = 0; i < item.Quantity; i++)
+                                {
+                                    var newOrder = new OrdersModel
+                                    {
+                                        UserID = SessionManager.CurrentUser!.ID,
+                                        ProductID = product.ID,
+                                        Price = product.Price,
+                                    };
+                                    OrderedItems.Add(newOrder);
+                                }
                             }
                         }
                         OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
+
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
-                        AnsiConsole.WriteLine("You have 30 days to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
+                        AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+
+                        OrderHistoryModel order = OrderLogic.GetOrderByUserId(SessionManager.CurrentUser!.ID);
+                        PayLaterLogic.Activate(order.Id);
+                        
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
@@ -442,133 +458,174 @@ public class Order
         OrderLogic.RemoveFromCart(productId);
     }
 
-public static void DisplayOrderHistory()
-{
-    while (true)
+    public static void DisplayOrderHistory()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Order History")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var userOrders = OrderHistoryAccess.GetOrdersByUserId(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
-        if (userOrders.Count == 0)
+        while (true)
         {
-            AnsiConsole.MarkupLine("[red]No order history found.[/]");
-            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-            Console.ReadKey();
-            return;
-        }
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Order History")
+                    .Centered()
+                    .Color(AsciiPrimary));
 
-        AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
-        if (Console.ReadKey(true).Key == ConsoleKey.Escape)
-            return;
-
-        var orderChoices = userOrders
-            .Select(order => $"Order #{order.ID} - {order.Date:yyyy-MM-dd HH:mm}")
-            .ToList();
-
-        string selectedOrderLabel = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("[yellow]Select an order to view details[/]")
-                .AddChoices(orderChoices)
-        );
-
-        var selectedOrderId = int.Parse(
-            selectedOrderLabel
-                .Split(' ')[1]
-                .Replace("#", "")
-        );
-
-        var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId); // geen access aanroepen in de presentation layer
-
-        if (orderItems.Count == 0)
-        {
-            AnsiConsole.MarkupLine("[grey]This order has no items.[/]");
-            Console.ReadKey();
-            continue;
-        }
-
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText($"Order #{selectedOrderId}")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var orderTable = new Table()
-            .BorderColor(AsciiPrimary)
-            .AddColumn("[white]Product[/]")
-            .AddColumn("[white]Quantity[/]")
-            .AddColumn("[white]Price per Unit[/]")
-            .AddColumn("[white]Total Price[/]");
-
-        double totalOrderPrice = 0;
-
-        // Dictionary to count how many times each product appears
-        var productCounts = new Dictionary<int, int>();
-
-        // First pass: count how many of each ProductID there are
-        foreach (var item in orderItems)
-        {
-            if (productCounts.ContainsKey(item.ProductID))
-                productCounts[item.ProductID]++;
-            else
-                productCounts[item.ProductID] = 1;
-        }
-
-        double TotalOrderPrice = 0;
-
-        // Second pass: build the table using the counted quantities
-        foreach (var keyValuePair in productCounts)
-        {
-            int productId = keyValuePair.Key;
-            int quantity = keyValuePair.Value;
-
-            var product = ProductAccess.GetProductByID(productId);
-            if (product != null)
+            var userOrders = OrderHistoryAccess.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
+            if (userOrders == null)
             {
-                double price = product.Price;
-
-                // Apply discounts if needed
-                if (product.DiscountType == "Weekly" ||
-                    (product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
-                {
-                    price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
-                    // TODO: update the price in OrderHistory database if needed
-                }
-
-                double itemTotal = quantity * price;
-                totalOrderPrice += itemTotal;
-
-                orderTable.AddRow(
-                    product?.Name ?? "[red]Unknown Product[/]",
-                    quantity.ToString(),
-                    $"${price:F2}",
-                    $"${itemTotal:F2}"
-                );
+                AnsiConsole.MarkupLine("[red]No order history found.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
             }
-        }
 
-        // Add total row
-        orderTable.AddEmptyRow();
-        orderTable.AddRow("Total", "", "", $"${TotalOrderPrice:F2}");
+            AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
+            if (Console.ReadKey(true).Key == ConsoleKey.Escape)
+                return;
+            
+            var orderChoices = userOrders
+                .Select(order => order.IsPaid
+                    ? $"Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm}"
+                    : $"[red]Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm} (Unpaid)[/]")
+                .ToList();
+            
+            string selectedOrderLabel = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]Select an order to view details[/]")
+                    .AddChoices(orderChoices)
+            );
 
-        if (TotalOrderPrice < 25)
-        {
-            double deliveryFee = 5;
-            TotalOrderPrice += deliveryFee;
+            var selectedOrderId = int.Parse(
+                selectedOrderLabel
+                    .Split(' ')[1]
+                    .Replace("#", "")
+            );
+
+            var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId); // geen access aanroepen in de presentation layer
+
+            if (orderItems.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[grey]This order has no items.[/]");
+                Console.ReadKey();
+                continue;
+            }
+
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText($"Order #{selectedOrderId}")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            var orderTable = new Table()
+                .BorderColor(AsciiPrimary)
+                .AddColumn("[white]Product[/]")
+                .AddColumn("[white]Quantity[/]")
+                .AddColumn("[white]Price per Unit[/]")
+                .AddColumn("[white]Total Price[/]");
+
+            double totalOrderPrice = 0;
+
+            // Dictionary to count how many times each product appears
+            var productCounts = new Dictionary<int, int>();
+
+            // First pass: count how many of each ProductID there are
+            foreach (var item in orderItems)
+            {
+                if (productCounts.ContainsKey(item.ProductID))
+                    productCounts[item.ProductID]++;
+                else
+                    productCounts[item.ProductID] = 1;
+            }
+
+            double TotalOrderPrice = 0;
+
+            // Second pass: build the table using the counted quantities
+            foreach (var keyValuePair in productCounts)
+            {
+                int productId = keyValuePair.Key;
+                int quantity = keyValuePair.Value;
+
+                var product = ProductAccess.GetProductByID(productId);
+                if (product != null)
+                {
+                    double price = product.Price;
+
+                    // Apply discounts if needed
+                    if (product.DiscountType == "Weekly" ||
+                        (product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
+                    {
+                        price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
+                        // TODO: update the price in OrderHistory database if needed
+                    }
+
+                    double itemTotal = quantity * price;
+                    totalOrderPrice += itemTotal;
+
+                    orderTable.AddRow(
+                        product?.Name ?? "[red]Unknown Product[/]",
+                        quantity.ToString(),
+                        $"${price:F2}",
+                        $"${itemTotal:F2}"
+                    );
+                }
+            }
+
+            // Add total row
             orderTable.AddEmptyRow();
-            orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
+            orderTable.AddRow("Total", "", "", $"${TotalOrderPrice:F2}");
+
+            if (TotalOrderPrice < 25)
+            {
+                double deliveryFee = 5;
+                TotalOrderPrice += deliveryFee;
+                orderTable.AddEmptyRow();
+                orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
+            }
+            orderTable.AddEmptyRow();
+            orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${TotalOrderPrice:F2}[/]");
+
+            AnsiConsole.Write(orderTable);
+
+            if (!userOrders.First(o => o.Id == selectedOrderId).IsPaid)
+            {
+                var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
+                if (selectedOrder.FineDate != null)
+                {
+                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:yyyy-MM-dd HH:mm}[/] to pay.[/]\n");
+                }
+                
+                var payChoice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[yellow]This order is unpaid. What would you like to do?[/]")
+                        .AddChoices("Pay Now", "Return")
+                );
+
+                if (payChoice == "Pay Now")
+                {
+                    var paymentCode = AnsiConsole.Ask<string>("[yellow]Enter your 6-digit payment code:[/]");
+
+                    if (!paymentCode.All(char.IsDigit) || paymentCode.Length != 6)
+                    {
+                        AnsiConsole.MarkupLine("[red]Invalid code. It must be 6 digits and numeric.[/]");
+                        Console.ReadKey();
+                        continue;
+                    }
+
+                    bool isPaid = PayLaterLogic.Pay(selectedOrderId, int.Parse(paymentCode));
+                    if (isPaid)
+                    {
+                        AnsiConsole.MarkupLine("[green]Payment successful.[/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[red]Payment failed or declined.[/]");
+                        Console.ReadKey();
+                        continue;
+                    }
+                }
+            }
+            AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
+            Console.ReadKey();
         }
-        orderTable.AddEmptyRow();
-        orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${TotalOrderPrice:F2}[/]");
-
-        AnsiConsole.Write(orderTable);
-        AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
-        Console.ReadKey();
     }
-}
-
-
 }

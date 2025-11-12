@@ -137,6 +137,9 @@ public class DatabaseFiller
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
+                IsPaid BOOLEAN NOT NULL DEFAULT 1,
+                FineDate DATETIME DEFAULT NULL,
+                PaymentCode INTEGER,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );");
 
