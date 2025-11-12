@@ -76,6 +76,7 @@ public class DiscountsUI
 
     public static void DisplayPersonalDiscounts()
     {
+        DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
         Console.Clear();
         AnsiConsole.Write(
         new FigletText("Personal Discounted Products")

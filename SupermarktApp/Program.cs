@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using NUnit.Framework.Constraints;
 using Spectre.Console;
+using System.Globalization;
 
 class Program
 {
@@ -11,5 +12,6 @@ class Program
     {
         DatabaseFiller.RunDatabaseMethods(1000);
         MenuUI.ShowMainMenu();
+        // ManagementUI.DiscountSpecificDate();
     }
 }

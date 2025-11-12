@@ -76,7 +76,9 @@ public class DiscountsLogic
             return;
         }
 
+        RemovePersonalDiscountsByUserID(SessionManager.CurrentUser!.ID);
         List<ProductModel> top5Products = OrderItemsAccess.GetTop5MostBoughtProducts(userID);
+        
 
         if (top5Products.Count < 5)
             return;
@@ -85,26 +87,32 @@ public class DiscountsLogic
 
         foreach (ProductModel product in top5Products)
         {
-            double discountPercentage = rand.Next(5, 41); 
-            DateTime startDate = DateTime.MinValue;
-            DateTime endDate = DateTime.MaxValue;
+            if (product.DiscountType != "Weekly")
+            {
+                double discountPercentage = rand.Next(1, 5);
+                DateTime startDate = DateTime.MinValue;
+                DateTime endDate = DateTime.MaxValue;
 
-            DiscountsModel discount = new DiscountsModel(
-                productId: product.ID,
-                discountPercentage: discountPercentage,
-                discountType: "Personal",
-                startDate: startDate,
-                endDate: endDate,
-                userId: userID
-            );
-            product.DiscountType = "Personal";
-            product.DiscountPercentage = discountPercentage;
-            AddDiscount(discount);
+                DiscountsModel discount = new DiscountsModel(
+                    productId: product.ID,
+                    discountPercentage: discountPercentage,
+                    discountType: "Personal",
+                    startDate: startDate,
+                    endDate: endDate,
+                    userId: userID
+                );
+                product.DiscountType = "Personal";
+                product.DiscountPercentage = discountPercentage;
+                AddDiscount(discount);
+            }
+            else
+            {
+                continue;
+            }
         }
-
         SentDiscountEmail(top5Products);
     }
-    
+
     public static async Task SentDiscountEmail(List<ProductModel> Top5List)
     {
         for (int i = 0; i < Top5List.Count; i++)
@@ -123,5 +131,31 @@ public class DiscountsLogic
             body: DiscountTemplate,
             isHtml: true
         );
+    }
+
+    public static bool IsDiscountActive(DiscountsModel discount)
+    {
+        DateTime now = DateTime.Now;
+        return now >= discount.StartDate && now <= discount.EndDate;
+    }
+
+    public static DiscountsModel GetDiscountsByProductID(int productID)
+    {
+        return DiscountsAccess.GetDiscountsByProductID(productID);
+    }
+
+    public static void RemoveDiscountByProductID(int productID)
+    {
+        DiscountsModel discount = DiscountsAccess.GetDiscountsByProductID(productID);
+        DiscountsAccess.RemoveDiscountByProductID(productID);
+    }
+    
+    public static void RemovePersonalDiscountsByUserID(int userID)
+    {
+        List<DiscountsModel> personalDiscounts = DiscountsAccess.GetPersonalDiscounts(userID);
+        foreach (var discount in personalDiscounts)
+        {
+            DiscountsAccess.RemoveDiscountByProductID(discount.ProductID);
+        }
     }
 }

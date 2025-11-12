@@ -43,4 +43,18 @@ public static class DiscountsAccess
             "SELECT * FROM Discounts WHERE ProductId = @ProductID",
             new { ProductID = productID });
     }
+
+    public static void RemoveDiscountByProductID(int productID)
+    {
+        _sharedConnection.Execute(
+            "DELETE FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID });
+
+        _sharedConnection.Execute(@"
+        UPDATE Products
+        SET
+        DiscountPercentage = 0,
+        DiscountType = @None
+        WHERE Id = @ProductID", new { ProductID = productID, None = "None" });
+    }
 }
