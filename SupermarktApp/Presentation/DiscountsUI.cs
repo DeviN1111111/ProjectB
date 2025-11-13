@@ -66,7 +66,8 @@ public class DiscountsUI
             table.AddColumn("[green]Discounted Price[/]");
             foreach (ProductModel product in products)
             {
-                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{product.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]€{Math.Round(product.Price * (1 - (product.DiscountPercentage / 100)), 2)}[/]");
+                DiscountsModel discountmodel = DiscountsLogic.GetDiscountsByProductID(product.ID);
+                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{product.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]€{Math.Round(product.Price * (1 - (discountmodel.DiscountPercentage / 100)), 2)}[/]");
             }
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");

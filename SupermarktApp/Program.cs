@@ -10,7 +10,7 @@ class Program
 {
     static void Main()
     {
-        // DatabaseFiller.RunDatabaseMethods(1000);
+        DatabaseFiller.RunDatabaseMethods(1000);
         MenuUI.ShowMainMenu();
         // ManagementUI.DiscountSpecificDate();
         // ManagementUI.DiscountSpecificDate();

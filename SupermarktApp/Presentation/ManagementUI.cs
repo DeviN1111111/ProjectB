@@ -221,11 +221,13 @@ public static class ManagementUI
             if (week.Length == 0)
             {
                 AnsiConsole.MarkupLine($"[yellow]Enter a number(1-53)[/] for which you want to apply the discount for [blue]{Product.Name}[/]:");
+                AnsiConsole.MarkupLine($"This is week: {intweek}");
                 AnsiConsole.MarkupLine($"[blue]Search: [/]");
             }
             else
             {
                 AnsiConsole.MarkupLine($"[yellow]Enter a number(1-53)[/] for which you want to apply the discount for [blue]{Product.Name}[/]:");
+                AnsiConsole.MarkupLine($"This is week: {intweek}");
                 AnsiConsole.MarkupLine($"[blue]Search: {week}[/]");
             }
 
@@ -253,7 +255,7 @@ public static class ManagementUI
                 DateTime end = ISOWeek.ToDateTime(year, intweek, DayOfWeek.Sunday);
 
                 Console.WriteLine();
-                Console.WriteLine($"Week {week} of {year}");
+                Console.WriteLine($"Week {intweek} of {year}");
                 Console.WriteLine($"Starts: {start:dd-MM-yyyy}");
                 Console.WriteLine($"Ends:   {end:dd-MM-yyyy}");
                 if (key.Key == ConsoleKey.Enter)
