@@ -20,7 +20,7 @@ public static class UserAccess
             WHERE ID = @ID", new { ID = userId });
     }
 
-    public static void Insert2FACode(int userId, string code, DateTime expiry) 
+    public static void Insert2FACode(int userId, string code, DateTime expiry)
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"UPDATE Users 
@@ -74,6 +74,21 @@ public static class UserAccess
         return db.QuerySingleOrDefault<UserModel>(@"SELECT * 
             FROM Users 
             WHERE ID = @ID", new { ID = userId });
+    }
+
+    public static List<UserModel>? GetUsersByDateOfBirth(DateTime dateOfBirth)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.Query<UserModel>(@"SELECT * 
+            FROM Users 
+            WHERE Birthdate = @Birthdate", new { Birthdate = dateOfBirth }).ToList();
+    }
+    public static void UpdateLastBirthdayGiftDate(int userId, DateTime lastBirthdayGiftDate)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(@"UPDATE Users 
+            SET LastBirthdayGift = @LastBirthdayGift 
+            WHERE ID = @ID", new { LastBirthdayGift = lastBirthdayGiftDate, ID = userId });
     }
 
 }

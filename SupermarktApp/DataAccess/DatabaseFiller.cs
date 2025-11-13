@@ -98,12 +98,14 @@ public class DatabaseFiller
                 Address TEXT,
                 Zipcode TEXT,
                 PhoneNumber TEXT,
+                Birthdate DATETIME,
                 City TEXT,
                 AccountStatus TEXT,
                 AccountPoints INTEGER DEFAULT 0,
                 TWOFAEnabled INTEGER DEFAULT 0,
                 TWOFACode TEXT,
-                TWOFAExpiry DATETIME
+                TWOFAExpiry DATETIME,
+                LastBirthdayGift DATETIME NULL
             );");
 
         db.Execute(@"
@@ -161,7 +163,7 @@ public class DatabaseFiller
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
-                RewardPrice REAL NOT NULL DEFAULT 0,
+                RewardPrice DOUBLE NOT NULL DEFAULT 0,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
                 UNIQUE(UserId, ProductId)
@@ -215,79 +217,79 @@ public class DatabaseFiller
         // USERS
         var users = new List<UserModel>
         {
-            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam"},
-            new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
-            new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
+            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
+            new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
         };
 
         // PRODUCT CATEGORIES
         var categories = new Dictionary<string, List<string>>
         {
-            ["Fruits"] = new List<string> 
-            { 
-                "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango", 
-                "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime", 
+            ["Fruits"] = new List<string>
+            {
+                "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango",
+                "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime",
                 "Nectarine", "Apricot", "Fig", "Pomegranate", "Tangerine", "Clementine", "Dragonfruit", "Passionfruit", "Guava", "Lychee"
             },
 
-            ["Vegetables"] = new List<string> 
-            { 
-                "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant", 
-                "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale", 
+            ["Vegetables"] = new List<string>
+            {
+                "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant",
+                "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale",
                 "Leek", "Brussels Sprouts", "Chard", "Artichoke", "Parsnip", "Turnip", "Okra", "Fennel", "Cabbage", "Rutabaga"
             },
 
-            ["Beverages"] = new List<string> 
-            { 
-                "Orange Juice", "Cola", "Water", "Milkshake", "Coffee", "Tea", "Beer", "Wine", "Apple Juice", "Lemonade", 
-                "Smoothie", "Iced Tea", "Hot Chocolate", "Energy Drink", "Sparkling Water", "Ginger Ale", "Soda", "Cider", 
-                "Tonic Water", "Protein Shake", "Mango Juice", "Berry Smoothie", "Coconut Water", "Herbal Tea", "Kombucha", 
+            ["Beverages"] = new List<string>
+            {
+                "Orange Juice", "Cola", "Water", "Milkshake", "Coffee", "Tea", "Beer", "Wine", "Apple Juice", "Lemonade",
+                "Smoothie", "Iced Tea", "Hot Chocolate", "Energy Drink", "Sparkling Water", "Ginger Ale", "Soda", "Cider",
+                "Tonic Water", "Protein Shake", "Mango Juice", "Berry Smoothie", "Coconut Water", "Herbal Tea", "Kombucha",
                 "Sports Drink", "Apple Cider", "Chocolate Milk", "Matcha Latte", "Iced Coffee"
             },
 
-            ["Bakery"] = new List<string> 
-            { 
-                "Bread", "Croissant", "Muffin", "Baguette", "Bagel", "Donut", "Cake", "Pie", "Scone", "Pretzel", 
-                "Roll", "Brownie", "Cupcake", "Focaccia", "Brioche", "Pita", "Danish", "Strudel", "Tart", "Panettone", 
+            ["Bakery"] = new List<string>
+            {
+                "Bread", "Croissant", "Muffin", "Baguette", "Bagel", "Donut", "Cake", "Pie", "Scone", "Pretzel",
+                "Roll", "Brownie", "Cupcake", "Focaccia", "Brioche", "Pita", "Danish", "Strudel", "Tart", "Panettone",
                 "Challah", "Ciabatta", "Eclair", "Madeleine", "Shortbread", "Macaron", "Kolache", "Crumpet", "Stollen", "Kouign-Amann"
             },
 
-            ["Dairy"] = new List<string> 
-            { 
-                "Milk", "Cheese", "Yogurt", "Butter", "Cream", "Cottage Cheese", "Ice Cream", "Sour Cream", "Cream Cheese", "Ghee", 
-                "Kefir", "Buttermilk", "Mascarpone", "Paneer", "Whey", "Ricotta", "Clotted Cream", "Quark", "Yogurt Drink", "Skyr", 
+            ["Dairy"] = new List<string>
+            {
+                "Milk", "Cheese", "Yogurt", "Butter", "Cream", "Cottage Cheese", "Ice Cream", "Sour Cream", "Cream Cheese", "Ghee",
+                "Kefir", "Buttermilk", "Mascarpone", "Paneer", "Whey", "Ricotta", "Clotted Cream", "Quark", "Yogurt Drink", "Skyr",
                 "Labneh", "Evaporated Milk", "Condensed Milk", "Goat Cheese", "Feta", "Halloumi", "Mascarpone Cheese", "Provolone", "Blue Cheese", "Cheddar"
             },
 
-            ["Meat"] = new List<string> 
-            { 
-                "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin", 
-                "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver", 
+            ["Meat"] = new List<string>
+            {
+                "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin",
+                "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver",
                 "Goose Breast", "Rabbit Meat", "Bison Steak", "Pork Belly", "Lamb Shoulder", "Beef Tenderloin", "Turkey Leg", "Chicken Drumstick", "Kielbasa", "Mortadella"
             },
 
-            ["Seafood"] = new List<string> 
-            { 
-                "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout", 
-                "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn", 
+            ["Seafood"] = new List<string>
+            {
+                "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout",
+                "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn",
                 "Halibut", "Pollock", "Swordfish", "Mussels", "Catfish", "Anchovy Fillet", "Sea Bass", "Caviar", "King Crab", "Haddock"
             },
 
-            ["Frozen"] = new List<string> 
-            { 
-                "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries", 
-                "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli", 
-                "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry", 
+            ["Frozen"] = new List<string>
+            {
+                "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries",
+                "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli",
+                "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry",
                 "Frozen Tater Tots", "Frozen Burrito", "Frozen Ravioli", "Frozen Fish Sticks", "Frozen Spring Rolls", "Frozen Edamame", "Frozen Peaches", "Frozen Cherries", "Frozen Cauliflower"
             },
 
-            ["Snacks"] = new List<string> 
-            { 
-                "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", 
-                "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", 
-                "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", 
+            ["Snacks"] = new List<string>
+            {
+                "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels",
+                "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar",
+                "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather",
                 "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel"
             },
 
@@ -337,10 +339,11 @@ public class DatabaseFiller
             },
 
             ["Rewards"] = new List<string>
-            { 
+            {
                 "Efteling Ticket", "Blijdorp Ticket", "Walibi Ticket"
             }
         };
+        
 
         int totalProducts = categories.Values.Sum(list => list.Count); // 453 products in total IF U ADD ANY OTHER PRODUCTS UPDATE THE seedProductsTask MAX VALUE IN RunDatabaseMethods :D
 
@@ -399,6 +402,19 @@ public class DatabaseFiller
         ProductAccess.SetProductVisibility(451, false);
         ProductAccess.SetProductVisibility(452, false);
         ProductAccess.SetProductVisibility(453, false);
+
+        // Add birthday Item
+        var birthdayPresent = new ProductModel(
+            name: "Birthday Present",
+            price: 0.00, // Free gift
+            nutritionDetails: "N/A",
+            description: "A free gift to celebrate your birthday! Enjoy your special day.",
+            category: "Gifts",
+            location: 0,
+            quantity: 999,
+            visible: 0
+        );
+        ProductAccess.AddProduct(birthdayPresent);
 
         // SEED DISCOUNTS
         var weeklyDiscounts = new List<DiscountsModel>
@@ -478,8 +494,8 @@ public class DatabaseFiller
     public static void InsertUser(UserModel user)
     {
         _sharedConnection!.Execute(@"
-        INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus)
-        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);", user);
+        INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, Birthdate, City, AccountStatus)
+        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @Birthdate, @City, @AccountStatus);", user);
     }
 
     public static void InsertProduct(ProductModel product)
