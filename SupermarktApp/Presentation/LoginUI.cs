@@ -18,48 +18,39 @@ public static class LoginUI
             UserModel Account = LoginLogic.Login(email, password);
             if (Account != null)
             {
-                if (TwoFALogic.Is2FAEnabled(Account.ID))
+            if (TwoFALogic.Is2FAEnabled(Account.ID))
+            {
+                TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
+                AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
+                while (true)
                 {
-                    TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
-                    AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
-                    while (true)
+                    string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                    if (inputCode.ToUpper() == "EXIT")
                     {
-                        string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
-                        if (inputCode.ToUpper() == "EXIT")
-                        {
-                            return;
-                        }
-                        if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
-                        {
-                            AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
-                        }
-                        else
-                        {
-                            SessionManager.CurrentUser = Account;
-                            AnsiConsole.MarkupLine("[green]Login successful![/]");
-                            AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
-                            Console.ReadKey();
-                            break;
-                        }
+                        return;
+                    }
+                    if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
+                    {
+                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
                     }
                     else
                     {
                         SessionManager.CurrentUser = Account;
-                        DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
                         AnsiConsole.MarkupLine("[green]Login successful![/]");
                         AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
                         Console.ReadKey();
                         break;
-                    }  
+                    }
                 }
-                else
-                {
-                    SessionManager.CurrentUser = Account;
-                    DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
-                    AnsiConsole.MarkupLine("[green]Login successful![/]");
-                    AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
-                    attempts = 0;
-                }
+            }
+            else
+            {
+                SessionManager.CurrentUser = Account;
+                DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
+                AnsiConsole.MarkupLine("[green]Login successful![/]");
+                AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
+                attempts = 0;
+            }
 
             }
             else
