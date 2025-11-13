@@ -13,6 +13,14 @@ public static class ProductAccess
             VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
     }
 
+    public static void AddProductUnitTest(ProductModel product)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(@"INSERT INTO Products 
+            (ID, Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible)
+            VALUES (@ID, @Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
+    }
+
     public static List<ProductModel> SearchProductByName(string name, bool includeHidden = false)
         {
             using var db = new SqliteConnection(ConnectionString);
