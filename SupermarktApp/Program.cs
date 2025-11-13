@@ -9,6 +9,7 @@ class Program
 {
     static void Main()
     {
+        DatabaseFiller.RunDatabaseMethods(500);
         //DatabaseFiller.RunDatabaseMethods(10000);
         MenuUI.ShowMainMenu();
     }
