@@ -1,8 +1,9 @@
+using System.Threading.Tasks;
 using Spectre.Console;
 public static class MenuUI
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-    public static void ShowMainMenu()
+    public static async Task ShowMainMenu()
     {
         while (true)
         {

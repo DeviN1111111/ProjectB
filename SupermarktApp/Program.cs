@@ -8,8 +8,8 @@ using Spectre.Console;
 class Program
 {
     static void Main()
-    {
-        //DatabaseFiller.RunDatabaseMethods(10000);
+    {   
+        DatabaseFiller.RunDatabaseMethods(10000);
         MenuUI.ShowMainMenu();
     }
 }

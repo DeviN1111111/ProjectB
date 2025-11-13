@@ -2,11 +2,12 @@ using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
 
 using System.Threading;
+using System.Threading.Tasks;
 public class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     private static string Safe(string text) => Markup.Escape(text);
-    public static void ShowCart()
+    public static async Task ShowCart()
     {
         Console.Clear();
         double totalAmount = 0;
@@ -86,7 +87,7 @@ public class Order
         AnsiConsole.WriteLine();
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
 
-        Checkout(allUserProducts, allProducts, finalAmount);
+        await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
 
     public static void ShowChecklist()
@@ -206,7 +207,7 @@ public class Order
 
 
 
-    public static void Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount)
+    public static async Task Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount, double UnpaidFine)
     {
         // Checkout or go back options
         var options = AnsiConsole.Prompt(
@@ -223,13 +224,14 @@ public class Order
         {
             case "Checkout":
                 // check if cart is empty
-                if (cartProducts.Count == 0)
+                if (cartProducts.Count == 0 && UnpaidFine <= 0)
                 {
                     AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
                     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                     Console.ReadKey();
                     return;
                 }
+                // else if UnpaidFine > 0
                 // Add reward points to user
                 int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
@@ -264,14 +266,16 @@ public class Order
                                 {
                                     var newOrder = new OrdersModel
                                     {
-                                        UserID = SessionManager.CurrentUser!.ID,       
+                                        UserID = SessionManager.CurrentUser!.ID,
                                         ProductID = product.ID,
-                                        Price = product.Price,     
+                                        Price = product.Price,
                                     };
                                     allOrderEntries.Add(newOrder);
                                 }
                             }
                         }
+
+                        PayLaterLogic.Pay();
 
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
                         OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
@@ -345,9 +349,8 @@ public class Order
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
 
                         OrderHistoryModel order = OrderLogic.GetOrderByUserId(SessionManager.CurrentUser!.ID);
-                        PayLaterLogic.Activate(order.Id);
-                        
                         Console.ReadKey();
+                        await PayLaterLogic.Activate(order.Id);
                         OrderLogic.UpdateStock();
                         OrderLogic.ClearCart();
                         break;
@@ -469,18 +472,19 @@ public class Order
                     .Color(AsciiPrimary));
 
             var userOrders = OrderHistoryAccess.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
-            if (userOrders == null)
-            {
-                AnsiConsole.MarkupLine("[red]No order history found.[/]");
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                Console.ReadKey();
-                return;
-            }
+
 
             AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
             if (Console.ReadKey(true).Key == ConsoleKey.Escape)
                 return;
-            
+            if (userOrders == null)
+            {
+                AnsiConsole.MarkupLine("[red]No order history found.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadLine();
+                return;
+            }
+
             var orderChoices = userOrders
                 .Select(order => order.IsPaid
                     ? $"Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm}"

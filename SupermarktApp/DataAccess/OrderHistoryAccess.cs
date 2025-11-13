@@ -50,4 +50,10 @@ public static class OrderHistoryAccess
 
         db.Execute(sql, new { IsPaid = isPaid, FineDate = fineDate, OrderId = orderId, PaymentCode = paymentCode });
     }
+    public static List<OrderHistoryModel> GetAllUnpaidOrders()
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        const string query = "SELECT * FROM OrderHistory WHERE IsPaid = 0 ORDER BY Date DESC;";
+        return connection.Query<OrderHistoryModel>(query).AsList();
+    }
 }
