@@ -15,22 +15,16 @@ public class DiscountsLogic
 
     public static List<DiscountsModel> GetWeeklyDiscounts() // this returns all ACTIVE weekly discounts
     {
-        List<ProductModel> weeklyProducts = DiscountsAccess.GetWeeklyDiscounts().ToList();
+        List<DiscountsModel> weeklyProducts = DiscountsAccess.GetWeeklyDiscounts().ToList();
         List<DiscountsModel> validWeeklyProducts = new List<DiscountsModel>();
 
-        foreach (var product in weeklyProducts)
+        foreach(var discount in weeklyProducts)
         {
-            var discounts = DiscountsAccess.GetDiscountsByProductID(product.ID);
-            foreach(var discount in discounts)
+            if (discount != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
             {
-                if (product != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
-                {
-                    DiscountsModel discountModel = GetDiscountsByProductID(product.ID);
-                    validWeeklyProducts.Add(discountModel);
-                }
+                validWeeklyProducts.Add(discount);
             }
         }
-
         return validWeeklyProducts;
     }
 
