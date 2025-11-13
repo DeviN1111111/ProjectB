@@ -38,4 +38,24 @@ public class LoginLogic
             return Errors;
         }
     }
+
+    public static UserModel GetUserByEmail(string email)
+    {
+        UserModel? Account = LoginAccess.GetUserByEmail(email);
+
+        if (Account != null)
+        {
+            return Account;
+        }
+        return null!;
+    }
+
+    public static void UpdateUserPassword(int userId, string newPassword)
+    {
+        LoginAccess.UpdateUserPassword(userId, newPassword);
+    }
+    public static void ForgetPassword2FAEmail(int userId, string email)
+    {
+        TwoFALogic.ForgetPassword2FAEmail(userId, email);
+    }
 }

@@ -7,61 +7,150 @@ public static class LoginUI
 {
     public static readonly Color Hover = Color.FromHex("#006494");
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
+    private static int attempts = 0;
     public static void Login()
     {
-        string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your [green]email[/]?:"));
-        string password = AnsiConsole.Prompt(
-            new TextPrompt<string>("What's your [green]password[/]?:")
-                .Secret());
+            string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your [green]email[/]?:"));
+            string password = AnsiConsole.Prompt(
+                new TextPrompt<string>("What's your [green]password[/]?:")
+                    .Secret());
 
-        UserModel Account = LoginLogic.Login(email, password);
-        if (Account != null)
-        {
-            if (TwoFALogic.Is2FAEnabled(Account.ID))
+            UserModel Account = LoginLogic.Login(email, password);
+            if (Account != null)
             {
-                TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
-                AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
-                while(true)
+                if (TwoFALogic.Is2FAEnabled(Account.ID))
                 {
-                    string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
-                    if (inputCode.ToUpper() == "EXIT")
+                    TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
+                    AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
+                    while (true)
                     {
-                        return;
+                        string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                        if (inputCode.ToUpper() == "EXIT")
+                        {
+                            return;
+                        }
+                        if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
+                        {
+                            AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
+                        }
+                        else
+                        {
+                            SessionManager.CurrentUser = Account;
+                            AnsiConsole.MarkupLine("[green]Login successful![/]");
+                            AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
+                            Console.ReadKey();
+                            break;
+                        }
                     }
-                    if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
-                    {
-                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
-                    }
-                    else
-                    {
-                        SessionManager.CurrentUser = Account;
-                        AnsiConsole.MarkupLine("[green]Login successful![/]");
-                        AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
-                        Console.ReadKey();
-                        break;
-                    }  
                 }
+                else
+                {
+                    SessionManager.CurrentUser = Account;
+                    AnsiConsole.MarkupLine("[green]Login successful![/]");
+                    AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
+                    attempts = 0;
+                }
+
             }
             else
             {
-                SessionManager.CurrentUser = Account;
-                AnsiConsole.MarkupLine("[green]Login successful![/]");
-                AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
+                // Ask twice then option to forget password
+
+                Console.Clear();
+                AnsiConsole.Write(
+                new FigletText("Error")
+                    .Centered()
+                    .Color(AsciiPrimary));
+                AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
+                Console.ReadKey();
+                attempts++;
+
+                if (attempts == 2)
+                {
+                    // option to go back or reset password
+                    Console.Clear();
+                    AnsiConsole.Write(
+                        new FigletText("Supermarket App")
+                            .Centered()
+                            .Color(AsciiPrimary));
+                    var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .AddChoices(new[] { "Reset Password", "Back to Main Menu" }));
+                    switch (choice)
+                    {
+                    case "Reset Password":
+                        for (int resetAttempts = 0; resetAttempts < 2; resetAttempts++)
+                        {
+                            email = AnsiConsole.Prompt(new TextPrompt<string>(
+                                $"What's your [green]email[/]? (you have {2 - resetAttempts} attempts left):"));
+
+                            var result = LoginLogic.GetUserByEmail(email);
+
+                            if (result == null)
+                            {
+                                AnsiConsole.MarkupLine("[red]Email not found![/]");
+                                
+                                // If this was their last allowed attempt
+                                if (resetAttempts == 1)
+                                {
+                                    AnsiConsole.MarkupLine("[red]Too many failed attempts! Returning to main menu.[/]");
+                                    attempts = 0;
+                                    return;
+                                }
+
+                                continue;
+                            }
+                                // Send 2FA code to email using logic layer
+                                LoginLogic.ForgetPassword2FAEmail(result.ID, result.Email);
+
+                                // Type in the 2FA code
+                                AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
+                                while (true)
+                                {
+                                    // Exit the loop option
+                                    string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                                    if (inputCode.ToUpper() == "EXIT")
+                                    {
+                                        return;
+                                    }
+                                    // Wrong code entered
+                                    if (!TwoFALogic.Validate2FACode(result.ID, inputCode))
+                                    {
+                                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
+                                    }
+                                    // Correct code entered
+                                    else
+                                    {
+                                        string newPassword;
+                                        do
+                                        {
+                                            AnsiConsole.MarkupLine("[blue]Password must contain at least 1 digit and has to be 6 characters long (Example: Cheese1).[/]");
+                                            newPassword = AnsiConsole.Prompt(
+                                                new TextPrompt<string>("Create a new password:")
+                                                    .Secret());
+                                        } while (ValidaterLogic.ValidatePassword(newPassword) == false);
+                                        // Update password in database
+                                        result.Password = newPassword;
+                                        LoginLogic.UpdateUserPassword(result.ID, newPassword);
+                                        AnsiConsole.MarkupLine("[green]Password reset successful! You can now log in with your new password.[/]");
+                                        AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
+                                        attempts = 0;
+                                        Console.ReadKey();
+                                        return;
+                                    }
+                                }
+                            }
+                        break;
+                    case "Back to Main Menu":
+                        attempts = 0;
+                            break;
+                    }
+                }
             }
 
-        }
-        else
-        {
-            Console.Clear();
-            AnsiConsole.Write(
-            new FigletText("Error")
-                .Centered()
-                .Color(AsciiPrimary));
-            AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
-            Console.ReadKey();
-        }
+        
     }
-
+// why after i click reset password and do it wrong twice and then go to main menu and do it wrong twice i dont go into forget password
     public static void Register()
     {
         while (true)
