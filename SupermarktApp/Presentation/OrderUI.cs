@@ -477,7 +477,7 @@ public class Order
             AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
             if (Console.ReadKey(true).Key == ConsoleKey.Escape)
                 return;
-            if (userOrders == null)
+            if (userOrders == null || userOrders.Count == 0)
             {
                 AnsiConsole.MarkupLine("[red]No order history found.[/]");
                 AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -539,7 +539,6 @@ public class Order
                     productCounts[item.ProductID] = 1;
             }
 
-            double TotalOrderPrice = 0;
 
             // Second pass: build the table using the counted quantities
             foreach (var keyValuePair in productCounts)
@@ -574,17 +573,16 @@ public class Order
 
             // Add total row
             orderTable.AddEmptyRow();
-            orderTable.AddRow("Total", "", "", $"${TotalOrderPrice:F2}");
-
-            if (TotalOrderPrice < 25)
+            orderTable.AddRow("Subtotal", "", "", $"${totalOrderPrice:F2}");
+            double deliveryFee = OrderLogic.DeliveryFee(totalOrderPrice);
+            if (deliveryFee > 0)
             {
-                double deliveryFee = 5;
-                TotalOrderPrice += deliveryFee;
                 orderTable.AddEmptyRow();
                 orderTable.AddRow("[yellow]Delivery Fee[/]", "", "", $"[bold red]${deliveryFee:F2}[/]");
             }
+            double finalTotal = totalOrderPrice + deliveryFee;
             orderTable.AddEmptyRow();
-            orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${TotalOrderPrice:F2}[/]");
+            orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${finalTotal:F2}[/]");
 
             AnsiConsole.Write(orderTable);
 
