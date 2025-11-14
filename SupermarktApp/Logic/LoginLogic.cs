@@ -38,4 +38,5 @@ public class LoginLogic
             return Errors;
         }
     }
+    public static UserModel? GetUserByEmail(string email) => UserAccess.GetUserByEmail(email);
 }

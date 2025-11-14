@@ -143,6 +143,9 @@ public static class LoginUI
             {
                 AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
                 AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
+
+                var createdUser = LoginLogic.GetUserByEmail(email);
+                CouponLogic.CreateCoupon(createdUser!.ID, 5);
                 Console.ReadKey();
                 break;
             }

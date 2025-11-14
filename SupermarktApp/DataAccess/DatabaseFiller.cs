@@ -205,6 +205,16 @@ public class DatabaseFiller
                 ClosingHourSunday TEXT
             );
         ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Coupon (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Code INTERGER NOT NULL,
+                UserId INTERGER NOT NULL,
+                Credit DOUBLE NOT NULL,
+                IsValid BOOLEAN NOT NULL DEFAULT 0,
+                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE
+            );
+        ");
     }
 
     public static void SeedData(

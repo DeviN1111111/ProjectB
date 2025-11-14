@@ -7,6 +7,7 @@ public class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     private static string Safe(string text) => Markup.Escape(text);
+    public static double CouponCredit = 0;
     public static async Task ShowCart()
     {
         Console.Clear();
@@ -77,7 +78,12 @@ public class Order
         }
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(UnpaidFine, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine, 2)}[/]"))
+            new Markup(
+                $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
+                $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
+                $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(UnpaidFine, 2)}[/]\n" +
+                $"[bold white]Coupon Credit:[/] [green]-€{Math.Round(CouponCredit, 2)}[/]\n" +
+                $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine - CouponCredit, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -85,7 +91,7 @@ public class Order
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
-        double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
+        double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
@@ -207,15 +213,20 @@ public class Order
 
 
 
-    public static async Task Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount, double UnpaidFine)
+    public static async Task Checkout(
+        List<CartModel> cartProducts, 
+        List<ProductModel> allProducts, 
+        double totalAmount, 
+        double UnpaidFine)
     {
         // Checkout or go back options
+        Coupon coupon = null;
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
         .AddChoices(new[]{
-
             "Checkout",
             "Remove items",
+            "Add Coupon",
             "Change quantity",
             "Go back"
         }));
@@ -231,7 +242,6 @@ public class Order
                     Console.ReadKey();
                     return;
                 }
-                // else if UnpaidFine > 0
                 // Add reward points to user
                 int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
@@ -275,11 +285,11 @@ public class Order
                             }
                         }
 
-                        PayLaterLogic.Pay();
 
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
                         OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
-
+                        PayLaterLogic.Pay();
+                        CouponLogic.UseCoupon(coupon!.Id);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -342,7 +352,7 @@ public class Order
                             }
                         }
                         OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
-
+                        CouponLogic.UseCoupon(coupon!.Id);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -359,6 +369,24 @@ public class Order
 
             case "Remove items":
                 RemoveFromCart(cartProducts, allProducts);
+                break;
+            case "Add Coupon":
+                var couponMenuChoice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[white]Coupon options[/]")
+                        .AddChoices("Add code", "Return")
+                );
+                if (couponMenuChoice == "Add code")
+                {
+                    var code = Convert.ToInt32(AnsiConsole.Ask<string>("[yellow]Enter coupon code:[/]"));
+                    coupon = CouponLogic.GetCouponByCode(code)!;
+                    CouponLogic.ActivateCoupon(code);
+                    CouponCredit = CouponLogic.GetCouponByCode(code)!.Credit;
+                    AnsiConsole.MarkupLine("[green]Coupon code received.[/]");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                }
+                ShowCart();
                 break;
             case "Change quantity":
                 var productNames = new List<string>();

@@ -40,6 +40,15 @@ public static class MenuUI
             {
                 // Options when you're logged in as a regular user
                 options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounts", "Shop Details", "Settings", "Logout", "Exit"});
+                var allCoupons = CouponLogic.GetAllCoupons(SessionManager.CurrentUser.ID);
+                if (allCoupons.Count == 1 && allCoupons[0].Id == 1)
+                {
+                    var userCoupon = CouponLogic.GetCouponByUserId(SessionManager.CurrentUser.ID);
+                    if (userCoupon != null)
+                    {
+                        await CouponLogic.SendEmail(userCoupon.Code, SessionManager.CurrentUser.Email);
+                    }
+                }
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {

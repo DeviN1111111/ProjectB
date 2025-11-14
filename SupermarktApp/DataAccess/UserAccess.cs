@@ -75,5 +75,11 @@ public static class UserAccess
             FROM Users 
             WHERE ID = @ID", new { ID = userId });
     }
-
+    public static UserModel? GetUserByEmail(string email)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QuerySingleOrDefault<UserModel>(@"SELECT *
+            FROM Users
+            WHERE Email = @Email", new { Email = email });
+    }
 }
