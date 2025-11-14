@@ -12,7 +12,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo"
+        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo", "Coupon"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -208,15 +208,13 @@ public class DatabaseFiller
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Coupon (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Code INTERGER NOT NULL,
                 UserId INTERGER NOT NULL,
                 Credit DOUBLE NOT NULL,
-                IsValid BOOLEAN NOT NULL DEFAULT 0,
+                IsValid BOOLEAN NOT NULL DEFAULT 1,
                 FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE
             );
         ");
     }
-
     public static void SeedData(
         int orderCount,
         Action<int>? reportUserProgress = null,

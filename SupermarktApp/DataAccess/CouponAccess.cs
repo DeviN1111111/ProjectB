@@ -3,14 +3,11 @@ using Microsoft.Data.Sqlite;
 static class CouponAccess
 {
     private const string ConnectionString = "Data Source=database.db";
-    
     public static void AddCoupon(int userId, double credit)
     {
-        var random = new Random();
-        var code = random.Next(100000, 999999);
         using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Coupon (UserId, Credit, IsValid, Code)
-                    VALUES (@UserId, @Credit, 0, @Code)", new { UserId = userId, Credit = credit, Code = code });
+        db.Execute(@"INSERT INTO Coupon (UserId, Credit, IsValid)
+                    VALUES (@UserId, @Credit, 1)", new { UserId = userId, Credit = credit });
     }
     public static Coupon? GetCouponByUserId(int userId)
     {
@@ -23,12 +20,6 @@ static class CouponAccess
         using var db = new SqliteConnection(ConnectionString);
         const string sql = "SELECT * FROM Coupon WHERE Id = @Id";
         return db.QueryFirstOrDefault<Coupon>(sql, new { Id = id });
-    }
-    public static Coupon? GetCouponByCode(int code)
-    {
-        using var db = new SqliteConnection(ConnectionString);
-        const string sql = "SELECT * FROM Coupon WHERE Code = @Code LIMIT 1";
-        return db.QueryFirstOrDefault<Coupon>(sql, new { Code = code });
     }
     public static void UseCoupon(int id)
     {
