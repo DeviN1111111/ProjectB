@@ -219,8 +219,16 @@ public class Order
         double totalAmount, 
         double UnpaidFine)
     {
-        // Checkout or go back options
-        Coupon coupon = null;
+        var coupons = CouponLogic.GetAllCoupons(SessionManager.CurrentUser!.ID);
+        foreach (var coupon in coupons)
+        {
+            if (coupon.IsValid)
+            {
+                CouponCredit += coupon.Credit;
+                break;
+            }
+        }
+
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
         .AddChoices(new[]{
@@ -289,7 +297,11 @@ public class Order
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
                         OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
                         PayLaterLogic.Pay();
-                        CouponLogic.UseCoupon(coupon!.Id);
+                        foreach (var coupon in coupons)
+                        {
+                            CouponCredit -= coupon.Credit;
+                            CouponLogic.UseCoupon(coupon.Id);
+                        }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -352,7 +364,11 @@ public class Order
                             }
                         }
                         OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
-                        CouponLogic.UseCoupon(coupon!.Id);
+                        foreach (var coupon in coupons)
+                        {
+                            CouponLogic.UseCoupon(coupon.Id);
+                            CouponCredit -= coupon.Credit;
+                        }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -379,7 +395,6 @@ public class Order
                 if (couponMenuChoice == "Add code")
                 {
                     var code = Convert.ToInt32(AnsiConsole.Ask<string>("[yellow]Enter coupon code:[/]"));
-                    coupon = CouponLogic.GetCouponByCode(code)!;
                     CouponLogic.ActivateCoupon(code);
                     CouponCredit = CouponLogic.GetCouponByCode(code)!.Credit;
                     AnsiConsole.MarkupLine("[green]Coupon code received.[/]");

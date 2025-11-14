@@ -27,7 +27,15 @@ static class CouponLogic
         }
         return true;
     }
-    public static void UseCoupon(int couponId) => CouponAccess.UseCoupon(couponId);
+    public static void UseCoupon(int couponId)
+    {
+        var coupon = CouponAccess.GetCouponById(couponId);
+        if (coupon == null) return;
+        
+        coupon.Credit = 0;
+        coupon.IsValid = false;
+        CouponAccess.EditCoupon(coupon);
+    }
     public static void CreateCoupon(int userId, double credit) => CouponAccess.AddCoupon(userId, credit);
     public static async Task SendEmail(int couponCode, string email)
     {
