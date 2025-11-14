@@ -5,12 +5,12 @@ public static class PayLaterLogic
 {
     private static readonly string PaymentTemplatePath = "EmailTemplates/PaymentCodeTemplate.html";
     private static readonly string PaymentTemplate = File.ReadAllText(PaymentTemplatePath);
-    public const int FineDays = 1;
+    public const int FineDays = 30;
     public static async Task Activate(int orderId)
     {
         var order = OrderHistoryAccess.GetOrderById(orderId);
 
-        DateTime fineDate = order.Date.AddDays(FineDays);
+        DateTime fineDate = order.Date.Date.AddDays(FineDays);
         Random random = new Random();
         int paymentCode = random.Next(100000, 1000000);
         OrderHistoryAccess.UpdateIsPaidStatus(orderId, fineDate, isPaid: false, paymentCode);
