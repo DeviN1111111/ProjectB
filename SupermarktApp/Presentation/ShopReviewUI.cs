@@ -60,7 +60,7 @@ public static class ShopReviewUI
             return;
         }
 
-        var reviews = logic.GetReviews(user.Id);
+        var reviews = logic.GetReviews(user.ID);
 
         if (!reviews.Any())
         {
@@ -94,7 +94,7 @@ public static class ShopReviewUI
 
         try
         {
-            logic.AddReview(user.Id, stars, text);
+            logic.AddReview(user.ID, stars, text);
             AnsiConsole.MarkupLine("[green]Review added successfully![/]");
         }
         catch (Exception ex)
@@ -116,7 +116,7 @@ public static class ShopReviewUI
             return;
         }
 
-        var avg = logic.GetAverageStars(user.Id);
+        var avg = logic.GetAverageStars(user.ID);
         AnsiConsole.MarkupLine($"[yellow]Your average rating:[/] [green]{avg:F1}★[/]");
         Console.ReadKey();
     }

@@ -14,6 +14,15 @@ public static class ShopDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
 
+        var reviewLogic = new ShopReviewLogic();
+        var avg = reviewLogic.GetAverageStars(1); // If you store ShopId or use global reviews, adjust this line.
+
+        if (avg > 0)
+            AnsiConsole.MarkupLine($"[bold yellow]Average Rating:[/] [green]{avg:F1}★[/]");
+        else
+            AnsiConsole.MarkupLine($"[yellow]No reviews yet! Be the first to leave one![/]");
+
+        AnsiConsole.WriteLine();
 
         var table = new Table();
         table.AddColumn(new TableColumn("[bold #00014d]Day[/]").Centered());
