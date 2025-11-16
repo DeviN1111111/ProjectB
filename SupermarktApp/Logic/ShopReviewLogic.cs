@@ -10,6 +10,11 @@ public class ShopReviewLogic
         return ShopReviewAcces.GetAllReviews(userId);
     }
 
+    public List<ShopReviewModel> GetAllReviews()
+    {
+        return ShopReviewAcces.GetAllReviews();
+    }
+
     public void AddReview(int userId, int stars, string text)
     {
         if (userId <= 0)
