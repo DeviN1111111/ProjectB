@@ -76,4 +76,16 @@ public static class UserAccess
             WHERE ID = @ID", new { ID = userId });
     }
 
+    public static bool EmailExists(string email)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        int count = db.QuerySingleOrDefault<int>(
+            @"SELECT COUNT(1) 
+                FROM Users 
+                WHERE LOWER(Email) = LOWER(@Email)",
+            new { Email = email.Trim() }
+        );
+        // if there is a match found
+        return count > 0;
+    }
 }
