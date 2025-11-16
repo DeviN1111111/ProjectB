@@ -227,7 +227,7 @@ public class ManageAdminUI
                 AccountStatus = AnsiConsole.Prompt(new TextPrompt<string>("What role should the account have?"));
             } while (AccountStatus != "User" && AccountStatus != "Admin");
 
-            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City, AccountStatus);
+            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City, false, AccountStatus);
             if (Errors.Count == 0)
             {
                 AnsiConsole.MarkupLine("[green]Registration successful![/]");
