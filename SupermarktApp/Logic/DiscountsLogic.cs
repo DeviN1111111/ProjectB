@@ -6,6 +6,8 @@ using Spectre.Console;
 
 public class DiscountsLogic
 {
+
+    private static bool DiscountMailSent = false;
     private static string DiscountTemplatePath = "EmailTemplates/DiscountTemplate.html";
     private static string DiscountTemplate = File.ReadAllText(DiscountTemplatePath);
     public static void AddDiscount(DiscountsModel Discount)
@@ -112,12 +114,16 @@ public class DiscountsLogic
         }
 
         DiscountTemplate = DiscountTemplate.Replace("{{DISCOUNT.TYPE}}", "Personal");
-
-        await EmailLogic.SendEmailAsync(
+        if(!DiscountMailSent)
+        {
+            await EmailLogic.SendEmailAsync(
             to: UserAccess.GetUserEmail(SessionManager.CurrentUser!.ID)!,
             subject: "Your Discounts!",
             body: DiscountTemplate,
             isHtml: true
-        );
+            );
+            
+            DiscountMailSent = true;
+        }
     }
 }

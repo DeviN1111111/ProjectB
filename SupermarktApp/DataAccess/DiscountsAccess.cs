@@ -33,18 +33,18 @@ public static class DiscountsAccess
     public static DiscountsModel GetPeronsalDiscountByProductAndUserID(int productID, int userID)
     {
         var products = _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
-        "SELECT * FROM Discounts WHERE UserId = @userID AND ProductID = @productID",
-        new { UserId = userID, ProductID = productID });
+        "SELECT * FROM Discounts WHERE UserId = @UserID AND ProductId = @ProductID",
+        new { UserID = userID, ProductID = productID });
         return products;
     }
     public static DiscountsModel GetWeeklyDiscountByProductID(int productID)
     {
-        var products = _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
-        "SELECT * FROM Discounts WHERE DiscountType = @discountType AND ProductID = @productID",
-        new { discountType = "Weekly", ProductID = productID });
-
-        return products;
+        return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE DiscountType = @DiscountType AND ProductId = @ProductID",
+            new { DiscountType = "Weekly", ProductID = productID }
+        );
     }
+
     public static DiscountsModel? GetDiscountsByProductID(int productID)
     {
         return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
