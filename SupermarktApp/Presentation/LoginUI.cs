@@ -46,7 +46,6 @@ public static class LoginUI
             else
             {
                 SessionManager.CurrentUser = Account;
-                DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID);
                 AnsiConsole.MarkupLine("[green]Login successful![/]");
                 AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
                 attempts = 0;
