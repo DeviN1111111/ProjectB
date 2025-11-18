@@ -12,7 +12,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "OrderItem", "RewardItems", "Checklist", "OrderHistory", "WeeklyPromotions", "ShopInfo"
+        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo", "Coupon"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -61,21 +61,6 @@ public class DatabaseFiller
                 seedUsersTask.StopTask();
                 seedProductsTask.StopTask();
                 seedOrdersTask.StopTask();
-
-
-                var products = ProductAccess.GetAllProducts();
-                Random random = new Random();
-                var selectedProducts = products.OrderBy(p => Guid.NewGuid()).Take(5).ToList();
-
-                foreach (var product in selectedProducts)
-                {
-                    double discount = random.Next(1, 7);
-                    if (discount >= product.Price) discount = Math.Max(0.5, product.Price - 0.5);
-                    discount = Math.Round(discount, 2);
-
-                    InsertWeeklyPromotions(new WeeklyPromotionsModel(product.ID, discount));
-                }
-
             });
 
         AnsiConsole.MarkupLine("[bold green]✅ Database setup complete![/]");
@@ -113,9 +98,14 @@ public class DatabaseFiller
                 Address TEXT,
                 Zipcode TEXT,
                 PhoneNumber TEXT,
+                Birthdate DATETIME,
                 City TEXT,
                 AccountStatus TEXT,
-                AccountPoints INTEGER DEFAULT 0
+                AccountPoints INTEGER DEFAULT 0,
+                TWOFAEnabled INTEGER DEFAULT 0,
+                TWOFACode TEXT,
+                TWOFAExpiry DATETIME,
+                LastBirthdayGift DATETIME NULL
             );");
 
         db.Execute(@"
@@ -128,22 +118,30 @@ public class DatabaseFiller
                 Category TEXT,
                 Location INTEGER,
                 Quantity INTEGER NOT NULL DEFAULT 0,
-                Visible INTEGER NOT NULL DEFAULT 1
+                Visible INTEGER NOT NULL DEFAULT 1,
+                DiscountPercentage REAL NOT NULL DEFAULT 0,
+                DiscountType TEXT NOT NULL DEFAULT 'None'
             );");
 
         db.Execute(@"
-            CREATE TABLE IF NOT EXISTS WeeklyPromotions (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                ProductID INTEGER NOT NULL,
-                Discount REAL NOT NULL
-            );
-        ");
+            CREATE TABLE IF NOT EXISTS Discounts (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ProductId INT NOT NULL,
+            UserId INT NULL,
+            DiscountPercentage REAL NOT NULL,
+            DiscountType TEXT NOT NULL,
+            StartDate DATETIME NULL,
+            EndDate DATETIME NULL
+            );");
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS OrderHistory (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
+                IsPaid BOOLEAN NOT NULL DEFAULT 1,
+                FineDate DATETIME DEFAULT NULL,
+                PaymentCode INTEGER,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );");
 
@@ -151,23 +149,16 @@ public class DatabaseFiller
             CREATE TABLE IF NOT EXISTS Orders (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
+                OrderId INTEGER NOT NULL,
                 ProductID INTEGER NOT NULL,
+                Price REAL NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
                 FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE,
-                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
+                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE,
+                FOREIGN KEY (OrderId) REFERENCES OrderHistory(Id) ON DELETE CASCADE
             );");
 
-        db.Execute(@"
-            CREATE TABLE IF NOT EXISTS OrderItem (
-                Id INTEGER PRIMARY KEY,
-                OrderId INTEGER NOT NULL,
-                ProductId INTEGER NOT NULL,
-                Quantity INTEGER NOT NULL,
-                Price REAL NOT NULL,
-                FOREIGN KEY (OrderId) REFERENCES OrderHistory(Id) ON DELETE CASCADE,
-                FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
-                UNIQUE(OrderId, ProductId)
-            );");
 
         db.Execute(@"
             CREATE TABLE IF NOT EXISTS Cart (
@@ -175,8 +166,7 @@ public class DatabaseFiller
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
                 Quantity INTEGER NOT NULL,
-                Discount REAL NOT NULL DEFAULT 0,
-                RewardPrice REAL NOT NULL DEFAULT 0,
+                RewardPrice DOUBLE NOT NULL DEFAULT 0,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
                 FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE,
                 UNIQUE(UserId, ProductId)
@@ -217,8 +207,16 @@ public class DatabaseFiller
                 ClosingHourSunday TEXT
             );
         ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Coupon (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId INTERGER NOT NULL,
+                Credit DOUBLE NOT NULL,
+                IsValid BOOLEAN NOT NULL DEFAULT 1,
+                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE
+            );
+        ");
     }
-
     public static void SeedData(
         int orderCount,
         Action<int>? reportUserProgress = null,
@@ -230,79 +228,79 @@ public class DatabaseFiller
         // USERS
         var users = new List<UserModel>
         {
-            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
-            new() { Name = "Mark", LastName = "Dekker", Email = "testing1@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
-            new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "Admin" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", City = "Rotterdam", AccountStatus = "SuperAdmin" }
+            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
+            new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
         };
 
         // PRODUCT CATEGORIES
         var categories = new Dictionary<string, List<string>>
         {
-            ["Fruits"] = new List<string> 
-            { 
-                "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango", 
-                "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime", 
+            ["Fruits"] = new List<string>
+            {
+                "Apple", "Banana", "Orange", "Pear", "Grapes", "Pineapple", "Strawberry", "Watermelon", "Kiwi", "Mango",
+                "Peach", "Plum", "Blueberry", "Raspberry", "Blackberry", "Cherry", "Cantaloupe", "Papaya", "Lemon", "Lime",
                 "Nectarine", "Apricot", "Fig", "Pomegranate", "Tangerine", "Clementine", "Dragonfruit", "Passionfruit", "Guava", "Lychee"
             },
 
-            ["Vegetables"] = new List<string> 
-            { 
-                "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant", 
-                "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale", 
+            ["Vegetables"] = new List<string>
+            {
+                "Carrot", "Broccoli", "Lettuce", "Spinach", "Tomato", "Cucumber", "Onion", "Pepper", "Zucchini", "Eggplant",
+                "Cauliflower", "Celery", "Mushroom", "Garlic", "Potato", "Sweet Potato", "Pumpkin", "Beetroot", "Radish", "Kale",
                 "Leek", "Brussels Sprouts", "Chard", "Artichoke", "Parsnip", "Turnip", "Okra", "Fennel", "Cabbage", "Rutabaga"
             },
 
-            ["Beverages"] = new List<string> 
-            { 
-                "Orange Juice", "Cola", "Water", "Milkshake", "Coffee", "Tea", "Beer", "Wine", "Apple Juice", "Lemonade", 
-                "Smoothie", "Iced Tea", "Hot Chocolate", "Energy Drink", "Sparkling Water", "Ginger Ale", "Soda", "Cider", 
-                "Tonic Water", "Protein Shake", "Mango Juice", "Berry Smoothie", "Coconut Water", "Herbal Tea", "Kombucha", 
+            ["Beverages"] = new List<string>
+            {
+                "Orange Juice", "Cola", "Water", "Milkshake", "Coffee", "Tea", "Beer", "Wine", "Apple Juice", "Lemonade",
+                "Smoothie", "Iced Tea", "Hot Chocolate", "Energy Drink", "Sparkling Water", "Ginger Ale", "Soda", "Cider",
+                "Tonic Water", "Protein Shake", "Mango Juice", "Berry Smoothie", "Coconut Water", "Herbal Tea", "Kombucha",
                 "Sports Drink", "Apple Cider", "Chocolate Milk", "Matcha Latte", "Iced Coffee"
             },
 
-            ["Bakery"] = new List<string> 
-            { 
-                "Bread", "Croissant", "Muffin", "Baguette", "Bagel", "Donut", "Cake", "Pie", "Scone", "Pretzel", 
-                "Roll", "Brownie", "Cupcake", "Focaccia", "Brioche", "Pita", "Danish", "Strudel", "Tart", "Panettone", 
+            ["Bakery"] = new List<string>
+            {
+                "Bread", "Croissant", "Muffin", "Baguette", "Bagel", "Donut", "Cake", "Pie", "Scone", "Pretzel",
+                "Roll", "Brownie", "Cupcake", "Focaccia", "Brioche", "Pita", "Danish", "Strudel", "Tart", "Panettone",
                 "Challah", "Ciabatta", "Eclair", "Madeleine", "Shortbread", "Macaron", "Kolache", "Crumpet", "Stollen", "Kouign-Amann"
             },
 
-            ["Dairy"] = new List<string> 
-            { 
-                "Milk", "Cheese", "Yogurt", "Butter", "Cream", "Cottage Cheese", "Ice Cream", "Sour Cream", "Cream Cheese", "Ghee", 
-                "Kefir", "Buttermilk", "Mascarpone", "Paneer", "Whey", "Ricotta", "Clotted Cream", "Quark", "Yogurt Drink", "Skyr", 
+            ["Dairy"] = new List<string>
+            {
+                "Milk", "Cheese", "Yogurt", "Butter", "Cream", "Cottage Cheese", "Ice Cream", "Sour Cream", "Cream Cheese", "Ghee",
+                "Kefir", "Buttermilk", "Mascarpone", "Paneer", "Whey", "Ricotta", "Clotted Cream", "Quark", "Yogurt Drink", "Skyr",
                 "Labneh", "Evaporated Milk", "Condensed Milk", "Goat Cheese", "Feta", "Halloumi", "Mascarpone Cheese", "Provolone", "Blue Cheese", "Cheddar"
             },
 
-            ["Meat"] = new List<string> 
-            { 
-                "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin", 
-                "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver", 
+            ["Meat"] = new List<string>
+            {
+                "Chicken Breast", "Beef Steak", "Pork Chop", "Bacon", "Sausage", "Lamb Chops", "Turkey Breast", "Ham", "Ground Beef", "Pork Loin",
+                "Veal Cutlet", "Chicken Thigh", "Ribs", "Salami", "Prosciutto", "Beef Brisket", "Chicken Wings", "Duck Breast", "Venison", "Liver",
                 "Goose Breast", "Rabbit Meat", "Bison Steak", "Pork Belly", "Lamb Shoulder", "Beef Tenderloin", "Turkey Leg", "Chicken Drumstick", "Kielbasa", "Mortadella"
             },
 
-            ["Seafood"] = new List<string> 
-            { 
-                "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout", 
-                "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn", 
+            ["Seafood"] = new List<string>
+            {
+                "Salmon", "Shrimp", "Tuna", "Crab", "Lobster", "Cod", "Herring", "Sardine", "Mackerel", "Trout",
+                "Oyster", "Clam", "Scallop", "Squid", "Octopus", "Anchovy", "Tilapia", "Snapper", "Crayfish", "Prawn",
                 "Halibut", "Pollock", "Swordfish", "Mussels", "Catfish", "Anchovy Fillet", "Sea Bass", "Caviar", "King Crab", "Haddock"
             },
 
-            ["Frozen"] = new List<string> 
-            { 
-                "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries", 
-                "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli", 
-                "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry", 
+            ["Frozen"] = new List<string>
+            {
+                "Frozen Peas", "Frozen Pizza", "Ice Cream", "Frozen Fish", "Frozen Vegetables", "Frozen Berries", "Frozen Corn", "Frozen Fries",
+                "Frozen Dumplings", "Frozen Chicken Nuggets", "Frozen Waffles", "Frozen Lasagna", "Frozen Meatballs", "Frozen Spinach", "Frozen Broccoli",
+                "Frozen Strawberries", "Frozen Mango", "Frozen Blueberries", "Frozen Vegetable Mix", "Frozen Bread Rolls", "Frozen Puff Pastry",
                 "Frozen Tater Tots", "Frozen Burrito", "Frozen Ravioli", "Frozen Fish Sticks", "Frozen Spring Rolls", "Frozen Edamame", "Frozen Peaches", "Frozen Cherries", "Frozen Cauliflower"
             },
 
-            ["Snacks"] = new List<string> 
-            { 
-                "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels", 
-                "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar", 
-                "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather", 
+            ["Snacks"] = new List<string>
+            {
+                "Chips", "Chocolate Bar", "Popcorn", "Nuts", "Candy", "Cookies", "Crackers", "Granola Bar", "Trail Mix", "Pretzels",
+                "Jerky", "Rice Cakes", "Fruit Snacks", "Gum", "Marshmallows", "Peanut Butter Cups", "Chocolate Covered Nuts", "Energy Bar",
+                "Snack Mix", "Protein Bar", "Cheese Puffs", "Beef Jerky Bites", "Caramel Popcorn", "Nut Mix", "Cereal Bar", "Fruit Leather",
                 "Chocolate Truffles", "Puffed Rice", "Corn Nuts", "Chocolate Pretzel"
             },
 
@@ -352,10 +350,11 @@ public class DatabaseFiller
             },
 
             ["Rewards"] = new List<string>
-            { 
+            {
                 "Efteling Ticket", "Blijdorp Ticket", "Walibi Ticket"
             }
         };
+        
 
         int totalProducts = categories.Values.Sum(list => list.Count); // 453 products in total IF U ADD ANY OTHER PRODUCTS UPDATE THE seedProductsTask MAX VALUE IN RunDatabaseMethods :D
 
@@ -378,18 +377,6 @@ public class DatabaseFiller
             }
         }
 
-        // ORDERS
-        var orders = new List<OrdersModel>();
-        for (int i = 0; i < orderCount; i++)
-        {
-            orders.Add(new OrdersModel
-            {
-                UserID = (i % users.Count) + 1,
-                ProductID = random.Next(products.Count) + 1,
-                Date = DateTime.Today.AddDays(-i)
-            });
-        }
-
         // INSERT USERS
         foreach (var user in users)
         {
@@ -404,21 +391,15 @@ public class DatabaseFiller
             reportProductProgress?.Invoke(1);
         }
 
-        // INSERT ORDERS
-        foreach (var order in orders)
-        {
-            InsertOrder(order);
-            reportOrderProgress?.Invoke(1);
-        }
 
         // REWARD ITEMS
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(451, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(452, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(453, 30));
 
-        ProductModel RewardItem1 = ProductAccess.GetProductByID(451);
-        ProductModel RewardItem2 = ProductAccess.GetProductByID(452);
-        ProductModel RewardItem3 = ProductAccess.GetProductByID(453);
+        ProductModel RewardItem1 = ProductAccess.GetProductByID(451)!;
+        ProductModel RewardItem2 = ProductAccess.GetProductByID(452)!;
+        ProductModel RewardItem3 = ProductAccess.GetProductByID(453)!;
 
         RewardItem1.Price = 0;
         RewardItem2.Price = 0;
@@ -433,28 +414,59 @@ public class DatabaseFiller
         ProductAccess.SetProductVisibility(452, false);
         ProductAccess.SetProductVisibility(453, false);
 
+        // Add birthday Item
+        var birthdayPresent = new ProductModel(
+            name: "Birthday Present",
+            price: 0.00, // Free gift
+            nutritionDetails: "N/A",
+            description: "A free gift to celebrate your birthday! Enjoy your special day.",
+            category: "Gifts",
+            location: 0,
+            quantity: 999,
+            visible: 0
+        );
+        ProductAccess.AddProduct(birthdayPresent);
+
+        // SEED DISCOUNTS
+        var weeklyDiscounts = new List<DiscountsModel>
+        {
+            new DiscountsModel(1, 10, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(2, 15, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(3, 20, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(4, 5, "Weekly", DateTime.Now, DateTime.Now.AddDays(7)),
+            new DiscountsModel(5, 12, "Weekly", DateTime.Now, DateTime.Now.AddDays(7))
+        };
+
+        // Voeg Weekly kortingen toe
+        foreach (var discount in weeklyDiscounts)
+        {
+            DiscountsAccess.AddDiscount(discount);
+        }
+        
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
-        for (int i = 0; i < orderCount; i++)
+        for (int i = 0; i < orderCount/15; i++)
         {
-            // Create a corresponding OrderHistory entry for each order
             var history = new OrderHistoryModel
             {
                 UserId = (i % users.Count) + 1,
-                Date = DateTime.Today.AddDays(-i)
+                Date = DateTime.Today.AddDays(-i * (36500 / orderCount))
             };
 
-            int orderHistoryId = InsertOrderHistory(history); // insert into DB and get the ID
+            int orderHistoryId = InsertOrderHistory(history);
             orderHistoryList.Add(history);
 
-            // OPTIONAL: Add random OrderItems for this OrderHistory
-            int itemCount = random.Next(1, 4); // 1–3 items per order
+            int itemCount = random.Next(1,3); // 1–2 items per order
             for (int j = 0; j < itemCount; j++)
             {
                 var product = products[random.Next(products.Count)];
-                InsertOrderItem(orderHistoryId, products.IndexOf(product) + 1, random.Next(1, 5), product.Price);
+                InsertOrderItem(history.UserId, orderHistoryId, products.IndexOf(product) + 1, product.Price, history.Date);
             }
+
+            // ✅ increment once per order
+            reportOrderProgress?.Invoke(1);
         }
+
 
         // Seed default shop info
         var defaultShopInfo = new ShopInfoModel
@@ -492,79 +504,43 @@ public class DatabaseFiller
 
     public static void InsertUser(UserModel user)
     {
-        _sharedConnection.Execute(@"
-        INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, AccountStatus)
-        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @AccountStatus);", user);
+        _sharedConnection!.Execute(@"
+        INSERT INTO Users (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, Birthdate, City, AccountStatus)
+        VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @Birthdate, @City, @AccountStatus);", user);
     }
 
     public static void InsertProduct(ProductModel product)
     {
-        _sharedConnection.Execute(@"
+        _sharedConnection!.Execute(@"
         INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
         VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);", product);
     }
 
-    public static void InsertOrder(OrdersModel order)
-    {
-        _sharedConnection.Execute(@"
-        INSERT INTO Orders (UserID, ProductID, Date)
-        VALUES (@UserID, @ProductID, @Date);", order);
-    }
-
-    public static void InsertWeeklyPromotions(WeeklyPromotionsModel model)
-    {
-        _sharedConnection.Execute(@"
-        INSERT INTO WeeklyPromotions (ProductID, Discount) 
-        VALUES (@ProductID, @Discount);", model);
-    }
+    // public static void InsertOrder(OrdersModel order)
+    // {
+    //     _sharedConnection.Execute(@"
+    //     INSERT INTO Orders (UserID, ProductID, Date)
+    //     VALUES (@UserID, @ProductID, @Date);", order);
+    // }
 
     public static int InsertOrderHistory(OrderHistoryModel order)
     {
-        _sharedConnection.Execute("PRAGMA foreign_keys = ON;");
+        _sharedConnection!.Execute("PRAGMA foreign_keys = ON;");
         string sql = @" 
             INSERT INTO OrderHistory (UserId, Date)
             VALUES (@UserId, @Date);
             SELECT last_insert_rowid();
         ";
-        int orderId = _sharedConnection.ExecuteScalar<int>(sql, order);
+        int orderId = _sharedConnection!.ExecuteScalar<int>(sql, order);
         return orderId;
     }
 
-    public static void InsertOrderItem(int orderId, int productId, int quantity, double price)
+    public static void InsertOrderItem(int UserID, int orderId, int productId, double price, DateTime date)
     {
-        _sharedConnection.Execute(@"
-            INSERT INTO OrderItem (OrderId, ProductId, Quantity, Price)
-            VALUES (@OrderId, @ProductId, @Quantity, @Price)
-            ON CONFLICT(OrderId, ProductId)
-            DO UPDATE SET
-                Quantity = excluded.Quantity,
-                Price = excluded.Price;",
-            new { OrderId = orderId, ProductId = productId, Quantity = quantity, Price = price }
+        _sharedConnection!.Execute(@"
+            INSERT INTO Orders (UserID, OrderId, ProductId, Price, Date)
+            VALUES (@UserID, @OrderId, @ProductId, @Price, @Date);",
+            new { UserID = UserID, OrderId = orderId, ProductId = productId, Price = price, Date = date }
         );
-    }
-
-    public static void SeedWeeklyPromotions()
-    {
-        var products = ProductAccess.GetAllProducts();
-        if (products.Count < 5)
-            return;
-
-        Random random = new Random();
-
-        var selectedProducts = products
-            .OrderBy(p => Guid.NewGuid())
-            .Take(5)
-            .ToList();
-
-        foreach (var product in selectedProducts)
-        {
-            double discount = random.Next(1, 7); // 1–6 euros
-            if (discount >= product.Price)
-            {
-                discount = Math.Max(0.5, product.Price - 0.5);
-            }
-            discount = Math.Round(discount, 2);
-            InsertWeeklyPromotions(new WeeklyPromotionsModel(product.ID, discount));
-        }
     }
 }
