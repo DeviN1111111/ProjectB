@@ -20,12 +20,12 @@ public static class MenuUI
             if (SessionManager.CurrentUser == null)
             {
                 // Options when you're not logged in
-                options.AddRange(new[] { "Login", "Register", "Shop Details", "Exit" });
+                options.AddRange(new[] { "Login", "Register", "Shop Details", "Shop Reviews", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounted Products", "Shop Details", "Settings", "Logout", "Exit"});
+                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounted Products", "Shop Details", "Shop Reviews", "Settings", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -75,6 +75,9 @@ public static class MenuUI
                     break;
                 case "Shop Details":
                     ShopDetailsUI.Show();
+                    break;
+                case "Shop Reviews":
+                    ShopReviewUI.ShowMenu();
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
