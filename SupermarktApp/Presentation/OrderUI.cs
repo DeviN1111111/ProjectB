@@ -9,6 +9,7 @@ public class Order
     private static string Safe(string text) => Markup.Escape(text);
     public static double CouponCredit = 0;
     public static int? SelectedCouponId = null;
+    public static double TotalPrice = 0;
     public static async Task ShowCart()
     {
         Console.Clear();
@@ -93,6 +94,7 @@ public class Order
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
+        TotalPrice = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
@@ -243,7 +245,8 @@ public class Order
                     return;
                 }
                 // Add reward points to user
-                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
+                double rewardableAmount = Math.Max(0, TotalPrice);
+                int rewardPoints = RewardLogic.CalculateRewardPoints(rewardableAmount);
                 RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 Console.Clear();
@@ -427,7 +430,21 @@ public class Order
                 var coupon = CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
                 if (coupon != null)
                 {
-                    AnsiConsole.MarkupLine($"[green]Coupon #{coupon.Id} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
+                    var user = SessionManager.CurrentUser;
+                    var couponNumber = coupon.Id;
+                    if (user != null)
+                    {
+                        var numberedCoupon = CouponLogic.GetAllCoupons(user.ID)
+                            .Where(c => c.IsValid && c.Credit > 0)
+                            .Select((c, index) => new { Id = c.Id, Number = index + 1 })
+                            .FirstOrDefault(entry => entry.Id == coupon.Id);
+                        if (numberedCoupon != null)
+                        {
+                            couponNumber = numberedCoupon.Number;
+                        }
+                    }
+
+                    AnsiConsole.MarkupLine($"[green]Coupon #{couponNumber} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
                 }
                 else
                 {

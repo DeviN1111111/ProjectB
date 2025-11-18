@@ -60,72 +60,149 @@ public static class ManagementUI
     }
     public static void CreateCouponForUser()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Create Coupon")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var email = AnsiConsole.Prompt(new TextPrompt<string>("Enter user email:"));
-        var user = LoginLogic.GetUserByEmail(email);
-        if (user == null)
+        while (true)
         {
-            AnsiConsole.MarkupLine("[red]User not found.[/]");
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Create Coupon")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            List<UserModel> allUsers = AdminLogic.GetAllUsers();
+
+            var choices = allUsers
+                .Select(user =>
+                {
+                    var label = $"User [yellow]{Markup.Escape(user.Name)}[/] - [blue]{Markup.Escape(user.Email)}[/]";
+                    return (User: user, Label: label);
+                })
+                .ToList();
+
+            var selection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select an user to create a coupon for")
+                     .HighlightStyle(new Style(Hover))
+                    .PageSize(10)
+                    .AddChoices(choices.Select(c => c.Label).Concat(new[] { "Go back" })));
+
+            if (selection == "Go back")
+                DisplayMenu();
+
+            var chosen = choices.FirstOrDefault(c => c.Label == selection);
+            if (chosen.User == null)
+            {
+                AnsiConsole.MarkupLine("[red]User not found.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var credit = AnsiConsole.Prompt(new TextPrompt<double>("Enter coupon credit:"));
+            if (credit <= 0 || credit > 500)
+            {
+                AnsiConsole.MarkupLine("[red]Credit must be greater than 0 and less than 500.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            CouponLogic.CreateCoupon(chosen.User.ID, credit);
+            AnsiConsole.MarkupLine("[green]Coupon created successfully.[/]");
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
             Console.ReadKey();
             return;
         }
-
-        var credit = AnsiConsole.Prompt(new TextPrompt<double>("Enter coupon credit:"));
-        CouponLogic.CreateCoupon(user.ID, credit);
-        AnsiConsole.MarkupLine("[green]Coupon created successfully.[/]");
-        AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
-        Console.ReadKey();
     }
     public static void EditCoupons()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Edit Coupon")
-                .Centered()
-                .Color(AsciiPrimary));
-        var id = AnsiConsole.Prompt(new TextPrompt<int>("Enter coupon id:"));
-        var coupon = CouponAccess.GetCouponById(id);
-        if (coupon == null)
-        {
-            AnsiConsole.MarkupLine("[red]Coupon not found.[/]");
-            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
-            Console.ReadKey();
-            return;
-        }
-        var newCredit = AnsiConsole.Prompt(new TextPrompt<double>("New credit:").DefaultValue(coupon.Credit));
-        var validityChoice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("Set validity:")
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Valid", "Invalid" }));
-        var newIsValid = validityChoice == "Valid";
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Confirm Changes")
-                .Centered()
-                .Color(AsciiPrimary));
-        AnsiConsole.MarkupLine($"Id: [yellow]{coupon.Id}[/]");
-        AnsiConsole.MarkupLine($"UserId: [blue]{coupon.UserId}[/]");
-        AnsiConsole.MarkupLine($"Credit: [red]{coupon.Credit}[/] -> [green]{newCredit}[/]");
-        AnsiConsole.MarkupLine($"IsValid: [red]{coupon.IsValid}[/] -> [green]{newIsValid}[/]");
-        var confirm = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Confirm", "Cancel" }));
-        if (confirm == "Confirm")
-        {
-            coupon.Credit = newCredit;
-            coupon.IsValid = newIsValid;
-            CouponLogic.EditCoupon(coupon);
-            AnsiConsole.MarkupLine("[green]Coupon updated successfully.[/]");
-            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
-            Console.ReadKey();
+        while (true)
+            {
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Edit Coupon")
+                    .Centered()
+                    .Color(AsciiPrimary));
+            
+            var allUsers = AdminLogic.GetAllUsers();
+            var userSelection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select a user to edit their coupons")
+                    .HighlightStyle(new Style(Hover))
+                    .PageSize(10)
+                    .AddChoices(allUsers.Select(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]").Concat(new[] { "Go back" })));
+            if (userSelection == "Go back") DisplayMenu();
+
+            var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]" == userSelection);
+            if (selectedUser == null)
+            {
+                AnsiConsole.MarkupLine("[red]User not found.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var userCoupons = CouponLogic.GetAllCoupons(selectedUser.ID);
+            if (userCoupons.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[yellow]This user has no coupons.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var couponSelection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select a coupon to edit")
+                    .HighlightStyle(new Style(Hover))
+                    .PageSize(10)
+                    .AddChoices(userCoupons.Select(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}").Concat(new[] { "Go back" })));
+            if (couponSelection == "Go back") continue;
+
+            var selectedCoupon = userCoupons.FirstOrDefault(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}" == couponSelection);
+            if (selectedCoupon == null)
+            {
+                AnsiConsole.MarkupLine("[red]Coupon not found.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var newCredit = AnsiConsole.Prompt(new TextPrompt<double>("New credit (greater than 0 and less than 500):").DefaultValue(selectedCoupon.Credit));
+            if (newCredit <= 0 || newCredit > 500)
+            {
+                AnsiConsole.MarkupLine("[red]Credit must be greater than 0 and less than 500.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+            var validityChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Set validity:")
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(new[] { "Valid", "Invalid" }));
+            var newIsValid = validityChoice == "Valid";
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Confirm Changes")
+                    .Centered()
+                    .Color(AsciiPrimary));
+            AnsiConsole.MarkupLine($"Id: [yellow]{selectedCoupon.Id}[/]");
+            AnsiConsole.MarkupLine($"UserId: [blue]{selectedCoupon.UserId}[/]");
+            AnsiConsole.MarkupLine($"Credit: [red]{selectedCoupon.Credit}[/] -> [green]{newCredit}[/]");
+            AnsiConsole.MarkupLine($"IsValid: [red]{selectedCoupon.IsValid}[/] -> [green]{newIsValid}[/]");
+            var confirm = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(new[] { "Confirm", "Cancel" }));
+            if (confirm == "Confirm")
+            {
+                selectedCoupon.Credit = newCredit;
+                selectedCoupon.IsValid = newIsValid;
+                CouponLogic.EditCoupon(selectedCoupon);
+                AnsiConsole.MarkupLine("[green]Coupon updated successfully.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+            }
         }
     }
     public static void ChangeProductDetails()
