@@ -639,7 +639,7 @@ public class Order
                 var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
                 if (selectedOrder.FineDate != null)
                 {
-                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:yyyy-MM-dd HH:mm}[/] to pay.[/]\n");
+                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:dd-MM-yyyy HH:mm}[/] to pay.[/]\n");
                 }
                 
                 var payChoice = AnsiConsole.Prompt(

@@ -9,8 +9,8 @@ public static class LoginAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         db.Execute(@"INSERT INTO Users 
-            (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, City, TWOFAEnabled, AccountStatus)
-            VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @City, @TwoFAEnabled, @AccountStatus)", user);
+            (Name, LastName, Email, Password, Address, Zipcode, PhoneNumber, Birthdate,City, TWOFAEnabled, AccountStatus)
+            VALUES (@Name, @LastName, @Email, @Password, @Address, @Zipcode, @PhoneNumber, @Birthdate, @City, @TwoFAEnabled, @AccountStatus)", user);
     }
 
     public static UserModel? Login(string Email, string Password)
