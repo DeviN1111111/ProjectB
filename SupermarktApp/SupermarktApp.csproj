@@ -16,8 +16,9 @@
   </ItemGroup>
   
   <ItemGroup>
-    <None Include="EmailTemplates\PaymentCodeTemplate.html">
+    <None Include="EmailTemplates\*.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
 </Project>

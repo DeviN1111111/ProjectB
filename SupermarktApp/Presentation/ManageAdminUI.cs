@@ -226,8 +226,24 @@ public class ManageAdminUI
                 AnsiConsole.MarkupLine("[blue]Choose between User and Admin[/]");
                 AccountStatus = AnsiConsole.Prompt(new TextPrompt<string>("What role should the account have?"));
             } while (AccountStatus != "User" && AccountStatus != "Admin");
-
-            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City, false, AccountStatus);
+            DateTime Birthdate;
+            while (true)
+            {
+                // Prompt for birthdate until valid
+                string birthdateInput = AnsiConsole.Prompt(new TextPrompt<string>("What's your birthdate? (DD-MM-YYYY)"));
+                if (!DateTime.TryParseExact(
+                        birthdateInput,
+                        "dd-MM-yyyy", 
+                        null, System.Globalization.DateTimeStyles.None, out Birthdate))
+                {
+                    break;
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Invalid date format. Please use DD-MM-YYYY.[/]");
+                }
+            }
+            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber,Birthdate, City, false, AccountStatus);
             if (Errors.Count == 0)
             {
                 AnsiConsole.MarkupLine("[green]Registration successful![/]");

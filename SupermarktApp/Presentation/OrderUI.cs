@@ -7,6 +7,8 @@ public class Order
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     private static string Safe(string text) => Markup.Escape(text);
+    public static double CouponCredit = 0;
+    public static int? SelectedCouponId = null;
     public static async Task ShowCart()
     {
         Console.Clear();
@@ -77,7 +79,12 @@ public class Order
         }
         // Summary box
         var panel = new Panel(
-            new Markup($"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(UnpaidFine, 2)}[/]\n[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine, 2)}[/]"))
+            new Markup(
+                $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
+                $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
+                $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(UnpaidFine, 2)}[/]\n" +
+                $"[bold white]Coupon Credit:[/] [green]€{Math.Round(CouponCredit, 2)}[/]\n" +
+                $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine - CouponCredit, 2)}[/]"))
             .Header("[bold white]Summary[/]", Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -85,7 +92,7 @@ public class Order
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
-        double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
+        double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
@@ -207,16 +214,20 @@ public class Order
 
 
 
-    public static async Task Checkout(List<CartModel> cartProducts, List<ProductModel> allProducts, double totalAmount, double UnpaidFine)
+    public static async Task Checkout(
+        List<CartModel> cartProducts, 
+        List<ProductModel> allProducts, 
+        double totalAmount, 
+        double UnpaidFine)
     {
-        // Checkout or go back options
+
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
         .AddChoices(new[]{
-
             "Checkout",
             "Remove items",
             "Change quantity",
+            "Add coupon",
             "Go back"
         }));
 
@@ -273,10 +284,15 @@ public class Order
                             }
                         }
 
-                        PayLaterLogic.Pay();
 
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
                         OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
+                        PayLaterLogic.Pay();
+                        if (SelectedCouponId.HasValue)
+                        {
+                            CouponLogic.UseCoupon(SelectedCouponId.Value);
+                            CouponLogic.ResetCouponSelection();
+                        }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -311,6 +327,12 @@ public class Order
 
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
                         OrderLogic.AddOrderWithItems(allOrderEntrie, allProducts);
+                        if (SelectedCouponId.HasValue)
+                        {
+                            CouponLogic.UseCoupon(SelectedCouponId.Value);
+                            CouponLogic.ResetCouponSelection();
+                        }
+
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -338,7 +360,11 @@ public class Order
                             }
                         }
                         OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
-
+                        if (SelectedCouponId.HasValue)
+                        {
+                            CouponLogic.UseCoupon(SelectedCouponId.Value);
+                            CouponLogic.ResetCouponSelection();
+                        }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -394,6 +420,21 @@ public class Order
                     ShowCart();
                 }
                 break;
+
+            case "Add coupon":
+                var coupon = CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
+                if (coupon != null)
+                {
+                    AnsiConsole.MarkupLine($"[green]Coupon #{coupon.Id} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[yellow]No coupon selected.[/]");
+                }
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey(true);
+                await ShowCart();
+                return;
 
             case "Go back":
                 break;
@@ -456,11 +497,23 @@ public class Order
         OrderLogic.RemoveFromCart(productId);
     }
 
-    public static void DisplayOrderHistory()
+    public static async Task DisplayOrderHistory()
     {
         while (true)
         {
             Console.Clear();
+
+            var currentUser = SessionManager.CurrentUser!;
+            var firstOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
+            if (firstOrders != null && firstOrders.Count == 1)
+            {
+            var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
+            if (userCoupons == null || userCoupons.Count == 0)
+            {
+                CouponLogic.CreateCoupon(currentUser.ID, 5);
+            }
+            }
+            
             AnsiConsole.Write(
                 new FigletText("Order History")
                     .Centered()
@@ -610,9 +663,6 @@ public class Order
                     if (isPaid)
                     {
                         AnsiConsole.MarkupLine("[green]Payment successful.[/]");
-                        int latePaymentReward = RewardLogic.CalculateRewardPoints(finalTotal);
-                        RewardLogic.AddRewardPointsToUser(latePaymentReward);
-                        AnsiConsole.MarkupLine($"[italic yellow]Added {latePaymentReward} reward points to your account![/]");
                     }
                     else
                     {
