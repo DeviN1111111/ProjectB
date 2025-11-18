@@ -196,7 +196,21 @@ public static class LoginUI
             {
                 AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
                 email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
-            } while (ValidaterLogic.ValidateEmail(email) == false);
+
+                if (!ValidaterLogic.ValidateEmail(email))
+                {
+                    AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
+                    continue;
+                }
+
+                if (UserAccess.EmailExists(email))
+                {
+                    AnsiConsole.MarkupLine($"[red]The email [yellow]{email}[/] is already registered. Please use a different one![/]");
+                    continue;
+                }
+                break;
+
+            } while (true);
             string password;
             do
             {

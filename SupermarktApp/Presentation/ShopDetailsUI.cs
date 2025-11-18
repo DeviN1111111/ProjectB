@@ -14,6 +14,8 @@ public static class ShopDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
 
+
+
         var table = new Table();
 
         var description = shopInfo.Description;
