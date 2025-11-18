@@ -19,7 +19,7 @@ public static class ManagementUI
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
+                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
 
         switch (period)
         {
@@ -52,12 +52,90 @@ public static class ManagementUI
                 DeleteDiscountSpecificDate();
                 break;
 
+            
+            case "Create Coupon":
+                CreateCouponForUser();
+                break;
+
+            case "Edit Coupons":
+                EditCoupons();
+                break;
+                
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
         }
     }
+    public static void CreateCouponForUser()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Create Coupon")
+                .Centered()
+                .Color(AsciiPrimary));
 
+        var email = AnsiConsole.Prompt(new TextPrompt<string>("Enter user email:"));
+        var user = LoginLogic.GetUserByEmail(email);
+        if (user == null)
+        {
+            AnsiConsole.MarkupLine("[red]User not found.[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
+
+        var credit = AnsiConsole.Prompt(new TextPrompt<double>("Enter coupon credit:"));
+        CouponLogic.CreateCoupon(user.ID, credit);
+        AnsiConsole.MarkupLine("[green]Coupon created successfully.[/]");
+        AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+        Console.ReadKey();
+    }
+    public static void EditCoupons()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Edit Coupon")
+                .Centered()
+                .Color(AsciiPrimary));
+        var id = AnsiConsole.Prompt(new TextPrompt<int>("Enter coupon id:"));
+        var coupon = CouponAccess.GetCouponById(id);
+        if (coupon == null)
+        {
+            AnsiConsole.MarkupLine("[red]Coupon not found.[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
+        var newCredit = AnsiConsole.Prompt(new TextPrompt<double>("New credit:").DefaultValue(coupon.Credit));
+        var validityChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Set validity:")
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Valid", "Invalid" }));
+        var newIsValid = validityChoice == "Valid";
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Confirm Changes")
+                .Centered()
+                .Color(AsciiPrimary));
+        AnsiConsole.MarkupLine($"Id: [yellow]{coupon.Id}[/]");
+        AnsiConsole.MarkupLine($"UserId: [blue]{coupon.UserId}[/]");
+        AnsiConsole.MarkupLine($"Credit: [red]{coupon.Credit}[/] -> [green]{newCredit}[/]");
+        AnsiConsole.MarkupLine($"IsValid: [red]{coupon.IsValid}[/] -> [green]{newIsValid}[/]");
+        var confirm = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Confirm", "Cancel" }));
+        if (confirm == "Confirm")
+        {
+            coupon.Credit = newCredit;
+            coupon.IsValid = newIsValid;
+            CouponLogic.EditCoupon(coupon);
+            AnsiConsole.MarkupLine("[green]Coupon updated successfully.[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+        }
+    }
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
@@ -192,14 +270,17 @@ public static class ManagementUI
         AnsiConsole.MarkupLine($"Enter the week number (1-53) for which you want to apply the discount for [blue]{Product.Name}[/]:");
 
         string week = "";
+        int thisweek = ISOWeek.GetWeekOfYear(DateTime.Now);
         int intweek = 0;
         Console.Clear();
         AnsiConsole.Write(
             new FigletText("Choose week number")
                 .Centered()
                 .Color(AsciiPrimary));
-        AnsiConsole.MarkupLine($"[yellow]Enter a number(1-53)[/] for which you want to apply the discount for [blue]{Product.Name}[/]:");
-        AnsiConsole.MarkupLine($"[blue]Search: [/]");
+        
+        AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
+        AnsiConsole.MarkupLine($"Currently week: {thisweek}");
+        AnsiConsole.MarkupLine($"[blue]Weeks from now: {week}[/]");
 
         while (true)
         {
@@ -218,22 +299,11 @@ public static class ManagementUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-            if (week.Length == 0)
-            {
-                AnsiConsole.MarkupLine($"[yellow]Enter a number(1-53)[/] for which you want to apply the discount for [blue]{Product.Name}[/]:");
-                AnsiConsole.MarkupLine($"[blue]Search: [/]");
-            }
-            else
-            {
-                AnsiConsole.MarkupLine($"[yellow]Enter a number(1-53)[/] for which you want to apply the discount for [blue]{Product.Name}[/]:");
-                AnsiConsole.MarkupLine($"[blue]Search: {week}[/]");
-            }
-
             int year = DateTime.Now.Year;
             if (week.Length != 0 && week.Length < 4)
             {
                 intweek = Convert.ToInt32(week);
-                intweek += 45; //Voor testdoeleinden, zodat je altijd een geldige week hebt.
+                intweek += thisweek; //Voor testdoeleinden, zodat je altijd een geldige week hebt.
                 if (intweek > 53)
                 {
                     intweek -= 53;
@@ -241,8 +311,21 @@ public static class ManagementUI
                 }
             }
 
+            if (week.Length == 0)
+            {
+                AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
+                AnsiConsole.MarkupLine($"Currently week: {thisweek}");
+                AnsiConsole.MarkupLine($"[blue]Weeks from now: {week}[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
+                AnsiConsole.MarkupLine($"Currently week: {thisweek}");
+                AnsiConsole.MarkupLine($"[blue]Weeks from now: {week}[/]");
+            }
+
             if (intweek < 1 || intweek > 53)
-                AnsiConsole.MarkupLine("[red]Please enter a valid week number (1-53).[/]");
+                continue;
             else if (week == "")
             {
                 continue;
@@ -253,7 +336,7 @@ public static class ManagementUI
                 DateTime end = ISOWeek.ToDateTime(year, intweek, DayOfWeek.Sunday);
 
                 Console.WriteLine();
-                Console.WriteLine($"Week {week} of {year}");
+                Console.WriteLine($"Week {intweek} of {year}");
                 Console.WriteLine($"Starts: {start:dd-MM-yyyy}");
                 Console.WriteLine($"Ends:   {end:dd-MM-yyyy}");
                 if (key.Key == ConsoleKey.Enter)
@@ -271,7 +354,8 @@ public static class ManagementUI
                         }
                     }
                     DiscountsLogic.AddDiscount(DiscountProduct);
-                    AnsiConsole.MarkupLine($"[green]Succesfully added a discount of [red]{discount}%[/] to [blue]{Product.Name}[/] for week [red]{intweek}[/]. Press any key to continue.[/]");
+                    System.Console.WriteLine();
+                    AnsiConsole.MarkupLine($"[green]Succesfully added a discount of [blue]{discount}%[/] to [blue]{Product.Name}[/] in year: [blue]{year}[/] for week [blue]{intweek}[/]. Press any key to continue.[/]");
                     Console.ReadKey();
                     return;
                 }

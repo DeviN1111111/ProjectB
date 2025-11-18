@@ -20,10 +20,10 @@ public static class DiscountsAccess
         WHERE Id = @ProductID", Discount);
     }
 
-    public static List<ProductModel> GetWeeklyDiscounts()
+    public static List<DiscountsModel> GetWeeklyDiscounts()
     {
-        var products = _sharedConnection.Query<ProductModel>(
-        "SELECT *FROM Products WHERE DiscountType = @DiscountType",
+        var products = _sharedConnection.Query<DiscountsModel>(
+        "SELECT * FROM Discounts WHERE DiscountType = @DiscountType",
         new { DiscountType = "Weekly" }).ToList();
 
         return products;

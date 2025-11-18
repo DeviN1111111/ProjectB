@@ -15,5 +15,11 @@
     <PackageReference Include="Spectre.Console" Version="0.51.1" />
     <None Include="EmailTemplates\**" CopyToOutputDirectory="Always" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="EmailTemplates\*.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

@@ -13,23 +13,18 @@ public class DiscountsLogic
         DiscountsAccess.AddDiscount(Discount);
     }
 
-    public static List<ProductModel> GetWeeklyDiscounts() // this returns all ACTIVE weekly discounts
+    public static List<DiscountsModel> GetWeeklyDiscounts() // this returns all ACTIVE weekly discounts
     {
-        List<ProductModel> weeklyProducts = DiscountsAccess.GetWeeklyDiscounts().ToList();
-        List<ProductModel> validWeeklyProducts = new List<ProductModel>();
+        List<DiscountsModel> weeklyProducts = DiscountsAccess.GetWeeklyDiscounts().ToList();
+        List<DiscountsModel> validWeeklyProducts = new List<DiscountsModel>();
 
-        foreach (var product in weeklyProducts)
+        foreach(var discount in weeklyProducts)
         {
-            var discounts = DiscountsAccess.GetDiscountsByProductID(product.ID);
-            foreach(var discount in discounts)
+            if (discount != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
             {
-                if (product != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
-                {
-                    validWeeklyProducts.Add(product);
-                }
+                validWeeklyProducts.Add(discount);
             }
         }
-
         return validWeeklyProducts;
     }
 
@@ -80,7 +75,7 @@ public class DiscountsLogic
         }
 
         RemoveAllPersonalDiscountsByUserID(userID); 
-        List<ProductModel> top5Products = OrderItemsAccess.GetTop5MostBoughtProducts(userID);
+        List<ProductModel> top5Products = OrderAccess.GetTop5MostBoughtProducts(userID);
         
         if (top5Products.Count < 5)
             return;

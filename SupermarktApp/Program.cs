@@ -8,12 +8,9 @@ using System.Globalization;
 
 class Program
 {
-    static void Main()
-    {
-        // DatabaseFiller.RunDatabaseMethods(1000);
-        MenuUI.ShowMainMenu();
-        // ManagementUI.DiscountSpecificDate();
-        // ManagementUI.DiscountSpecificDate();
-        // ManagementUI.DeleteDiscountSpecificDate();
+    static async Task Main()
+    { 
+        DatabaseFiller.RunDatabaseMethods(10000);
+        await MenuUI.ShowMainMenu();
     }
 }
