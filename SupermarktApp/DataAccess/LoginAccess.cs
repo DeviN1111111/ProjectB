@@ -23,4 +23,21 @@ public static class LoginAccess
               Password = @Password",
             new { Email, Password });
     }
+    public static UserModel? GetUserByEmail(string email)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.QueryFirstOrDefault<UserModel>(
+            @"SELECT * FROM Users 
+              WHERE Email = @Email",
+            new { Email = email });
+    }
+    public static void UpdateUserPassword(int userId, string newPassword)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(
+            @"UPDATE Users 
+              SET Password = @NewPassword 
+              WHERE ID = @UserId",
+            new { NewPassword = newPassword, UserId = userId });
+    }
 }

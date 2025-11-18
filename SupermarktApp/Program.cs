@@ -4,14 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using NUnit.Framework.Constraints;
 using Spectre.Console;
+using System.Globalization;
 
 class Program
 {
-    static void Main()
-    {
-        DatabaseFiller.RunDatabaseMethods(1000);
-        // StartScreen.ShowMainMenu();
-        // StatisticsUI.DisplayMenu();
-        MenuUI.ShowMainMenu();
+    static async Task Main()
+    { 
+        DatabaseFiller.RunDatabaseMethods(10000);
+        await MenuUI.ShowMainMenu();
     }
 }

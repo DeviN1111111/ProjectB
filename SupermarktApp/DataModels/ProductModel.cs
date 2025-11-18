@@ -9,6 +9,8 @@ public class ProductModel
     public int Location { get; set; }
     public int Quantity { get; set; }
     public int Visible { get; set; } = 1;
+    public double DiscountPercentage { get; set; }
+    public string DiscountType{ get; set;}
 
     public ProductModel(string name, double price, string nutritionDetails, string description, string category, int location, int quantity, int visible)
     {
