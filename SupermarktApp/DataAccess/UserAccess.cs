@@ -87,6 +87,7 @@ public static class UserAccess
         );
         // if there is a match found
         return count > 0;
+    }
     public static List<UserModel>? GetUsersByDateOfBirth(DateTime dateOfBirth)
     {
         using var db = new SqliteConnection(ConnectionString);
