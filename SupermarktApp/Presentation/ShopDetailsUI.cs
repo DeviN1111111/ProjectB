@@ -14,9 +14,22 @@ public static class ShopDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-        
+
 
         var table = new Table();
+
+        var description = shopInfo.Description;
+
+        var body = description;
+        var panel = new Panel(body)
+        {
+            Border = BoxBorder.Heavy,
+            Header = new PanelHeader($"[bold #1B98E0]Info[/]").Centered()
+        };
+        table.Expand = true;
+
+        panel.Expand = true;
+        panel.Header = new PanelHeader("[bold #1B98E0]Info[/]").Centered();
         table.AddColumn(new TableColumn("[bold #00014d]Day[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Date[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Opening Hours[/]").Centered());
@@ -54,6 +67,8 @@ public static class ShopDetailsUI
                 table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSunday} - {shopInfo.ClosingHourSunday}[/]");
         }
         table.Border(TableBorder.Heavy);
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(panel); 
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
