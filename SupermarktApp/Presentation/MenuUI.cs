@@ -1,8 +1,9 @@
+using System.Threading.Tasks;
 using Spectre.Console;
 public static class MenuUI
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-    public static void ShowMainMenu()
+    public static async Task ShowMainMenu()
     {
         while (true)
         {
@@ -25,11 +26,7 @@ public static class MenuUI
                     else
                         AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
                 }
-                
-
             }
-            
-
             if (SessionManager.CurrentUser == null)
             {
                 // Options when you're not logged in
@@ -84,7 +81,7 @@ public static class MenuUI
                     Order.ShowChecklist();
                     break;
                 case "Order History":
-                    Order.DisplayOrderHistory();
+                    await Order.DisplayOrderHistory();
                     break;
                 case "Management":
                     ManagementUI.DisplayMenu();
@@ -116,9 +113,6 @@ public static class MenuUI
                 case "Exit":
                     return;
             }
-
-
-
         }
     }
 }

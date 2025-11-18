@@ -12,7 +12,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo"
+        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo", "Coupon"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -139,6 +139,9 @@ public class DatabaseFiller
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 Date DATETIME NOT NULL DEFAULT (datetime('now')),
+                IsPaid BOOLEAN NOT NULL DEFAULT 1,
+                FineDate DATETIME DEFAULT NULL,
+                PaymentCode INTEGER,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );");
 
@@ -204,8 +207,16 @@ public class DatabaseFiller
                 ClosingHourSunday TEXT
             );
         ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS Coupon (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId INTERGER NOT NULL,
+                Credit DOUBLE NOT NULL,
+                IsValid BOOLEAN NOT NULL DEFAULT 1,
+                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE
+            );
+        ");
     }
-
     public static void SeedData(
         int orderCount,
         Action<int>? reportUserProgress = null,
