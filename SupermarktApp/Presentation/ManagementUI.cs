@@ -19,7 +19,7 @@ public static class ManagementUI
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
+                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
 
         switch (period)
         {
@@ -52,12 +52,90 @@ public static class ManagementUI
                 DeleteDiscountSpecificDate();
                 break;
 
+            
+            case "Create Coupon":
+                CreateCouponForUser();
+                break;
+
+            case "Edit Coupons":
+                EditCoupons();
+                break;
+                
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
         }
     }
+    public static void CreateCouponForUser()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Create Coupon")
+                .Centered()
+                .Color(AsciiPrimary));
 
+        var email = AnsiConsole.Prompt(new TextPrompt<string>("Enter user email:"));
+        var user = LoginLogic.GetUserByEmail(email);
+        if (user == null)
+        {
+            AnsiConsole.MarkupLine("[red]User not found.[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
+
+        var credit = AnsiConsole.Prompt(new TextPrompt<double>("Enter coupon credit:"));
+        CouponLogic.CreateCoupon(user.ID, credit);
+        AnsiConsole.MarkupLine("[green]Coupon created successfully.[/]");
+        AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+        Console.ReadKey();
+    }
+    public static void EditCoupons()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Edit Coupon")
+                .Centered()
+                .Color(AsciiPrimary));
+        var id = AnsiConsole.Prompt(new TextPrompt<int>("Enter coupon id:"));
+        var coupon = CouponAccess.GetCouponById(id);
+        if (coupon == null)
+        {
+            AnsiConsole.MarkupLine("[red]Coupon not found.[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
+        var newCredit = AnsiConsole.Prompt(new TextPrompt<double>("New credit:").DefaultValue(coupon.Credit));
+        var validityChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Set validity:")
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Valid", "Invalid" }));
+        var newIsValid = validityChoice == "Valid";
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Confirm Changes")
+                .Centered()
+                .Color(AsciiPrimary));
+        AnsiConsole.MarkupLine($"Id: [yellow]{coupon.Id}[/]");
+        AnsiConsole.MarkupLine($"UserId: [blue]{coupon.UserId}[/]");
+        AnsiConsole.MarkupLine($"Credit: [red]{coupon.Credit}[/] -> [green]{newCredit}[/]");
+        AnsiConsole.MarkupLine($"IsValid: [red]{coupon.IsValid}[/] -> [green]{newIsValid}[/]");
+        var confirm = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .HighlightStyle(new Style(Hover))
+                .AddChoices(new[] { "Confirm", "Cancel" }));
+        if (confirm == "Confirm")
+        {
+            coupon.Credit = newCredit;
+            coupon.IsValid = newIsValid;
+            CouponLogic.EditCoupon(coupon);
+            AnsiConsole.MarkupLine("[green]Coupon updated successfully.[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+        }
+    }
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
