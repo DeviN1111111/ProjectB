@@ -156,4 +156,5 @@ public class OrderLogic
     {
         return OrderAccess.GetOrderssByOrderId(orderId);
     }
+    public static OrderHistoryModel GetOrderByUserId(int userId) => OrderHistoryAccess.GetOrderByUserId(userId);
 }
