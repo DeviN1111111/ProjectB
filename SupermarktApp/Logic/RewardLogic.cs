@@ -20,7 +20,7 @@ public static class RewardLogic
 
     public static int CalculateRewardPoints(double amountSpent)
     {
-        if (amountSpent == 0) return 0;
+        if (amountSpent <= 0) return 0;
         return (int)Math.Floor(amountSpent / 10.0);
     }
 

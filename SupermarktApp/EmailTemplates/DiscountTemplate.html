@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupermarketApp Discounts</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .header {
+      text-align: center;
+      color: #247ba0;
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .intro {
+      text-align: center;
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .product-box {
+      background-color: #ffffff;
+      border: 2px solid #247ba0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .discount-badge {
+      display: inline-block;
+      background-color: #ff5252;
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .product-name {
+      font-size: 20px;
+      color: #247ba0;
+      font-weight: 600;
+      margin: 8px 0;
+    }
+
+    .price {
+      margin-top: 8px;
+    }
+
+    .old-price {
+      display: block;
+      color: #d9534f;
+      font-size: 16px;
+      text-decoration: line-through;
+      margin-bottom: 4px;
+    }
+
+    .new-price {
+      display: block;
+      color: #28a745;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">SupermarketApp {{DISCOUNT.TYPE}} Discounts</div>
+    <div class="intro">
+      Good news! We have 5 {{DISCOUNT.TYPE}} discounts for you!  
+      Weekly discounts are available for one week — don't miss out!
+    </div>
+
+    <!-- Product 0 -->
+    <div class="product-box">
+      <div class="discount-badge">--DISCOUNT.PERCENTAGE0--%</div>
+      <div class="product-name">--DISCOUNT.PRODUCT0--</div>
+      <div class="price">
+        <span class="old-price">€--DISCOUNT.BEFORE0--</span>
+        <span class="new-price">€--DISCOUNT.AFTER0--</span>
+      </div>
+    </div>
+
+    <!-- Product 1 -->
+    <div class="product-box">
+      <div class="discount-badge">--DISCOUNT.PERCENTAGE1--%</div>
+      <div class="product-name">--DISCOUNT.PRODUCT1--</div>
+      <div class="price">
+        <span class="old-price">€--DISCOUNT.BEFORE1--</span>
+        <span class="new-price">€--DISCOUNT.AFTER1--</span>
+      </div>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="product-box">
+      <div class="discount-badge">--DISCOUNT.PERCENTAGE2--%</div>
+      <div class="product-name">--DISCOUNT.PRODUCT2--</div>
+      <div class="price">
+        <span class="old-price">€--DISCOUNT.BEFORE2--</span>
+        <span class="new-price">€--DISCOUNT.AFTER2--</span>
+      </div>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="product-box">
+      <div class="discount-badge">--DISCOUNT.PERCENTAGE3--%</div>
+      <div class="product-name">--DISCOUNT.PRODUCT3--</div>
+      <div class="price">
+        <span class="old-price">€--DISCOUNT.BEFORE3--</span>
+        <span class="new-price">€--DISCOUNT.AFTER3--</span>
+      </div>
+    </div>
+
+    <!-- Product 4 -->
+    <div class="product-box">
+      <div class="discount-badge">--DISCOUNT.PERCENTAGE4--%</div>
+      <div class="product-name">--DISCOUNT.PRODUCT4--</div>
+      <div class="price">
+        <span class="old-price">€--DISCOUNT.BEFORE4--</span>
+        <span class="new-price">€--DISCOUNT.AFTER4--</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; 2025 Supermarket App. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>

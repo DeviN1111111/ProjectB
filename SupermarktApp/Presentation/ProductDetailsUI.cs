@@ -13,12 +13,27 @@ public static class ProductDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
         var body = string.Empty;
-        if (product.DiscountType == "Weekly" || product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)) // if u got a discount print the discounted price
+        var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
+        var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
+        double DiscountPercentage = 0;
+        string discountType = "None";
+        if(WeeklyDiscount != null)
         {
-            ProductPrice = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
+            discountType = WeeklyDiscount.DiscountType;
+            DiscountPercentage = WeeklyDiscount.DiscountPercentage;
+        }
+        else if(PersonalDiscount != null && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID))
+        {
+            discountType = PersonalDiscount.DiscountType;
+            DiscountPercentage = PersonalDiscount.DiscountPercentage;
+        }
+
+        if (DiscountPercentage > 0) // if u got a discount print the discounted price
+        {
+            ProductPrice = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
-                $"[bold #00014d]Price:[/] [#5dabcf][red strike]€{product.Price}[/] €{ProductPrice} [italic yellow]({product.DiscountType} Discount)[/][/]\n" +
+                $"[bold #00014d]Price:[/] [#5dabcf][red strike]€{product.Price}[/] €{ProductPrice} [italic yellow]({discountType} Discount)[/][/]\n" +
                 $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
                 $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
                 $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +

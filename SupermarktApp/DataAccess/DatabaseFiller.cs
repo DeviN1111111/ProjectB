@@ -118,9 +118,7 @@ public class DatabaseFiller
                 Category TEXT,
                 Location INTEGER,
                 Quantity INTEGER NOT NULL DEFAULT 0,
-                Visible INTEGER NOT NULL DEFAULT 1,
-                DiscountPercentage REAL NOT NULL DEFAULT 0,
-                DiscountType TEXT NOT NULL DEFAULT 'None'
+                Visible INTEGER NOT NULL DEFAULT 1
             );");
 
         db.Execute(@"
@@ -130,8 +128,8 @@ public class DatabaseFiller
             UserId INT NULL,
             DiscountPercentage REAL NOT NULL,
             DiscountType TEXT NOT NULL,
-            StartDate DATETIME NOT NULL,
-            EndDate DATETIME NOT NULL
+            StartDate DATETIME NULL,
+            EndDate DATETIME NULL
             );");
 
         db.Execute(@"

@@ -11,19 +11,12 @@ public static class DiscountsAccess
         _sharedConnection.Execute(@"INSERT INTO Discounts 
             (ProductId, UserId, DiscountPercentage, DiscountType, StartDate, EndDate)
             VALUES (@ProductID, @UserID, @DiscountPercentage, @DiscountType, @StartDate, @EndDate)", Discount);
-
-        _sharedConnection.Execute(@"
-        UPDATE Products
-        SET
-        DiscountPercentage = @DiscountPercentage,
-        DiscountType = @DiscountType
-        WHERE Id = @ProductID", Discount);
     }
 
-    public static List<ProductModel> GetWeeklyDiscounts()
+    public static List<DiscountsModel> GetWeeklyDiscounts()
     {
-        var products = _sharedConnection.Query<ProductModel>(
-        "SELECT *FROM Products WHERE DiscountType = @DiscountType",
+        var products = _sharedConnection.Query<DiscountsModel>(
+        "SELECT * FROM Discounts WHERE DiscountType = @DiscountType",
         new { DiscountType = "Weekly" }).ToList();
 
         return products;
@@ -37,6 +30,21 @@ public static class DiscountsAccess
 
         return products;
     }
+    public static DiscountsModel GetPeronsalDiscountByProductAndUserID(int productID, int userID)
+    {
+        var products = _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
+        "SELECT * FROM Discounts WHERE UserId = @UserID AND ProductId = @ProductID",
+        new { UserID = userID, ProductID = productID });
+        return products;
+    }
+    public static DiscountsModel GetWeeklyDiscountByProductID(int productID)
+    {
+        return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE DiscountType = @DiscountType AND ProductId = @ProductID",
+            new { DiscountType = "Weekly", ProductID = productID }
+        );
+    }
+
     public static DiscountsModel? GetDiscountsByProductID(int productID)
     {
         return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
