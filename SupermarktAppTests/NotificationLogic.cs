@@ -24,7 +24,6 @@ namespace SupermarktAppTests
 
             //Assert
             Assert.AreEqual(QuantityToAdd, updated.Quantity);
-            // Assert.AreEqual(updated.Name, product.Name);
         }
     }
 }
