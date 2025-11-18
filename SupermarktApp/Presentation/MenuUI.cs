@@ -20,7 +20,7 @@ public static class MenuUI
             if (SessionManager.CurrentUser == null)
             {
                 // Options when you're not logged in
-                options.AddRange(new[] { "Login", "Register", "Shop Details", "Shop Reviews", "Exit" });
+                options.AddRange(new[] { "Login", "Register", "Shop Details", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
