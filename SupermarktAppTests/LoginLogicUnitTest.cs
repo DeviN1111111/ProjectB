@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 
 namespace SupermarktAppTests
 {
@@ -43,6 +44,24 @@ namespace SupermarktAppTests
 
             //Assert
             Assert.IsNull(actual);
+        }
+
+        [TestMethod]
+        [DataRow("FirstNameTest", "LastNameTest", "test@gmail.com", "123456", "Test Address", "1234AB", "1234567890", "1990-01-01", "Test City", false, "User")]
+        [DataRow("FirstNameTest2", "LastNameTest", "test2@gmail.com", "123456", "Test Address", "1234AB", "1234567890", "1990-01-01", "Test City", false, "User")]
+        [DataRow("FirstNameTest3", "LastNameTest", "test3@gmail.com", "123456", "Test Address", "1234AB", "1234567890", "1990-01-01", "Test City", false, "User")]
+        public void ValidateRegister_CorrectRegister_ReturnsListErrors(string name, string lastName, string email, string password, string address, string zipcode, string phoneNumber, string birthdateString, string city, bool is2FAEnabled, string AccountStatus)
+        {
+            //Arrange
+            DatabaseFiller.RunDatabaseMethods();
+            DateTime birthdate = DateTime.Parse(birthdateString);
+
+            //Act
+            List<string> actual = LoginLogic.Register(name, lastName, email, password, address, zipcode, phoneNumber, birthdate, city, is2FAEnabled, AccountStatus);
+
+            //Assert
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(0, actual.Count);
         }
     }
 }
