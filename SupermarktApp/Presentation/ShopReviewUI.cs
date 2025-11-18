@@ -4,7 +4,13 @@ public static class ShopReviewUI
 {
     public static void ShowMenu()
     {
+
         var logic = new ShopReviewLogic();
+        // Color AsciiPrimary = Color.FromHex("#247BA0");
+        // AnsiConsole.Write(
+        //     new FigletText("Shop Reviews")
+        //         .Centered()
+        //         .Color(AsciiPrimary));
 
         while (true)
         {
@@ -18,7 +24,7 @@ public static class ShopReviewUI
             {
                 "View My Reviews",
                 "Add a Review",
-                "View Average Rating",
+                "View All Reviews",
                 "Go Back"
             };
 
@@ -37,8 +43,8 @@ public static class ShopReviewUI
                     AddReview(logic);
                     break;
 
-                case "View Average Rating":
-                    ViewAverage(logic);
+                case "View All Reviews":
+                    ShopDetailsUI.Show();
                     break;
 
                 case "Go Back":
@@ -105,19 +111,19 @@ public static class ShopReviewUI
         Console.ReadKey();
     }
 
-    private static void ViewAverage(ShopReviewLogic logic)
-    {
-        Console.Clear();
-        var user = SessionManager.CurrentUser;
-        if (user == null)
-        {
-            AnsiConsole.MarkupLine("[red]You must be logged in to view averages![/]");
-            Console.ReadKey();
-            return;
-        }
+    // private static void ViewAverage(ShopReviewLogic logic)
+    // {
+    //     Console.Clear();
+    //     var user = SessionManager.CurrentUser;
+    //     if (user == null)
+    //     {
+    //         AnsiConsole.MarkupLine("[red]You must be logged in to view averages![/]");
+    //         Console.ReadKey();
+    //         return;
+    //     }
 
-        var avg = logic.GetAverageStars(user.ID);
-        AnsiConsole.MarkupLine($"[yellow]Your average rating:[/] [green]{avg:F1}★[/]");
-        Console.ReadKey();
-    }
+    //     var avg = logic.GetAverageStars(user.ID);
+    //     AnsiConsole.MarkupLine($"[yellow]Your average rating:[/] [green]{avg:F1}★[/]");
+    //     Console.ReadKey();
+    // }
 }

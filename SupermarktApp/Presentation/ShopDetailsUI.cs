@@ -104,22 +104,27 @@ public static class ShopDetailsUI
         var currentUser = SessionManager.CurrentUser;
         if (currentUser != null)
         {
-            var addChoice = AnsiConsole.Confirm("[green]Would you like to add a review?[/]");
-            if (addChoice)
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[green]Would you like to add a review?[/]")
+                    .AddChoices("Yes", "No")
+            );
+            
+            if (choice == "Yes")
             {
                 Console.Clear();
                 AnsiConsole.Write(
                     new FigletText("Add Your Review")
                         .Centered()
                         .Color(Color.Yellow));
-
+            
                 int stars = AnsiConsole.Prompt(
                     new SelectionPrompt<int>()
                         .Title("[yellow]How many stars would you rate the shop?[/]")
                         .AddChoices(1, 2, 3, 4, 5));
-
+            
                 string text = AnsiConsole.Ask<string>("Write your [green]review text[/]:");
-
+            
                 try
                 {
                     var logic = new ShopReviewLogic();
@@ -130,11 +135,11 @@ public static class ShopDetailsUI
                 {
                     AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}");
                 }
-
+            
                 AnsiConsole.MarkupLine("[grey]Press any key to return to shop details...[/]");
                 Console.ReadKey();
-                Show();
-                return;
+            
+                return; 
             }
         }
         else
