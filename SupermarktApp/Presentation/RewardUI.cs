@@ -38,7 +38,7 @@ public static class RewardUI
                 .Title("Select an item to add to cart (this will be free in checkout)")
                 .PageSize(10)
                 .AddChoices(options);
-
+                
             var selectedItem = AnsiConsole.Prompt(prompt);
 
             switch (selectedItem)
