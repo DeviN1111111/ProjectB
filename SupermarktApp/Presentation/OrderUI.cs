@@ -73,7 +73,7 @@ public class Order
         double UnpaidFine = PayLaterLogic.Track(SessionManager.CurrentUser!);
 
        
-        if (totalAmount + deliveryFee - totalDiscount == 0)
+        if (totalAmount + UnpaidFine + deliveryFee - totalDiscount == 0)
         {
             deliveryFee = 5;
         }
