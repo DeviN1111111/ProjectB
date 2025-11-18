@@ -244,7 +244,6 @@ public class Order
                 }
                 // Add reward points to user
                 int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
-                RewardLogic.AddRewardPointsToUser(rewardPoints);
                 // pay now or pay on pickup
                 Console.Clear();
                 AnsiConsole.Write(
@@ -295,6 +294,7 @@ public class Order
                             CouponLogic.ResetCouponSelection();
                         }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -334,7 +334,6 @@ public class Order
                         }
 
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
-                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -368,7 +367,6 @@ public class Order
                         }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
-                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
 
                         OrderHistoryModel order = OrderLogic.GetOrderByUserId(SessionManager.CurrentUser!.ID);
