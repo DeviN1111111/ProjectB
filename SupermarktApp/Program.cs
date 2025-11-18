@@ -7,11 +7,9 @@ using Spectre.Console;
 
 class Program
 {
-    static void Main()
-    {
-        DatabaseFiller.RunDatabaseMethods(1000);
-        // StartScreen.ShowMainMenu();
-        // StatisticsUI.DisplayMenu();
-        MenuUI.ShowMainMenu();
+    static async Task Main()
+    { 
+        DatabaseFiller.RunDatabaseMethods(10000);
+        await MenuUI.ShowMainMenu();
     }
 }
