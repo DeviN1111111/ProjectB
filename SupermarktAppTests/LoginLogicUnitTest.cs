@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace SupermarktAppTests
 {
@@ -14,7 +15,8 @@ namespace SupermarktAppTests
         {
             //Arrange
             DatabaseFiller.RunDatabaseMethods();
-            UserModel user = new UserModel("Test", "User", email, password, "Test Address", "1234AB", "1234567890", "Test City");
+            DateTime birthdate = new DateTime(1990, 1, 1);
+            UserModel user = new UserModel("Test", "User", email, password, "Test Address", "1234AB", "1234567890", birthdate, "Test City");
             LoginAccess.Register(user);
 
             //Act
