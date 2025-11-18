@@ -42,14 +42,35 @@ public static class LoginUI
                         break;
                     }
                 }
-            }
-            else
-            {
-                SessionManager.CurrentUser = Account;
-                AnsiConsole.MarkupLine("[green]Login successful![/]");
-                AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
-                attempts = 0;
-            }
+                else
+                {
+                    SessionManager.CurrentUser = Account;
+                    AnsiConsole.MarkupLine("[green]Login successful![/]");
+                    AnsiConsole.MarkupLine($"[blue]Welcome, {SessionManager.CurrentUser.Name} {SessionManager.CurrentUser.LastName}![/]");
+                    attempts = 0;
+                    // Check for birthday
+                    var user = SessionManager.CurrentUser;
+                    if (user.Birthdate.Month == DateTime.Today.Month &&
+                        user.Birthdate.Day == DateTime.Today.Day)
+                    {
+                        // Check if they already got a gift this year
+                        if (user.LastBirthdayGift == null || user.LastBirthdayGift.Value.Year < DateTime.Today.Year)
+                        {
+                            OrderLogic.AddBirthdayGiftToCart(user);
+
+                            // Update last birthday gift date
+                            user.LastBirthdayGift = DateTime.Today;
+                            LoginLogic.UpdateLastBirthdayGiftDate(user.ID, user.LastBirthdayGift.Value);
+                        }
+                        else
+                        {
+                            AnsiConsole.MarkupLine("[yellow] You’ve already received your birthday gift this year![/]");
+                        }
+                    }
+
+
+
+                }
 
             }
             else
@@ -195,6 +216,44 @@ public static class LoginUI
             } while (ValidaterLogic.ValidatePhoneNumber(PhoneNumber) == false);
             string City = AnsiConsole.Prompt(new TextPrompt<string>("What's your city?"));
 
+            DateTime Birthdate;
+
+            while (true)
+            {
+                string birthdateInput = AnsiConsole.Prompt(
+                    new TextPrompt<string>("What's your birthdate? (DD-MM-YYYY)")
+                );
+
+                // First check format
+                if (!System.Text.RegularExpressions.Regex.IsMatch(birthdateInput, @"^\d{2}-\d{2}-\d{4}$"))
+                {
+                    AnsiConsole.MarkupLine("[red]Invalid format. Please use DD-MM-YYYY (e.g., 25-12-2005).[/]");
+                    continue;
+                }
+
+                // Then check if it's a real date
+                if (!DateTime.TryParseExact(
+                        birthdateInput,
+                        "dd-MM-yyyy",
+                        null,
+                        System.Globalization.DateTimeStyles.None,
+                        out Birthdate))
+                {
+                    AnsiConsole.MarkupLine("[red]Date is out of range — please enter a valid calendar date.[/]");
+                    continue;
+                }
+
+                // Check logical range (0–100 years)
+                if (!ValidaterLogic.ValidateDateOfBirth(Birthdate))
+                {
+                    AnsiConsole.MarkupLine("[red]Birthdate must be between 0 and 100 years old.[/]");
+                    continue;
+                }
+
+                break;
+            }
+
+
             AnsiConsole.MarkupLine($"Do you want to [green]ENABLE[/] [yellow]2FA[/] for your account?");
 
             bool is2FAEnabled = false;
@@ -225,12 +284,15 @@ public static class LoginUI
                 AnsiConsole.MarkupLine("[green]2FA has been enabled for your account![/]");
             }
 
-            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, City, is2FAEnabled);
+            List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, Birthdate, City, is2FAEnabled);
             
             if (Errors.Count == 0)
             {
                 AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
                 AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
+
+                var createdUser = LoginLogic.GetUserByEmail(email);
+                CouponLogic.CreateCoupon(createdUser!.ID, 5);
                 Console.ReadKey();
                 break;
             }

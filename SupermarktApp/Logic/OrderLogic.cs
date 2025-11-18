@@ -23,6 +23,36 @@ public class OrderLogic
         // add new item to cart
         CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity, RewardPrice);
     }
+       public static string AddBirthdayGiftToCart(UserModel user)
+        {
+            if (user == null || SessionManager.CurrentUser == null)
+            {
+                return "Error: No logged-in user found.";
+            }
+
+            // Find the birthday gift (case-insensitive)
+            var giftProduct = ProductAccess.GetAllProducts()
+                .FirstOrDefault(p => p.Name.Equals("Birthday Present", StringComparison.OrdinalIgnoreCase));
+
+            if (giftProduct == null)
+            {
+                return "No 'Birthday Present' product found in the database.";
+            }
+
+            // Ensure we're checking the current user's cart
+            var userCart = CartAccess.GetAllUserProducts(user.ID);
+            var existingItem = userCart.FirstOrDefault(p => p.ProductId == giftProduct.ID);
+
+            if (existingItem != null)
+            {
+                return "Birthday present already in your cart.";
+            }
+
+        // Add the gift to the cart
+        AddToCart(giftProduct, 1, 0, 0);
+            return $" Happy Birthday, {user.Name}! A free '{giftProduct.Name}' has been added to your cart!";
+        }
+
 
     public static List<CartModel> AllUserProducts()
     {
@@ -126,6 +156,3 @@ public class OrderLogic
         return OrderAccess.GetOrderssByOrderId(orderId);
     }
 }
-
-
-

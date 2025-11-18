@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      color: #247BA0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .code {
+      display: block;
+      text-align: center;
+      font-size: 32px;
+      letter-spacing: 5px;
+      background-color: #E0F7FA;
+      color: #006494;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">SupermarketApp</div>
+    <p>Hello,</p>
+    <p>Your payment code is:</p>
+    <div class="code">{{PAYMENT_CODE}}</div>
+    <p>Use this code to complete your transaction securely.</p>
+    <div class="footer">&copy; 2025 Supermarket App</div>
+  </div>
+</body>
+</html>

@@ -38,7 +38,7 @@ public static class ValidaterLogic
         else
             return false;
     }
-    
+
     public static bool ValidateQuantityProduct(int quantity)
     {
         if (quantity >= 0)
@@ -48,4 +48,16 @@ public static class ValidaterLogic
         else
             return false;
     }
+
+    public static bool ValidateDateOfBirth(DateTime birthdate)
+    {
+        DateTime today = DateTime.Today;
+        int age = today.Year - birthdate.Year;
+        if (birthdate > today.AddYears(-age))
+            age--;
+
+        return age >= 0 && age <= 100;
+    }
+    
+
 }
