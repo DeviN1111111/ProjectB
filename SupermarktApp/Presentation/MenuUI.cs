@@ -45,7 +45,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
                 // Options when you're logged in as a superadmin
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage Users", "Shop Details", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
             }
             else
             {

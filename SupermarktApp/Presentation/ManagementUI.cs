@@ -1,6 +1,7 @@
 using Spectre.Console;
 using System;
 using System.Globalization;
+
 public static class ManagementUI
 {
     public static readonly Color Text = Color.FromHex("#E8F1F2");
@@ -10,22 +11,67 @@ public static class ManagementUI
     public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Product Management")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var period = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
-
-        switch (period)
+        while (true)
         {
-            case "Go back":
-                return;
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Product Management")
+                    .Centered()
+                    .Color(AsciiPrimary));
 
+            var items = new List<string>
+            {
+                "Products",
+                "Shop Settings",
+                "Discounts",
+                "Coupons",
+                "Go back"
+            };
+
+            if (SessionManager.CurrentUser?.AccountStatus == "SuperAdmin")
+            {
+                items.Insert(0, "Manage Users");
+            }
+                
+            var mainChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]Choose a category:[/]")
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(items));
+
+  
+            switch (mainChoice)
+            {
+                case "Products":
+                    ShowProductMenu();
+                    break;
+                case "Shop Settings":
+                    ShowShopSettingsMenu();
+                    break;
+                case "Discounts":
+                    ShowDiscountMenu();
+                    break;
+                case "Coupons":
+                    ShowCouponMenu();
+                    break;
+                case "Go back":
+                    return;
+            }
+        }
+    }
+    static void ShowProductMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Product Options[/]")
+            .AddChoices(
+                "Add new product",
+                "Delete product",
+                "Edit product details",
+                "Back"));
+
+        switch (choice)
+        {
             case "Add new product":
                 AddProduct();
                 break;
@@ -38,6 +84,23 @@ public static class ManagementUI
                 ChangeProductDetails();
                 break;
 
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowShopSettingsMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Shop Settings[/]")
+            .AddChoices(
+                "Edit Shop Description",
+                "Edit Opening Hours",
+                "Back"));
+
+        switch (choice)
+        {
             case "Edit Shop Description":
                 ShopDetailsUI.PromptDescription();
                 break;
@@ -45,14 +108,49 @@ public static class ManagementUI
             case "Edit Opening Hours":
                 ShopDetailsUI.PromptOpeningHours();
                 break;
+
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowDiscountMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Discount Options[/]")
+            .AddChoices(
+                "Add discount on a specific date",
+                "Delete discount on a specific date",
+                "Back"));
+
+        switch (choice)
+        {
             case "Add discount on a specific date":
                 DiscountSpecificDate();
                 break;
+
             case "Delete discount on a specific date":
                 DeleteDiscountSpecificDate();
                 break;
 
-            
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowCouponMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Coupon Options[/]")
+            .AddChoices(
+                "Create Coupon",
+                "Edit Coupons",
+                "Back"));
+
+        switch (choice)
+        {
             case "Create Coupon":
                 CreateCouponForUser();
                 break;
@@ -60,12 +158,62 @@ public static class ManagementUI
             case "Edit Coupons":
                 EditCoupons();
                 break;
-                
-            default:
-                AnsiConsole.MarkupLine("[red]Invalid selection[/]");
-                break;
+
+            case "Back":
+                return;
         }
     }
+        // var period = AnsiConsole.Prompt(
+        //     new SelectionPrompt<string>()
+        //         .HighlightStyle(new Style(Hover))
+        //         .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
+        // Change management menu ( organize it with sub menus, add dropdown menu, )
+        // switch (period)
+        // {
+        //     case "Go back":
+        //         return;
+
+        //     case "Add new product":
+        //         AddProduct();
+        //         break;
+
+        //     case "Delete product":
+        //         DeleteProduct();
+        //         break;
+
+        //     case "Edit product details":
+        //         ChangeProductDetails();
+        //         break;
+
+        //     case "Edit Shop Description":
+        //         ShopDetailsUI.PromptDescription();
+        //         break;
+
+        //     case "Edit Opening Hours":
+        //         ShopDetailsUI.PromptOpeningHours();
+        //         break;
+
+        //     case "Add discount on a specific date":
+        //         DiscountSpecificDate();
+        //         break;
+
+        //     case "Delete discount on a specific date":
+        //         DeleteDiscountSpecificDate();
+        //         break;
+
+        //     case "Create Coupon":
+        //         CreateCouponForUser();
+        //         break;
+
+        //     case "Edit Coupons":
+        //         EditCoupons();
+        //         break;
+                
+        //     default:
+        //         AnsiConsole.MarkupLine("[red]Invalid selection[/]");
+        //         break;
+        // }
+
     public static void CreateCouponForUser()
     {
         Console.Clear();
