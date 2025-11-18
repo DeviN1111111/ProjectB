@@ -101,47 +101,23 @@ public static class ShopDetailsUI
         {
             AnsiConsole.MarkupLine("[grey]No reviews yet! Be the first to leave one![/]");
         }
-        var currentUser = SessionManager.CurrentUser;
-        if (currentUser != null)
+        // var currentUser = SessionManager.CurrentUser;
+        // if (currentUser != null)
+        
+        var choice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[green]Would you like to add a review?[/]")
+                .AddChoices("Yes", "No")
+        );
+        switch(choice)
         {
-            var addChoice = AnsiConsole.Confirm("[green]Would you like to add a review?[/]");
-            if (addChoice)
-            {
-                Console.Clear();
-                AnsiConsole.Write(
-                    new FigletText("Add Your Review")
-                        .Centered()
-                        .Color(Color.Yellow));
-
-                int stars = AnsiConsole.Prompt(
-                    new SelectionPrompt<int>()
-                        .Title("[yellow]How many stars would you rate the shop?[/]")
-                        .AddChoices(1, 2, 3, 4, 5));
-
-                string text = AnsiConsole.Ask<string>("Write your [green]review text[/]:");
-
-                try
-                {
-                    var logic = new ShopReviewLogic();
-                    logic.AddReview(currentUser.ID, stars, text);
-                    AnsiConsole.MarkupLine("[green]✅ Thank you! Your review has been submitted.[/]");
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}");
-                }
-
-                AnsiConsole.MarkupLine("[grey]Press any key to return to shop details...[/]");
-                Console.ReadKey();
-                Show();
-                return;
-            }
+            case "Yes":
+                ShopReviewUI.AddReview(new ShopReviewLogic());
+                break;
+            case "No":
+                break;
         }
-        else
-        {
-            AnsiConsole.MarkupLine("[grey]Log in to leave your own review![/]");
-        }
-        // enter to continue
+        
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
         Console.ReadKey();
     }

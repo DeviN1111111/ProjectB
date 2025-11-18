@@ -4,7 +4,13 @@ public static class ShopReviewUI
 {
     public static void ShowMenu()
     {
+
         var logic = new ShopReviewLogic();
+        Color AsciiPrimary = Color.FromHex("#247BA0");
+        AnsiConsole.Write(
+            new FigletText("Shop Reviews")
+                .Centered()
+                .Color(AsciiPrimary));
 
         while (true)
         {
@@ -18,7 +24,7 @@ public static class ShopReviewUI
             {
                 "View My Reviews",
                 "Add a Review",
-                "View Average Rating",
+                "View All Reviews",
                 "Go Back"
             };
 
@@ -37,8 +43,8 @@ public static class ShopReviewUI
                     AddReview(logic);
                     break;
 
-                case "View Average Rating":
-                    ViewAverage(logic);
+                case "View All Reviews":
+                    ShopDetailsUI.Show();
                     break;
 
                 case "Go Back":
@@ -50,6 +56,11 @@ public static class ShopReviewUI
     private static void ViewMyReviews(ShopReviewLogic logic)
     {
         Console.Clear();
+        Color AsciiPrimary = Color.FromHex("#247BA0");
+        AnsiConsole.Write(
+            new FigletText("Your Reviews")
+                .Centered()
+                .Color(AsciiPrimary));
 
         var user = SessionManager.CurrentUser;
         if (user == null)
@@ -78,46 +89,42 @@ public static class ShopReviewUI
         Console.ReadKey();
     }
 
-    private static void AddReview(ShopReviewLogic logic)
+    public static void AddReview(ShopReviewLogic logic)
     {
         Console.Clear();
-        var user = SessionManager.CurrentUser;
-        if (user == null)
+        AnsiConsole.Write(
+            new FigletText("Add Your Review")
+                .Centered()
+                .Color(Color.Yellow));
+
+        var currentUser = SessionManager.CurrentUser;
+        if (currentUser == null)
         {
             AnsiConsole.MarkupLine("[red]You must be logged in to add a review![/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to go back...[/]");
             Console.ReadKey();
             return;
         }
+        // give stars
+        int stars = AnsiConsole.Prompt(
+                new SelectionPrompt<int>()
+                    .Title("[yellow]How many stars would you rate the shop?[/]")
+                    .AddChoices(1, 2, 3, 4, 5));
 
-        int stars = AnsiConsole.Ask<int>("Enter star rating (1-5):");
-        string text = AnsiConsole.Ask<string>("Enter your review:");
-
+        string text = AnsiConsole.Ask<string>("Write your [green]review text[/]:");
         try
-        {
-            logic.AddReview(user.ID, stars, text);
-            AnsiConsole.MarkupLine("[green]Review added successfully![/]");
-        }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
-        }
-
-        Console.ReadKey();
-    }
-
-    private static void ViewAverage(ShopReviewLogic logic)
-    {
-        Console.Clear();
-        var user = SessionManager.CurrentUser;
-        if (user == null)
-        {
-            AnsiConsole.MarkupLine("[red]You must be logged in to view averages![/]");
+            {
+                logic.AddReview(currentUser.ID, stars, text);
+                AnsiConsole.MarkupLine("[green]Thank you! Your review has been submitted.[/]");
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}");
+            }
+            AnsiConsole.MarkupLine("[grey]Press any key to return to shop details...[/]");
             Console.ReadKey();
-            return;
-        }
+        
+            return; 
 
-        var avg = logic.GetAverageStars(user.ID);
-        AnsiConsole.MarkupLine($"[yellow]Your average rating:[/] [green]{avg:F1}★[/]");
-        Console.ReadKey();
     }
 }
