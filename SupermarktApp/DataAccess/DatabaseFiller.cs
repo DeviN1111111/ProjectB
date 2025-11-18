@@ -17,7 +17,7 @@ public class DatabaseFiller
 
     public static void RunDatabaseMethods(int orderCount = 50)
     {
-        Console.Clear();
+        try { Console.Clear(); } catch { /* ignore if no console */ }
         AnsiConsole.MarkupLine("[bold yellow]Starting database setup...[/]");
 
         _sharedConnection = new SqliteConnection(ConnectionString);
