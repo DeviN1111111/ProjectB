@@ -9,6 +9,7 @@ public class Order
     private static string Safe(string text) => Markup.Escape(text);
     public static double CouponCredit = 0;
     public static int? SelectedCouponId = null;
+    public static double TotalPrice = 0;
     public static async Task ShowCart()
     {
         Console.Clear();
@@ -79,25 +80,48 @@ public class Order
         AnsiConsole.Write(cartTable);
         AnsiConsole.WriteLine();
 
-        // Calculate delivery fee
-        double deliveryFee = OrderLogic.DeliveryFee(totalAmount);
-        // Calculate fine
-        double UnpaidFine = PayLaterLogic.Track(SessionManager.CurrentUser!);
+        double deliveryFee = allUserProducts.Count == 0 ? 0 : OrderLogic.DeliveryFee(totalAmount);
+        var currentUser = SessionManager.CurrentUser!;
+        double UnpaidFine = PayLaterLogic.Track(currentUser);
+        double unpaidFineAmount = 0;
+        double unpaidOrdersTotal = 0;
+        int unpaidOrdersCount = 0;
+        var userOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
 
-       
-        if (totalAmount + deliveryFee - totalDiscount == 0)
+        if (userOrders != null)
         {
-            deliveryFee = 5;
+            foreach (var order in userOrders)
+            {
+                if (!order.IsPaid)
+                {
+                    unpaidOrdersCount++;
+                }
+
+                if (UnpaidFine > 0 && !order.IsPaid && order.FineDate.HasValue && DateTime.Now > order.FineDate.Value)
+                {
+                    unpaidFineAmount += 50;
+                }
+            }
         }
-        // Summary box
+
+        if (UnpaidFine > unpaidFineAmount)
+        {
+            unpaidOrdersTotal = UnpaidFine - unpaidFineAmount;
+        }
+
+        var headerText = unpaidOrdersCount > 0
+            ? $"[bold white]You have {unpaidOrdersCount} unpaid orders[/]"
+            : "[bold white]Summary[/]";
+
         var panel = new Panel(
             new Markup(
                 $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
                 $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
-                $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(UnpaidFine, 2)}[/]\n" +
+                $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(unpaidFineAmount, 2)}[/]\n" +
+                $"[bold white]Unpaid Order:[/] [yellow]€{Math.Round(unpaidOrdersTotal, 2)}[/]\n" +
                 $"[bold white]Coupon Credit:[/] [green]€{Math.Round(CouponCredit, 2)}[/]\n" +
                 $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine - CouponCredit, 2)}[/]"))
-            .Header("[bold white]Summary[/]", Justify.Left)
+            .Header(headerText, Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
             .Expand();
@@ -105,6 +129,7 @@ public class Order
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
+        TotalPrice = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
@@ -255,8 +280,8 @@ public class Order
                     return;
                 }
                 // Add reward points to user
-                int rewardPoints = RewardLogic.CalculateRewardPoints(totalAmount);;
-                RewardLogic.AddRewardPointsToUser(rewardPoints);
+                double rewardableAmount = Math.Max(0, TotalPrice);
+                int rewardPoints = RewardLogic.CalculateRewardPoints(rewardableAmount);
                 // pay now or pay on pickup
                 Console.Clear();
                 AnsiConsole.Write(
@@ -306,7 +331,9 @@ public class Order
                             CouponLogic.UseCoupon(SelectedCouponId.Value);
                             CouponLogic.ResetCouponSelection();
                         }
+                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -344,9 +371,8 @@ public class Order
                             CouponLogic.UseCoupon(SelectedCouponId.Value);
                             CouponLogic.ResetCouponSelection();
                         }
-
+                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
-                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -380,7 +406,6 @@ public class Order
                         }
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
-                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
 
                         OrderHistoryModel order = OrderLogic.GetOrderByUserId(SessionManager.CurrentUser!.ID);
@@ -439,7 +464,21 @@ public class Order
                 var coupon = CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
                 if (coupon != null)
                 {
-                    AnsiConsole.MarkupLine($"[green]Coupon #{coupon.Id} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
+                    var user = SessionManager.CurrentUser;
+                    var couponNumber = coupon.Id;
+                    if (user != null)
+                    {
+                        var numberedCoupon = CouponLogic.GetAllCoupons(user.ID)
+                            .Where(c => c.IsValid && c.Credit > 0)
+                            .Select((c, index) => new { Id = c.Id, Number = index + 1 })
+                            .FirstOrDefault(entry => entry.Id == coupon.Id);
+                        if (numberedCoupon != null)
+                        {
+                            couponNumber = numberedCoupon.Number;
+                        }
+                    }
+
+                    AnsiConsole.MarkupLine($"[green]Coupon #{couponNumber} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
                 }
                 else
                 {
@@ -650,7 +689,7 @@ public class Order
                 var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
                 if (selectedOrder.FineDate != null)
                 {
-                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:yyyy-MM-dd HH:mm}[/] to pay.[/]\n");
+                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:dd-MM-yyyy HH:mm}[/] to pay.[/]\n");
                 }
                 
                 var payChoice = AnsiConsole.Prompt(
@@ -674,6 +713,10 @@ public class Order
                     if (isPaid)
                     {
                         AnsiConsole.MarkupLine("[green]Payment successful.[/]");
+                        double rewardableAmount = Math.Max(0, finalTotal);
+                        int rewardPoints = RewardLogic.CalculateRewardPoints(rewardableAmount);
+                        RewardLogic.AddRewardPointsToUser(rewardPoints);
+                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                     }
                     else
                     {

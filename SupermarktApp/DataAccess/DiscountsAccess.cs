@@ -51,4 +51,47 @@ public static class DiscountsAccess
             "SELECT * FROM Discounts WHERE ProductId = @ProductID",
             new { ProductID = productID });
     }
+    public static List<DiscountsModel> GetDiscountsByProductID(int productID)
+    {
+        return _sharedConnection.Query<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID }).ToList();
+    }
+
+    public static void RemoveDiscountByProductID(int productID)
+    {
+        _sharedConnection.Execute(
+            "DELETE FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID });
+
+        _sharedConnection.Execute(@"
+        UPDATE Products
+        SET
+        DiscountPercentage = 0,
+        DiscountType = @None
+        WHERE Id = @ProductID", new { ProductID = productID, None = "None" });
+    }
+
+    public static void RemoveAllPersonalDiscountsByUserID(int userID)
+    {
+        _sharedConnection.Execute( // delete all Personal discounts in the Discount table 
+            "DELETE FROM Discounts WHERE UserId = @userID AND DiscountType = 'Personal'",
+            new { userID }
+        );
+    }
+
+    public static List<DiscountsModel> GetAllWeeklyDiscounts()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.Query<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE DiscountType = @DiscountType",
+            new { DiscountType = "Weekly" }).ToList();
+    }
+
+    public static void RemoveDiscountByID(int discountID)
+    {
+        _sharedConnection.Execute(
+            "DELETE FROM Discounts WHERE ID = @DiscountID",
+            new { DiscountID = discountID });
+    }
 }

@@ -29,34 +29,41 @@ public static class CouponUI
             if (coupons.Count == 0)
             {
                 AnsiConsole.MarkupLine("[yellow]You have no valid coupons.[/]");
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to go back");
-                Console.ReadKey(true);
                 return null;
             }
+
+            var appliedCouponId = Order.SelectedCouponId;
+            var orderedCoupons = coupons
+                .Select((coupon, index) => new
+                {
+                    Coupon = coupon,
+                    Number = index + 1,
+                    RoundedCredit = Math.Round(coupon.Credit, 2),
+                    IsApplied = appliedCouponId.HasValue && appliedCouponId.Value == coupon.Id
+                })
+                .ToList();
 
             var couponTable = new Table()
                 .BorderColor(MenuUI.AsciiPrimary)
                 .AddColumn("[white]Coupon[/]")
                 .AddColumn("[white]Credit[/]");
 
-            foreach (var coupon in coupons)
+            foreach (var entry in orderedCoupons)
             {
-                couponTable.AddRow($"#{coupon.Id}", $"[green]{Math.Round(coupon.Credit, 2)}[/]");
+                couponTable.AddRow($"#{entry.Number}", $"\u20ac[green]{entry.RoundedCredit}[/]");
             }
 
             AnsiConsole.Write(couponTable);
 
-            var appliedCouponId = Order.SelectedCouponId;
-            var choices = coupons
-                .Select(c =>
+            var choices = orderedCoupons
+                .Select(entry =>
                 {
-                    var isApplied = appliedCouponId.HasValue && appliedCouponId.Value == c.Id;
-                    var label = $"Coupon #{c.Id} - [green]{Math.Round(c.Credit, 2)}[/]";
-                    if (isApplied)
+                    var label = $"Coupon #{entry.Number} - \u20ac[green]{entry.RoundedCredit}[/]";
+                    if (entry.IsApplied)
                     {
                         label += " [bold][applied][/]";
                     }
-                    return (Coupon: c, Label: label, IsApplied: isApplied);
+                    return (Coupon: entry.Coupon, Label: label, Number: entry.Number, IsApplied: entry.IsApplied);
                 })
                 .ToList();
 
@@ -76,8 +83,8 @@ public static class CouponUI
 
             var actionPrompt = new SelectionPrompt<string>()
                 .Title(selectedEntry.IsApplied
-                    ? $"Coupon #{selectedCoupon.Id} is currently applied"
-                    : $"Apply coupon #{selectedCoupon.Id}?")
+                    ? $"Coupon #{selectedEntry.Number} is currently applied"
+                    : $"Apply coupon #{selectedEntry.Number}?")
                 .AddChoices(selectedEntry.IsApplied
                     ? new[] { "Remove coupon", "Back" }
                     : new[] { "Apply coupon", "Back" });
@@ -89,12 +96,12 @@ public static class CouponUI
             if (action == "Apply coupon")
             {
                 onCouponSelected?.Invoke(selectedCoupon);
-                AnsiConsole.MarkupLine($"[green]Coupon #{selectedCoupon.Id} applied to your cart.[/]");
+                AnsiConsole.MarkupLine($"[green]Coupon #{selectedEntry.Number} applied to your cart.[/]");
                 return selectedCoupon;
             }
 
             CouponLogic.ResetCouponSelection();
-            AnsiConsole.MarkupLine($"[yellow]Coupon #{selectedCoupon.Id} removed from your cart.[/]");
+            AnsiConsole.MarkupLine($"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
             return null;
         }
     }

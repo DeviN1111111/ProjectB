@@ -12,12 +12,13 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "RewardItems", "Checklist", "OrderHistory", "Discounts", "ShopInfo", "Coupon"
+        "Cart", "Users", "Products", "Orders", "RewardItems",
+        "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
     {
-        Console.Clear();
+        try { Console.Clear(); } catch { /* ignore if no console */ }
         AnsiConsole.MarkupLine("[bold yellow]Starting database setup...[/]");
 
         _sharedConnection = new SqliteConnection(ConnectionString);
@@ -203,6 +204,16 @@ public class DatabaseFiller
                 ClosingHourSaturday TEXT,
                 OpeningHourSunday TEXT,
                 ClosingHourSunday TEXT
+            );");
+
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS ShopReviews (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                UserId INTEGER NOT NULL,
+                Stars INTEGER NOT NULL,
+                Text TEXT, 
+                CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );
         ");
         db.Execute(@"
@@ -498,6 +509,22 @@ public class DatabaseFiller
 
         // Save or update in DB
         ShopInfoAccess.UpdateShopInfo(defaultShopInfo);
+
+        // test reviews 
+        var sampleReviews = new List<ShopReviewModel>
+        {
+            new() { UserId = 1, Stars = 5, Text = "Absolutely love this place! Always fresh produce and friendly staff." },
+            new() { UserId = 2, Stars = 4, Text = "Great selection and clean aisles. Prices could be a bit better though." },
+            new() { UserId = 3, Stars = 5, Text = "Their bakery section is divine. The croissants are next-level!" },
+            new() { UserId = 1, Stars = 3, Text = "Good overall, but sometimes crowded in the evenings." },
+            new() { UserId = 4, Stars = 5, Text = "Fantastic service, especially during weekends. Highly recommend!" }
+        };
+
+        foreach (var review in sampleReviews)
+        {
+            InsertShopReview(review);
+        }
+
     }
 
     public static void InsertUser(UserModel user)
@@ -540,5 +567,13 @@ public class DatabaseFiller
             VALUES (@UserID, @OrderId, @ProductId, @Price, @Date);",
             new { UserID = UserID, OrderId = orderId, ProductId = productId, Price = price, Date = date }
         );
+    }
+
+    public static void InsertShopReview(ShopReviewModel review)
+    {
+        _sharedConnection.Execute(@"
+            INSERT INTO ShopReviews (UserId, Stars, Text)
+            VALUES (@UserId, @Stars, @Text);
+        ", review);
     }
 }

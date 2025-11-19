@@ -1,4 +1,6 @@
 using Spectre.Console;
+using System;
+using System.Globalization;
 
 public static class ManagementUI
 {
@@ -9,22 +11,67 @@ public static class ManagementUI
     public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Product Management")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var period = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours", "Create Coupon", "Edit Coupons", "Go back" }));
-
-        switch (period)
+        while (true)
         {
-            case "Go back":
-                return;
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Product Management")
+                    .Centered()
+                    .Color(AsciiPrimary));
 
+            var items = new List<string>
+            {
+                "Products",
+                "Shop Settings",
+                "Discounts",
+                "Coupons",
+                "Go back"
+            };
+
+            if (SessionManager.CurrentUser?.AccountStatus == "SuperAdmin")
+            {
+                items.Insert(0, "Manage Users");
+            }
+                
+            var mainChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]Choose a category:[/]")
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(items));
+
+  
+            switch (mainChoice)
+            {
+                case "Products":
+                    ShowProductMenu();
+                    break;
+                case "Shop Settings":
+                    ShowShopSettingsMenu();
+                    break;
+                case "Discounts":
+                    ShowDiscountMenu();
+                    break;
+                case "Coupons":
+                    ShowCouponMenu();
+                    break;
+                case "Go back":
+                    return;
+            }
+        }
+    }
+    static void ShowProductMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Product Options[/]")
+            .AddChoices(
+                "Add new product",
+                "Delete product",
+                "Edit product details",
+                "Back"));
+
+        switch (choice)
+        {
             case "Add new product":
                 AddProduct();
                 break;
@@ -37,6 +84,23 @@ public static class ManagementUI
                 ChangeProductDetails();
                 break;
 
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowShopSettingsMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Shop Settings[/]")
+            .AddChoices(
+                "Edit Shop Description",
+                "Edit Opening Hours",
+                "Back"));
+
+        switch (choice)
+        {
             case "Edit Shop Description":
                 ShopDetailsUI.PromptDescription();
                 break;
@@ -44,7 +108,49 @@ public static class ManagementUI
             case "Edit Opening Hours":
                 ShopDetailsUI.PromptOpeningHours();
                 break;
-            
+
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowDiscountMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Discount Options[/]")
+            .AddChoices(
+                "Add discount on a specific date",
+                "Delete discount on a specific date",
+                "Back"));
+
+        switch (choice)
+        {
+            case "Add discount on a specific date":
+                DiscountSpecificDate();
+                break;
+
+            case "Delete discount on a specific date":
+                DeleteDiscountSpecificDate();
+                break;
+
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowCouponMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Coupon Options[/]")
+            .AddChoices(
+                "Create Coupon",
+                "Edit Coupons",
+                "Back"));
+
+        switch (choice)
+        {
             case "Create Coupon":
                 CreateCouponForUser();
                 break;
@@ -52,86 +158,213 @@ public static class ManagementUI
             case "Edit Coupons":
                 EditCoupons();
                 break;
-                
-            default:
-                AnsiConsole.MarkupLine("[red]Invalid selection[/]");
-                break;
+
+            case "Back":
+                return;
         }
     }
+        // var period = AnsiConsole.Prompt(
+        //     new SelectionPrompt<string>()
+        //         .HighlightStyle(new Style(Hover))
+        //         .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
+        // Change management menu ( organize it with sub menus, add dropdown menu, )
+        // switch (period)
+        // {
+        //     case "Go back":
+        //         return;
+
+        //     case "Add new product":
+        //         AddProduct();
+        //         break;
+
+        //     case "Delete product":
+        //         DeleteProduct();
+        //         break;
+
+        //     case "Edit product details":
+        //         ChangeProductDetails();
+        //         break;
+
+        //     case "Edit Shop Description":
+        //         ShopDetailsUI.PromptDescription();
+        //         break;
+
+        //     case "Edit Opening Hours":
+        //         ShopDetailsUI.PromptOpeningHours();
+        //         break;
+
+        //     case "Add discount on a specific date":
+        //         DiscountSpecificDate();
+        //         break;
+
+        //     case "Delete discount on a specific date":
+        //         DeleteDiscountSpecificDate();
+        //         break;
+
+        //     case "Create Coupon":
+        //         CreateCouponForUser();
+        //         break;
+
+        //     case "Edit Coupons":
+        //         EditCoupons();
+        //         break;
+                
+        //     default:
+        //         AnsiConsole.MarkupLine("[red]Invalid selection[/]");
+        //         break;
+        // }
+
     public static void CreateCouponForUser()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Create Coupon")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        var email = AnsiConsole.Prompt(new TextPrompt<string>("Enter user email:"));
-        var user = LoginLogic.GetUserByEmail(email);
-        if (user == null)
+        while (true)
         {
-            AnsiConsole.MarkupLine("[red]User not found.[/]");
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Create Coupon")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            List<UserModel> allUsers = AdminLogic.GetAllUsers();
+
+            var choices = allUsers
+                .Select(user =>
+                {
+                    var label = $"User [yellow]{Markup.Escape(user.Name)}[/] - [blue]{Markup.Escape(user.Email)}[/]";
+                    return (User: user, Label: label);
+                })
+                .ToList();
+
+            var selection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select an user to create a coupon for")
+                     .HighlightStyle(new Style(Hover))
+                    .PageSize(10)
+                    .AddChoices(choices.Select(c => c.Label).Concat(new[] { "Go back" })));
+
+            if (selection == "Go back")
+                DisplayMenu();
+
+            var chosen = choices.FirstOrDefault(c => c.Label == selection);
+            if (chosen.User == null)
+            {
+                AnsiConsole.MarkupLine("[red]User not found.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var credit = AnsiConsole.Prompt(new TextPrompt<double>("Enter coupon credit:"));
+            if (credit <= 0 || credit > 500)
+            {
+                AnsiConsole.MarkupLine("[red]Credit must be greater than 0 and less than 500.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            CouponLogic.CreateCoupon(chosen.User.ID, credit);
+            AnsiConsole.MarkupLine("[green]Coupon created successfully.[/]");
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
             Console.ReadKey();
             return;
         }
-
-        var credit = AnsiConsole.Prompt(new TextPrompt<double>("Enter coupon credit:"));
-        CouponLogic.CreateCoupon(user.ID, credit);
-        AnsiConsole.MarkupLine("[green]Coupon created successfully.[/]");
-        AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
-        Console.ReadKey();
     }
     public static void EditCoupons()
     {
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Edit Coupon")
-                .Centered()
-                .Color(AsciiPrimary));
-        var id = AnsiConsole.Prompt(new TextPrompt<int>("Enter coupon id:"));
-        var coupon = CouponAccess.GetCouponById(id);
-        if (coupon == null)
-        {
-            AnsiConsole.MarkupLine("[red]Coupon not found.[/]");
-            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
-            Console.ReadKey();
-            return;
-        }
-        var newCredit = AnsiConsole.Prompt(new TextPrompt<double>("New credit:").DefaultValue(coupon.Credit));
-        var validityChoice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("Set validity:")
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Valid", "Invalid" }));
-        var newIsValid = validityChoice == "Valid";
-        Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Confirm Changes")
-                .Centered()
-                .Color(AsciiPrimary));
-        AnsiConsole.MarkupLine($"Id: [yellow]{coupon.Id}[/]");
-        AnsiConsole.MarkupLine($"UserId: [blue]{coupon.UserId}[/]");
-        AnsiConsole.MarkupLine($"Credit: [red]{coupon.Credit}[/] -> [green]{newCredit}[/]");
-        AnsiConsole.MarkupLine($"IsValid: [red]{coupon.IsValid}[/] -> [green]{newIsValid}[/]");
-        var confirm = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
-                .AddChoices(new[] { "Confirm", "Cancel" }));
-        if (confirm == "Confirm")
-        {
-            coupon.Credit = newCredit;
-            coupon.IsValid = newIsValid;
-            CouponLogic.EditCoupon(coupon);
-            AnsiConsole.MarkupLine("[green]Coupon updated successfully.[/]");
-            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
-            Console.ReadKey();
+        while (true)
+            {
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Edit Coupon")
+                    .Centered()
+                    .Color(AsciiPrimary));
+            
+            var allUsers = AdminLogic.GetAllUsers();
+            var userSelection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select a user to edit their coupons")
+                    .HighlightStyle(new Style(Hover))
+                    .PageSize(10)
+                    .AddChoices(allUsers.Select(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]").Concat(new[] { "Go back" })));
+            if (userSelection == "Go back") DisplayMenu();
+
+            var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]" == userSelection);
+            if (selectedUser == null)
+            {
+                AnsiConsole.MarkupLine("[red]User not found.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var userCoupons = CouponLogic.GetAllCoupons(selectedUser.ID);
+            if (userCoupons.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[yellow]This user has no coupons.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var couponSelection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select a coupon to edit")
+                    .HighlightStyle(new Style(Hover))
+                    .PageSize(10)
+                    .AddChoices(userCoupons.Select(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}").Concat(new[] { "Go back" })));
+            if (couponSelection == "Go back") continue;
+
+            var selectedCoupon = userCoupons.FirstOrDefault(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}" == couponSelection);
+            if (selectedCoupon == null)
+            {
+                AnsiConsole.MarkupLine("[red]Coupon not found.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+
+            var newCredit = AnsiConsole.Prompt(new TextPrompt<double>("New credit (greater than 0 and less than 500):").DefaultValue(selectedCoupon.Credit));
+            if (newCredit <= 0 || newCredit > 500)
+            {
+                AnsiConsole.MarkupLine("[red]Credit must be greater than 0 and less than 500.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+                continue;
+            }
+            var validityChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Set validity:")
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(new[] { "Valid", "Invalid" }));
+            var newIsValid = validityChoice == "Valid";
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Confirm Changes")
+                    .Centered()
+                    .Color(AsciiPrimary));
+            AnsiConsole.MarkupLine($"Id: [yellow]{selectedCoupon.Id}[/]");
+            AnsiConsole.MarkupLine($"UserId: [blue]{selectedCoupon.UserId}[/]");
+            AnsiConsole.MarkupLine($"Credit: [red]{selectedCoupon.Credit}[/] -> [green]{newCredit}[/]");
+            AnsiConsole.MarkupLine($"IsValid: [red]{selectedCoupon.IsValid}[/] -> [green]{newIsValid}[/]");
+            var confirm = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(new[] { "Confirm", "Cancel" }));
+            if (confirm == "Confirm")
+            {
+                selectedCoupon.Credit = newCredit;
+                selectedCoupon.IsValid = newIsValid;
+                CouponLogic.EditCoupon(selectedCoupon);
+                AnsiConsole.MarkupLine("[green]Coupon updated successfully.[/]");
+                AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+                Console.ReadKey();
+            }
         }
     }
     public static void ChangeProductDetails()
     {
         ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
-        if(EditProduct == null)
+        if (EditProduct == null)
         {
             return;
         }
@@ -160,15 +393,15 @@ public static class ManagementUI
                 .Centered()
                 .Color(AsciiPrimary));
 
-        ProductDetailsUI.CompareTwoProducts(EditProduct, new ProductModel(name, price, nutritionDetails, description, category, location, quantity , visible));
+        ProductDetailsUI.CompareTwoProducts(EditProduct, new ProductModel(name, price, nutritionDetails, description, category, location, quantity, visible));
         AnsiConsole.MarkupLine($"Are you sure you want to save changes to [red]{EditProduct.Name}[/]?");
 
         var confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
                 .AddChoices(new[] { "Confirm", "Cancel" }));
-                
-        switch(confirm)
+
+        switch (confirm)
         {
             case "Confirm":
                 AnsiConsole.Write(
@@ -181,7 +414,6 @@ public static class ManagementUI
                 return;
         }
     }
-
     public static void AddProduct()
     {
         Console.Clear();
@@ -211,13 +443,12 @@ public static class ManagementUI
         }
         else
             AnsiConsole.MarkupLine("[red]Product already exists.[/]");
-            Console.ReadKey();
+        Console.ReadKey();
     }
-    
     public static void DeleteProduct()
     {
         ProductModel EditProduct = SearchUI.SearchProductByNameOrCategory();
-        if(EditProduct == null)
+        if (EditProduct == null)
         {
             return;
         }
@@ -226,13 +457,13 @@ public static class ManagementUI
             new FigletText("Delete Product")
                 .Centered()
                 .Color(AsciiPrimary));
-                
+
         AnsiConsole.MarkupLine($"Are you sure you want to delete [red]{EditProduct.Name}[/]? This action cannot be undone.");
         var confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
                 .AddChoices(new[] { "Confirm", "Cancel" }));
-        switch(confirm)
+        switch (confirm)
         {
             case "Confirm":
                 ProductLogic.DeleteProductByID(EditProduct.ID);
@@ -240,6 +471,172 @@ public static class ManagementUI
                 break;
             case "Cancel":
                 return;
+        }
+    }
+    public static void DiscountSpecificDate()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Add discount on a specific date")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        ProductModel Product = SearchUI.SearchProductByNameOrCategory();
+        if (Product == null)
+        {
+            return;
+        }
+
+        double discount;
+        do
+        {
+            discount = AnsiConsole.Prompt(new TextPrompt<double>("How much discount percentage do you want to give? (0-100)").DefaultValue(10));
+        } while (discount < 0 || discount > 100);
+        AnsiConsole.MarkupLine($"Enter the week number (1-53) for which you want to apply the discount for [blue]{Product.Name}[/]:");
+
+        string week = "";
+        int thisweek = ISOWeek.GetWeekOfYear(DateTime.Now);
+        int intweek = 0;
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Choose week number")
+                .Centered()
+                .Color(AsciiPrimary));
+        
+        AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
+        AnsiConsole.MarkupLine($"Currently week: {thisweek}");
+        AnsiConsole.MarkupLine($"[blue]Weeks from now: {week}[/]");
+
+        while (true)
+        {
+            var key = Console.ReadKey();
+            if (key.Key == ConsoleKey.Escape)
+                break;
+            if (char.IsDigit(key.KeyChar))
+                week += key.KeyChar;
+            if (key.Key == ConsoleKey.Backspace && week.Length > 0)
+                week = week.Remove(week.Length - 1);
+
+            Console.Clear();
+
+            AnsiConsole.Write(
+            new FigletText("Choose week number")
+                .Centered()
+                .Color(AsciiPrimary));
+
+            int year = DateTime.Now.Year;
+            if (week.Length != 0 && week.Length < 4)
+            {
+                intweek = Convert.ToInt32(week);
+                intweek += thisweek; //Voor testdoeleinden, zodat je altijd een geldige week hebt.
+                if (intweek > 53)
+                {
+                    intweek -= 53;
+                    year += 1;
+                }
+            }
+
+            if (week.Length == 0)
+            {
+                AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
+                AnsiConsole.MarkupLine($"Currently week: {thisweek}");
+                AnsiConsole.MarkupLine($"[blue]Weeks from now: {week}[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
+                AnsiConsole.MarkupLine($"Currently week: {thisweek}");
+                AnsiConsole.MarkupLine($"[blue]Weeks from now: {week}[/]");
+            }
+
+            if (intweek < 1 || intweek > 53)
+                continue;
+            else if (week == "")
+            {
+                continue;
+            }
+            else
+            {
+                DateTime start = ISOWeek.ToDateTime(year, intweek, DayOfWeek.Monday);
+                DateTime end = ISOWeek.ToDateTime(year, intweek, DayOfWeek.Sunday);
+
+                Console.WriteLine();
+                Console.WriteLine($"Week {intweek} of {year}");
+                Console.WriteLine($"Starts: {start:dd-MM-yyyy}");
+                Console.WriteLine($"Ends:   {end:dd-MM-yyyy}");
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    List<DiscountsModel> ExistingDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
+                    DiscountsModel DiscountProduct = new DiscountsModel(Product.ID, discount, "Weekly", start, end);
+                    foreach (DiscountsModel existing in ExistingDiscounts)
+                    {
+                        if (existing.ProductID == DiscountProduct.ProductID && existing.StartDate == DiscountProduct.StartDate && existing.EndDate == DiscountProduct.EndDate)
+                        {
+                            AnsiConsole.MarkupLine("[red]Error: A discount for this product already exists for the selected week.[/]");
+                            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                            Console.ReadKey();
+                            return;
+                        }
+                    }
+                    DiscountsLogic.AddDiscount(DiscountProduct);
+                    System.Console.WriteLine();
+                    AnsiConsole.MarkupLine($"[green]Succesfully added a discount of [blue]{discount}%[/] to [blue]{Product.Name}[/] in year: [blue]{year}[/] for week [blue]{intweek}[/]. Press any key to continue.[/]");
+                    Console.ReadKey();
+                    return;
+                }
+            }
+        }
+    }
+
+    public static void DeleteDiscountSpecificDate()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Delete discount on a specific date")
+                .Centered()
+                .Color(AsciiPrimary));
+        
+        List<DiscountsModel> AllDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
+        if (AllDiscounts.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]There are no weekly discounts to delete.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
+        List<string> DiscountedProductsList = [];
+
+        foreach (DiscountsModel discount in AllDiscounts)
+        {
+            ProductModel product = ProductLogic.GetProductById(discount.ProductID);
+            DiscountedProductsList.Add($"{discount.ID} / {discount.StartDate:dd-MM-yyyy} to {discount.EndDate:dd-MM-yyyy} / {product.Name} / {discount.DiscountPercentage}%");
+        }
+
+        var weeksToDelete = AnsiConsole.Prompt(
+            new MultiSelectionPrompt<string>()
+                .Title("[bold white]Select the weeks you want to delete:[/]")
+                .NotRequired()
+                .PageSize(20)
+                .AddChoiceGroup("Select all", DiscountedProductsList)
+        );
+
+        if (weeksToDelete.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No weeks selected.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
+        else
+        {
+            foreach (var week in weeksToDelete)
+            {
+                var weekID = week.Replace(" ", "").Split("/");
+                DiscountsLogic.RemoveDiscountByID(Convert.ToInt32(weekID[0]));
+            }
+            AnsiConsole.MarkupLine("[green]Succesfully deleted selected discounts.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
         }
     }
 }
