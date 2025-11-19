@@ -129,7 +129,7 @@ public class Order
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
-        TotalPrice = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
+        TotalPrice = totalAmount + deliveryFee + UnpaidFine;
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
@@ -331,7 +331,6 @@ public class Order
                             CouponLogic.UseCoupon(SelectedCouponId.Value);
                             CouponLogic.ResetCouponSelection();
                         }
-                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -461,32 +460,7 @@ public class Order
                 break;
 
             case "Add coupon":
-                var coupon = CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
-                if (coupon != null)
-                {
-                    var user = SessionManager.CurrentUser;
-                    var couponNumber = coupon.Id;
-                    if (user != null)
-                    {
-                        var numberedCoupon = CouponLogic.GetAllCoupons(user.ID)
-                            .Where(c => c.IsValid && c.Credit > 0)
-                            .Select((c, index) => new { Id = c.Id, Number = index + 1 })
-                            .FirstOrDefault(entry => entry.Id == coupon.Id);
-                        if (numberedCoupon != null)
-                        {
-                            couponNumber = numberedCoupon.Number;
-                        }
-                    }
-
-                    AnsiConsole.MarkupLine($"[green]Coupon #{couponNumber} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("[yellow]No coupon selected.[/]");
-                }
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                Console.ReadKey(true);
-                await ShowCart();
+                CouponUI.DisplayMenu();
                 return;
 
             case "Go back":
@@ -646,40 +620,42 @@ public class Order
                 int productId = keyValuePair.Key;
                 int quantity = keyValuePair.Value;
 
-                var product = ProductLogic.GetProductByID(productId); 
-                var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
-                var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
-
-                double DiscountPercentage = 0;
-
-                if(WeeklyDiscount != null)
-                {
-                    DiscountPercentage = WeeklyDiscount.DiscountPercentage;
-                }
-                else if(PersonalDiscount != null)
-                {
-                    DiscountPercentage = PersonalDiscount.DiscountPercentage;
-                }
-
-                // Apply discounts if needed
-                if (DiscountPercentage > 0)
-                {
-                    double price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
-                    // TODO: update the price in OrderHistory database if needed
-                }
+                var product = ProductAccess.GetProductByID(productId);
                 if (product != null)
                 {
-                    double itemTotal = quantity * product.Price;
+                    double price = product.Price;
+
+                    var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
+                    var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
+
+                    double DiscountPercentage = 0;
+
+                    if(WeeklyDiscount != null)
+                    {
+                        DiscountPercentage = WeeklyDiscount.DiscountPercentage;
+                    }
+                    else if(PersonalDiscount != null)
+                    {
+                        DiscountPercentage = PersonalDiscount.DiscountPercentage;
+                    }
+
+                    // Apply discounts if needed
+                    if (DiscountPercentage > 0)
+                    {
+                        price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
+                        // TODO: update the price in OrderHistory database if needed
+                    }
+
+                    double itemTotal = quantity * price;
                     totalOrderPrice += itemTotal;
 
                     orderTable.AddRow(
                         product?.Name ?? "[red]Unknown Product[/]",
                         quantity.ToString(),
-                        $"${product?.Price:F2}",
+                        $"${price:F2}",
                         $"${itemTotal:F2}"
-                );   
+                    );
                 }
-
             }
 
 
