@@ -36,6 +36,12 @@ public class ProductModel
         Quantity = quantity;
         Visible = visible;
     }
+    public ProductModel(int id, string name, double price)
+    {
+        ID = id;
+        Name = name;
+        Price = price;
+    }
 
     public ProductModel() { }
 }
