@@ -449,7 +449,7 @@ public class Order
                 break;
 
             case "Add coupon":
-                CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
+                CouponUI.DisplayMenu();
                 ShowCart();
                 return;
 

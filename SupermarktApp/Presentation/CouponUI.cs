@@ -2,7 +2,7 @@ using Spectre.Console;
 
 public static class CouponUI
 {
-    public static void DisplayMenu(Action<Coupon>? onCouponSelected = null)
+    public static void DisplayMenu()
     {
         while (true)
         {
@@ -132,7 +132,7 @@ public static class CouponUI
 
             else if (action == "Apply coupon")
             {
-                // onCouponSelected?.Invoke(selectedCoupon);
+                CouponLogic.ApplyCouponToCart(selectedCoupon);
 
                 var rounded = Math.Round(selectedCoupon.Credit, 2);
                 AnsiConsole.MarkupLine(
