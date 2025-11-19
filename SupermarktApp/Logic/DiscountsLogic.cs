@@ -20,16 +20,13 @@ public class DiscountsLogic
         List<DiscountsModel> weeklyProducts = DiscountsAccess.GetWeeklyDiscounts().ToList();
         List<DiscountsModel> validWeeklyProducts = new List<DiscountsModel>();
 
-        foreach (var product in weeklyProducts)
+        foreach(var discount in weeklyProducts)
         {
-            var discount = DiscountsAccess.GetDiscountsByProductID(product.ID);
-
-            if (product != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+            if (discount != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
             {
-                validWeeklyProducts.Add(product);
+                validWeeklyProducts.Add(discount);
             }
         }
-
         return validWeeklyProducts;
     }
 

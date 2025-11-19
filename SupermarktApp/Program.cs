@@ -10,7 +10,7 @@ class Program
 {
     static async Task Main()
     { 
-        DatabaseFiller.RunDatabaseMethods(1000);
+        // DatabaseFiller.RunDatabaseMethods(1000);
         await MenuUI.ShowMainMenu();
     }
 }
