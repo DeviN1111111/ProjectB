@@ -640,7 +640,6 @@ public class Order
                     productCounts[item.ProductID] = 1;
             }
 
-
             // Second pass: build the table using the counted quantities
             foreach (var keyValuePair in productCounts)
             {
@@ -668,7 +667,21 @@ public class Order
                     double price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
                     // TODO: update the price in OrderHistory database if needed
                 }
+                if (product != null)
+                {
+                    double itemTotal = quantity * product.Price;
+                    totalOrderPrice += itemTotal;
+
+                    orderTable.AddRow(
+                        product?.Name ?? "[red]Unknown Product[/]",
+                        quantity.ToString(),
+                        $"${product?.Price:F2}",
+                        $"${itemTotal:F2}"
+                );   
+                }
+
             }
+
 
             // Add total row
             orderTable.AddEmptyRow();
