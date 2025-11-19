@@ -597,6 +597,13 @@ public static class ManagementUI
                 .Color(AsciiPrimary));
         
         List<DiscountsModel> AllDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
+        if (AllDiscounts.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]There are no weekly discounts to delete.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
         List<string> DiscountedProductsList = [];
 
         foreach (DiscountsModel discount in AllDiscounts)
