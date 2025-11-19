@@ -130,23 +130,21 @@ public static class CouponUI
             if (action == "Back")
                 continue;
 
-            if (action == "Apply coupon")
+            else if (action == "Apply coupon")
             {
-                onCouponSelected?.Invoke(selectedCoupon);
+                // onCouponSelected?.Invoke(selectedCoupon);
 
                 var rounded = Math.Round(selectedCoupon.Credit, 2);
                 AnsiConsole.MarkupLine(
                     $"[green]Coupon #{selectedEntry.Number} applied to your cart with [yellow]€{rounded}[/] credit.[/]");
                 AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
                 Console.ReadKey();
-
                 continue;
             }
 
-            else
+            else if (action == "Remove coupon")
             {
                 CouponLogic.ResetCouponSelection();
-
                 AnsiConsole.MarkupLine(
                     $"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
                 AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
