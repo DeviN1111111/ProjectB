@@ -29,7 +29,7 @@ public static class ShopInfoLogic
         DateTime monday = today.AddDays(-daysSinceMonday);
         List<string[]> dayDate = new();
 
-        for (int i = 0; i <= 7; i++)
+        for (int i = 0; i <= 6; i++)
         {
             DateTime date = monday.AddDays(i);
             string day = date.ToString("dddd");   // e.g. "Monday"
