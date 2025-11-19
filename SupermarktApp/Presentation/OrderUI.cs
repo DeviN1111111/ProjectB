@@ -73,24 +73,34 @@ public class Order
         double UnpaidFine = PayLaterLogic.Track(currentUser);
         double unpaidFineAmount = 0;
         double unpaidOrdersTotal = 0;
+        int unpaidOrdersCount = 0;
+        var userOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
 
-        if (UnpaidFine > 0)
+        if (userOrders != null)
         {
-            var userOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
             foreach (var order in userOrders)
             {
-                if (!order.IsPaid && order.FineDate.HasValue && DateTime.Now > order.FineDate.Value)
+                if (!order.IsPaid)
+                {
+                    unpaidOrdersCount++;
+                }
+
+                if (UnpaidFine > 0 && !order.IsPaid && order.FineDate.HasValue && DateTime.Now > order.FineDate.Value)
                 {
                     unpaidFineAmount += 50;
                 }
             }
-
-            if (UnpaidFine > unpaidFineAmount)
-            {
-                unpaidOrdersTotal = UnpaidFine - unpaidFineAmount;
-            }
         }
-        // Summary box
+
+        if (UnpaidFine > unpaidFineAmount)
+        {
+            unpaidOrdersTotal = UnpaidFine - unpaidFineAmount;
+        }
+
+        var headerText = unpaidOrdersCount > 0
+            ? $"[bold white]You have {unpaidOrdersCount} unpaid orders[/]"
+            : "[bold white]Summary[/]";
+
         var panel = new Panel(
             new Markup(
                 $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
@@ -99,7 +109,7 @@ public class Order
                 $"[bold white]Unpaid Order:[/] [yellow]€{Math.Round(unpaidOrdersTotal, 2)}[/]\n" +
                 $"[bold white]Coupon Credit:[/] [green]€{Math.Round(CouponCredit, 2)}[/]\n" +
                 $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine - CouponCredit, 2)}[/]"))
-            .Header("[bold white]Summary[/]", Justify.Left)
+            .Header(headerText, Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
             .Expand();
