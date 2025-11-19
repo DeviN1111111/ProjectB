@@ -86,7 +86,7 @@ public static class ManagementUI
                     .AddChoices(choices.Select(c => c.Label).Concat(new[] { "Go back" })));
 
             if (selection == "Go back")
-                DisplayMenu();
+                break;
 
             var chosen = choices.FirstOrDefault(c => c.Label == selection);
             if (chosen.User == null)
@@ -130,7 +130,7 @@ public static class ManagementUI
                     .HighlightStyle(new Style(Hover))
                     .PageSize(10)
                     .AddChoices(allUsers.Select(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]").Concat(new[] { "Go back" })));
-            if (userSelection == "Go back") DisplayMenu();
+            if (userSelection == "Go back") break;
 
             var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]" == userSelection);
             if (selectedUser == null)
@@ -156,7 +156,7 @@ public static class ManagementUI
                     .HighlightStyle(new Style(Hover))
                     .PageSize(10)
                     .AddChoices(userCoupons.Select(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}").Concat(new[] { "Go back" })));
-            if (couponSelection == "Go back") continue;
+            if (couponSelection == "Go back") return;
 
             var selectedCoupon = userCoupons.FirstOrDefault(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}" == couponSelection);
             if (selectedCoupon == null)
