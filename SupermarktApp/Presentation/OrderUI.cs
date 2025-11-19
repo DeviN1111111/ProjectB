@@ -449,31 +449,7 @@ public class Order
                 break;
 
             case "Add coupon":
-                var coupon = CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
-                if (coupon != null)
-                {
-                    var user = SessionManager.CurrentUser;
-                    var couponNumber = coupon.Id;
-                    if (user != null)
-                    {
-                        var numberedCoupon = CouponLogic.GetAllCoupons(user.ID)
-                            .Where(c => c.IsValid && c.Credit > 0)
-                            .Select((c, index) => new { Id = c.Id, Number = index + 1 })
-                            .FirstOrDefault(entry => entry.Id == coupon.Id);
-                        if (numberedCoupon != null)
-                        {
-                            couponNumber = numberedCoupon.Number;
-                        }
-                    }
-
-                    AnsiConsole.MarkupLine($"[green]Coupon #{couponNumber} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("[yellow]No coupon selected.[/]");
-                }
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                Console.ReadKey(true);
+                CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
                 await ShowCart();
                 return;
 

@@ -1,9 +1,8 @@
-using System;
-using System.Linq;
 using Spectre.Console;
+
 public static class CouponUI
 {
-    public static Coupon? DisplayMenu(Action<Coupon>? onCouponSelected = null)
+    public static void DisplayMenu(Action<Coupon>? onCouponSelected = null)
     {
         while (true)
         {
@@ -18,8 +17,8 @@ public static class CouponUI
             {
                 AnsiConsole.MarkupLine("[red]You must be logged in to view coupons.[/]");
                 AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                Console.ReadKey(true);
-                return null;
+                Console.ReadKey();
+                return;
             }
 
             var coupons = CouponLogic.GetAllCoupons(user.ID)
@@ -29,10 +28,13 @@ public static class CouponUI
             if (coupons.Count == 0)
             {
                 AnsiConsole.MarkupLine("[yellow]You have no valid coupons.[/]");
-                return null;
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
             }
 
             var appliedCouponId = Order.SelectedCouponId;
+
             var orderedCoupons = coupons
                 .Select((coupon, index) => new
                 {
@@ -43,6 +45,7 @@ public static class CouponUI
                 })
                 .ToList();
 
+            // Table display
             var couponTable = new Table()
                 .BorderColor(MenuUI.AsciiPrimary)
                 .AddColumn("[white]Coupon[/]")
@@ -63,7 +66,13 @@ public static class CouponUI
                     {
                         label += " [bold][applied][/]";
                     }
-                    return (Coupon: entry.Coupon, Label: label, Number: entry.Number, IsApplied: entry.IsApplied);
+
+                    return (
+                        Coupon: entry.Coupon,
+                        Label: label,
+                        Number: entry.Number,
+                        IsApplied: entry.IsApplied
+                    );
                 })
                 .ToList();
 
@@ -74,7 +83,34 @@ public static class CouponUI
                     .AddChoices(choices.Select(c => c.Label).Concat(new[] { "Go back" })));
 
             if (selection == "Go back")
-                return null;
+            {
+                appliedCouponId = Order.SelectedCouponId;
+
+                if (appliedCouponId.HasValue)
+                {
+                    var appliedEntry = orderedCoupons
+                        .FirstOrDefault(e => e.Coupon.Id == appliedCouponId.Value);
+
+                    if (appliedEntry != null)
+                    {
+                        var rounded = Math.Round(appliedEntry.Coupon.Credit, 2);
+                        AnsiConsole.MarkupLine(
+                            $"[green]Coupon #{appliedEntry.Number} applied with [yellow]€{rounded}[/] credit.[/]");
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[green]A coupon is applied to your cart.[/]");
+                    }
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[yellow]No coupon selected.[/]");
+                }
+
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
+            }
 
             var selectedEntry = choices.FirstOrDefault(c => c.Label == selection);
             var selectedCoupon = selectedEntry.Coupon;
@@ -90,19 +126,29 @@ public static class CouponUI
                     : new[] { "Apply coupon", "Back" });
 
             var action = AnsiConsole.Prompt(actionPrompt);
+
             if (action == "Back")
                 continue;
 
             if (action == "Apply coupon")
             {
                 onCouponSelected?.Invoke(selectedCoupon);
-                AnsiConsole.MarkupLine($"[green]Coupon #{selectedEntry.Number} applied to your cart.[/]");
-                return selectedCoupon;
+
+                var rounded = Math.Round(selectedCoupon.Credit, 2);
+                AnsiConsole.MarkupLine(
+                    $"[green]Coupon #{selectedEntry.Number} applied to your cart with [yellow]€{rounded}[/] credit.[/]");
+                AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
+                Console.ReadKey();
+
+                continue;
             }
 
             CouponLogic.ResetCouponSelection();
-            AnsiConsole.MarkupLine($"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
-            return null;
+
+            AnsiConsole.MarkupLine(
+                $"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
+            AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
+            Console.ReadKey();
         }
     }
 }
