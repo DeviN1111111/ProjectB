@@ -114,8 +114,6 @@ public static class CouponUI
 
             var selectedEntry = choices.FirstOrDefault(c => c.Label == selection);
             var selectedCoupon = selectedEntry.Coupon;
-            if (selectedCoupon == null)
-                continue;
 
             var actionPrompt = new SelectionPrompt<string>()
                 .Title(selectedEntry.IsApplied
@@ -128,7 +126,7 @@ public static class CouponUI
             var action = AnsiConsole.Prompt(actionPrompt);
 
             if (action == "Back")
-                continue;
+                break;
 
             else if (action == "Apply coupon")
             {
@@ -139,7 +137,7 @@ public static class CouponUI
                     $"[green]Coupon #{selectedEntry.Number} applied to your cart with [yellow]€{rounded}[/] credit.[/]");
                 AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
                 Console.ReadKey();
-                continue;
+                break;
             }
 
             else if (action == "Remove coupon")
@@ -149,6 +147,7 @@ public static class CouponUI
                     $"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
                 AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
                 Console.ReadKey();
+                break;
             }
         }
     }

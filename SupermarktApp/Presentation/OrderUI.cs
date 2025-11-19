@@ -444,14 +444,15 @@ public class Order
                     AnsiConsole.MarkupLine($"[green]Quantity for [yellow]{selectedProduct.Name}[/] updated to [yellow]{newQuantity}[/].[/]");
                     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                     Console.ReadKey();
-                    ShowCart();
+                    break;
                 }
                 break;
 
             case "Add coupon":
                 CouponUI.DisplayMenu();
-                ShowCart();
-                return;
+                Console.ReadKey();
+                System.Console.WriteLine("here 1");
+                break;
 
             case "Go back":
                 break;
