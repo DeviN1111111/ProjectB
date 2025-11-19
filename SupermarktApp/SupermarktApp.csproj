@@ -13,6 +13,13 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="Spectre.Console" Version="0.51.1" />
+    <None Include="EmailTemplates\**" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="EmailTemplates\*.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

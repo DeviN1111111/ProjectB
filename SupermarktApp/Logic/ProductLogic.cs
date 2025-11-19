@@ -56,5 +56,3 @@ public class ProductLogic
         return ProductAccess.GetProductByID(productID)!;
     }
 }
-
-

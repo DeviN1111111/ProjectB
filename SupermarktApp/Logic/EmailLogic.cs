@@ -44,6 +44,7 @@ public static class EmailLogic
         }
         catch (Exception ex)
         {
+            System.Console.WriteLine("Email sending failed: " + ex.Message);
             return false;
         }
     }

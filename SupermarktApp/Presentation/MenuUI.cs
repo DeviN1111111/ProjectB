@@ -1,8 +1,9 @@
+using System.Threading.Tasks;
 using Spectre.Console;
 public static class MenuUI
 {
     public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-    public static void ShowMainMenu()
+    public static async Task ShowMainMenu()
     {
         while (true)
         {
@@ -25,11 +26,7 @@ public static class MenuUI
                     else
                         AnsiConsole.MarkupLine($"[green]You have {lowStockCount} low stock notifications![/]");
                 }
-                
-
             }
-            
-
             if (SessionManager.CurrentUser == null)
             {
                 // Options when you're not logged in
@@ -38,7 +35,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounts", "Shop Details", "Settings", "Logout", "Exit"});
+                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounts", "Shop Reviews", "Shop Details", "Settings", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -48,7 +45,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
                 // Options when you're logged in as a superadmin
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage Users", "Shop Details", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
             }
             else
             {
@@ -72,6 +69,9 @@ public static class MenuUI
                 case "Shop Details":
                     ShopDetailsUI.Show();
                     break;
+                case "Shop Reviews":
+                    ShopReviewUI.ShowMenu();
+                    break;
                 case "Order":
                     ProductUI.SearchProduct();
                     break;
@@ -84,7 +84,7 @@ public static class MenuUI
                     Order.ShowChecklist();
                     break;
                 case "Order History":
-                    Order.DisplayOrderHistory();
+                    await Order.DisplayOrderHistory();
                     break;
                 case "Management":
                     ManagementUI.DisplayMenu();
@@ -116,9 +116,6 @@ public static class MenuUI
                 case "Exit":
                     return;
             }
-
-
-
         }
     }
 }

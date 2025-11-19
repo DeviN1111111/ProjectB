@@ -2,21 +2,17 @@ public class OrderHistoryModel
 {
     public int Id { get; set; }
     public int UserId { get; set; }
-    public int ProductId { get; set; }
     public DateTime Date { get; set; }
+    public bool IsPaid { get; set; }
+    public DateTime? FineDate { get; set; }
+    public int PaymentCode { get; set; }
 
-    public OrderHistoryModel(int userId)
+    public OrderHistoryModel(int userId, bool isPaid = true)
     {
         UserId = userId;
         Date = DateTime.Now;
+        IsPaid = isPaid;
     }
-    public OrderHistoryModel(int userId, int productId)
-    {
-        UserId = userId;
-        ProductId = productId;
-        Date = DateTime.Now;
-    }
-
     public OrderHistoryModel() { }
 }
     

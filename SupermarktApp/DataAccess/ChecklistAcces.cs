@@ -16,28 +16,25 @@ public class ChecklistAccess
     {
         using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE Userid = @UserID ";
-        return db.Query<ChecklistModel>(sql, new { UserID = userId }).ToList();
+        return db.Query<ChecklistModel>(sql, new { UserId = userId }).ToList();
     }
     
-
-        public static ChecklistModel? GetUserProductByProductId(int userId, int productId)
-        {
-            using var db = new SqliteConnection(ConnectionString);
-            var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
-            return db.QueryFirstOrDefault<ChecklistModel>(sql, new { UserId = userId, ProductId = productId });
-        }
-
-        public static void ClearChecklist()
-        {
-            using var db = new SqliteConnection(ConnectionString);
-            var sql = $"DELETE FROM Cart WHERE UserId = @UserId";
-            db.Execute(sql, new { UserId = SessionManager.CurrentUser.ID });
-        }
-
-        public static void RemoveFromChecklist(int userId, int productId)
-        {
-            using var db = new SqliteConnection(ConnectionString);
-            var sql = $"DELETE FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
-            db.Execute(sql, new { UserId = userId, ProductId = productId });
-        }
+    public static ChecklistModel? GetUserProductByProductId(int userId, int productId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
+        return db.QueryFirstOrDefault<ChecklistModel>(sql, new { UserId = userId, ProductId = productId });
+    }
+    public static void ClearChecklist()
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"DELETE FROM Cart WHERE UserId = @UserId";
+        db.Execute(sql, new { UserId = SessionManager.CurrentUser.ID });
+    }
+    public static void RemoveFromChecklist(int userId, int productId)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"DELETE FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
+        db.Execute(sql, new { UserId = userId, ProductId = productId });
+    }
 }
