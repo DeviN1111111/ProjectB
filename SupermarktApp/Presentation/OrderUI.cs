@@ -450,7 +450,7 @@ public class Order
 
             case "Add coupon":
                 CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
-                await ShowCart();
+                ShowCart();
                 return;
 
             case "Go back":
