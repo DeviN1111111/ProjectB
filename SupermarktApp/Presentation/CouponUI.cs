@@ -143,12 +143,15 @@ public static class CouponUI
                 continue;
             }
 
-            CouponLogic.ResetCouponSelection();
+            else
+            {
+                CouponLogic.ResetCouponSelection();
 
-            AnsiConsole.MarkupLine(
-                $"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
-            AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
-            Console.ReadKey();
+                AnsiConsole.MarkupLine(
+                    $"[yellow]Coupon #{selectedEntry.Number} removed from your cart.[/]");
+                AnsiConsole.MarkupLine("[grey]Press [green]ENTER[/] to continue.[/]");
+                Console.ReadKey();
+            }
         }
     }
 }
