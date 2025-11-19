@@ -40,15 +40,27 @@ public class Order
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
+                var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(Product.ID);
+                var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(Product.ID, SessionManager.CurrentUser!.ID);
                 if (cartProduct.ProductId == Product.ID)
                 {
                     if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
                     {
                         cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
                     }
-                    else if (Product.DiscountType == "Weekly" || Product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(Product.ID))
+                    else if (WeeklyDiscount != null && WeeklyDiscount.DiscountType == "Weekly")
                     {
-                        double priceAfterDiscount = Math.Round((Product.Price * (1 - Product.DiscountPercentage / 100)), 2);
+                        double priceAfterDiscount = Math.Round((Product.Price * (1 - WeeklyDiscount.DiscountPercentage / 100)), 2);
+                        double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
+
+                        totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
+
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * cartProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (priceAfterDiscount * cartProduct.Quantity);
+                    }
+                    else if(PersonalDiscount != null && PersonalDiscount.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(Product.ID))
+                    {
+                        double priceAfterDiscount = Math.Round((Product.Price * (1 - PersonalDiscount.DiscountPercentage / 100)), 2);
                         double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
 
                         totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
@@ -635,28 +647,25 @@ public class Order
                 int productId = keyValuePair.Key;
                 int quantity = keyValuePair.Value;
 
-                var product = ProductAccess.GetProductByID(productId);
-                if (product != null)
+                var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
+                var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
+
+                double DiscountPercentage = 0;
+
+                if(WeeklyDiscount != null)
                 {
-                    double price = product.Price;
+                    DiscountPercentage = WeeklyDiscount.DiscountPercentage;
+                }
+                else if(PersonalDiscount != null)
+                {
+                    DiscountPercentage = PersonalDiscount.DiscountPercentage;
+                }
 
-                    // Apply discounts if needed
-                    if (product.DiscountType == "Weekly" ||
-                        (product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
-                    {
-                        price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
-                        // TODO: update the price in OrderHistory database if needed
-                    }
-
-                    double itemTotal = quantity * price;
-                    totalOrderPrice += itemTotal;
-
-                    orderTable.AddRow(
-                        product?.Name ?? "[red]Unknown Product[/]",
-                        quantity.ToString(),
-                        $"${price:F2}",
-                        $"${itemTotal:F2}"
-                    );
+                // Apply discounts if needed
+                if (DiscountPercentage > 0)
+                {
+                    price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
+                    // TODO: update the price in OrderHistory database if needed
                 }
             }
 

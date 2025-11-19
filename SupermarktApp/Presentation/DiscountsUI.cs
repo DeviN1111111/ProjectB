@@ -50,8 +50,8 @@ public class DiscountsUI
             .Centered()
             .Color(AsciiPrimary));
 
-        var products = DiscountsLogic.GetWeeklyDiscounts();
-        if (products.Count == 0)
+        var discounts = DiscountsLogic.GetWeeklyDiscounts();
+        if (discounts.Count == 0)
         {
             AnsiConsole.MarkupLine("[bold red] NO WEEKLY DISCOUNTS[/]");
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
@@ -64,10 +64,10 @@ public class DiscountsUI
             table.AddColumn("[italic yellow]Discount Percentage[/]");
             table.AddColumn("[red]Original Price[/]");
             table.AddColumn("[green]Discounted Price[/]");
-            foreach (DiscountsModel discountModel in products)
+            foreach (DiscountsModel discount in discounts)
             {
-                ProductModel productModel = ProductLogic.GetProductByID(discountModel.ProductID);
-                table.AddRow($"[blue]{productModel.Name}[/]", $"[italic yellow]{discountModel.DiscountPercentage}% OFF[/]", $"[strike][red]€{productModel.Price}[/][/]", $"[green]€{Math.Round(productModel.Price * (1 - (discountModel.DiscountPercentage / 100)), 2)}[/]");
+                var product = ProductLogic.GetProductById(discount.ProductID);
+                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]€{Math.Round(product.Price * (1 - (discount.DiscountPercentage / 100)), 2)}[/]");
             }
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
@@ -84,9 +84,9 @@ public class DiscountsUI
             .Color(AsciiPrimary));
 
         DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID); // clear previous discounts and seed again based on order history
-        var products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser!.ID); // retrieve the (new) personal discounts
+        var discounts = DiscountsLogic.GetValidPersonalDiscounts(SessionManager.CurrentUser!.ID); // retrieve the (new) personal discounts
 
-        if (products.Count < 5)
+        if (discounts.Count < 5)
         {
             AnsiConsole.MarkupLine("[bold red] NO PERSONAL DISCOUNTS [italic yellow](Place some orders to get personal discounts!)[/][/]");
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
@@ -99,14 +99,15 @@ public class DiscountsUI
             table.AddColumn("[italic yellow]Discount Percentage[/]");
             table.AddColumn("[red]Original Price[/]");
             table.AddColumn("[green]Discounted Price[/]");
-            foreach (ProductModel product in products)
+            foreach (var discount in discounts)
             {
-                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{product.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]€{Math.Round(product.Price * (1 - (product.DiscountPercentage / 100)), 2)}[/]");
+                var product = ProductLogic.GetProductById(discount.ProductID);
+                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]€{Math.Round(product.Price * (1 - (discount.DiscountPercentage / 100)), 2)}[/]");
             }
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
             Console.ReadKey();
-            products.Clear();
+            discounts.Clear();
         }
     }
 }

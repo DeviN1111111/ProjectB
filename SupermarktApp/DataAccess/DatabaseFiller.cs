@@ -119,9 +119,7 @@ public class DatabaseFiller
                 Category TEXT,
                 Location INTEGER,
                 Quantity INTEGER NOT NULL DEFAULT 0,
-                Visible INTEGER NOT NULL DEFAULT 1,
-                DiscountPercentage REAL NOT NULL DEFAULT 0,
-                DiscountType TEXT NOT NULL DEFAULT 'None'
+                Visible INTEGER NOT NULL DEFAULT 1
             );");
 
         db.Execute(@"
