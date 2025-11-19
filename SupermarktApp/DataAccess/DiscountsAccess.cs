@@ -51,12 +51,12 @@ public static class DiscountsAccess
             "SELECT * FROM Discounts WHERE ProductId = @ProductID",
             new { ProductID = productID });
     }
-    public static List<DiscountsModel> GetDiscountsByProductID(int productID)
-    {
-        return _sharedConnection.Query<DiscountsModel>(
-            "SELECT * FROM Discounts WHERE ProductId = @ProductID",
-            new { ProductID = productID }).ToList();
-    }
+    // public static List<DiscountsModel> GetDiscountsByProductID(int productID)
+    // {
+    //     return _sharedConnection.Query<DiscountsModel>(
+    //         "SELECT * FROM Discounts WHERE ProductId = @ProductID",
+    //         new { ProductID = productID }).ToList();
+    // }
 
     public static void RemoveDiscountByProductID(int productID)
     {
@@ -93,5 +93,12 @@ public static class DiscountsAccess
         _sharedConnection.Execute(
             "DELETE FROM Discounts WHERE ID = @DiscountID",
             new { DiscountID = discountID });
+    }
+
+    public static DiscountsModel GetDiscountByProductID(int productID)
+    {
+        return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID });
     }
 }

@@ -42,6 +42,7 @@ public static class LoginUI
                         break;
                     }
                 }
+            }
                 else
                 {
                     SessionManager.CurrentUser = Account;
@@ -67,11 +68,7 @@ public static class LoginUI
                             AnsiConsole.MarkupLine("[yellow] You’ve already received your birthday gift this year![/]");
                         }
                     }
-
-
-
                 }
-
             }
             else
             {

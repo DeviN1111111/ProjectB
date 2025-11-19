@@ -588,8 +588,8 @@ public class Order
 
             var orderChoices = userOrders
                 .Select(order => order.IsPaid
-                    ? $"Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm}"
-                    : $"[red]Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm} (Unpaid)[/]")
+                    ? $"Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm}"
+                    : $"[red]Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm} (Unpaid)[/]")
                 .ToList();
             
             string selectedOrderLabel = AnsiConsole.Prompt(
@@ -647,6 +647,7 @@ public class Order
                 int productId = keyValuePair.Key;
                 int quantity = keyValuePair.Value;
 
+                var product = ProductLogic.GetProductByID(productId); 
                 var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
                 var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
 
@@ -664,7 +665,7 @@ public class Order
                 // Apply discounts if needed
                 if (DiscountPercentage > 0)
                 {
-                    price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
+                    double price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
                     // TODO: update the price in OrderHistory database if needed
                 }
             }
