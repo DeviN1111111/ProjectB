@@ -27,11 +27,12 @@ public static class CouponUI
             if (c.IsValid && c.Credit > 0)
                 coupons.Add(c);
         }
-
+        
         if (coupons.Count == 0)
         {
             AnsiConsole.MarkupLine("[yellow]You have no valid coupons.[/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
             return;
         }
 
