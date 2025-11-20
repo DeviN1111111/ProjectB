@@ -41,11 +41,11 @@ public static class PayLaterLogic
             if (product != null)
             {
                 double price = product.Price;
-
-                if (product.DiscountType == "Weekly" ||
-                    (product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
+                DiscountsModel? discount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
+                if (discount.DiscountType == "Weekly" ||
+                    (discount.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
                 {
-                    price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
+                    price = Math.Round(product.Price * (1 - discount.DiscountPercentage / 100), 2);
                 }
 
                 double itemTotal = quantity * price;
