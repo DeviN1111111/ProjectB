@@ -30,6 +30,8 @@ public static class TwoFALogic
         DateTime expiry = DateTime.Now.AddMinutes(validityMinutes);
 
         UserAccess.Insert2FACode(userId, code, expiry);
+
+        Login2FATemplate = File.ReadAllText(Login2FATemplatePath);
     }
 
     public static async Task<string> Register2FAEmail(string email)
@@ -44,6 +46,8 @@ public static class TwoFALogic
             isHtml: true
         );
 
+        Register2FATemplate = File.ReadAllText(Register2FATemplatePath);
+
         return code;
     }
     public static async Task<string> ForgetPassword2FAEmail(int userId, string email)
@@ -57,8 +61,11 @@ public static class TwoFALogic
             body: ForgetPassword2FATemplate,
             isHtml: true
         );
+        
         UserAccess.Insert2FACode(userId, code, DateTime.Now.AddMinutes(10));
 
+        ForgetPassword2FATemplate = File.ReadAllText(ForgetPassword2FATemplatePath);
+        
         return code;
     }
     public static bool Validate2FACode(int userId, string inputCode)
