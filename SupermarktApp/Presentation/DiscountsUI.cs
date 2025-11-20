@@ -64,9 +64,10 @@ public class DiscountsUI
             table.AddColumn("[italic yellow]Discount Percentage[/]");
             table.AddColumn("[red]Original Price[/]");
             table.AddColumn("[green]Discounted Price[/]");
-            foreach (ProductModel product in products)
+            foreach (DiscountsModel discountModel in products)
             {
-                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{product.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]€{Math.Round(product.Price * (1 - (product.DiscountPercentage / 100)), 2)}[/]");
+                ProductModel productModel = ProductLogic.GetProductByID(discountModel.ProductID);
+                table.AddRow($"[blue]{productModel.Name}[/]", $"[italic yellow]{discountModel.DiscountPercentage}% OFF[/]", $"[strike][red]€{productModel.Price}[/][/]", $"[green]€{Math.Round(productModel.Price * (1 - (discountModel.DiscountPercentage / 100)), 2)}[/]");
             }
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
@@ -82,12 +83,9 @@ public class DiscountsUI
             .Centered()
             .Color(AsciiPrimary));
 
-        var products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser.ID);
-        if (products.Count == 0)
-        {
-            DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser.ID); // SEED PERSONAL DISCOUNTS
-            products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser.ID);
-        }
+        DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID); // clear previous discounts and seed again based on order history
+        var products = DiscountsLogic.GetPersonalDiscountsProducts(SessionManager.CurrentUser!.ID); // retrieve the (new) personal discounts
+
         if (products.Count < 5)
         {
             AnsiConsole.MarkupLine("[bold red] NO PERSONAL DISCOUNTS [italic yellow](Place some orders to get personal discounts!)[/][/]");
@@ -108,6 +106,7 @@ public class DiscountsUI
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
             Console.ReadKey();
+            products.Clear();
         }
     }
 }

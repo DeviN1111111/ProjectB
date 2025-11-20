@@ -65,7 +65,7 @@ public static class SearchUI
                         string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (product.DiscountPercentage / 100)), 2)}[/]";
                         table.AddRow(product.Name, newPrice);            
                     }
-                    else if(product.DiscountType == "Weekly")
+                    else if(product.DiscountType == "Weekly" && DiscountsLogic.IsDiscountActive(DiscountsLogic.GetDiscountsByProductID(product.ID)))
                     {
                         string text = product.Price.ToString();
                         var struckPrice = $"[strike][red]€{text}[/][/]";

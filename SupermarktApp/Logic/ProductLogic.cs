@@ -50,6 +50,9 @@ public class ProductLogic
     {
         return ProductAccess.GetAllProducts();
     }
+
+    public static ProductModel GetProductByID(int productID)
+    {
+        return ProductAccess.GetProductByID(productID)!;
+    }
 }
-
-

@@ -321,6 +321,7 @@ public class Order
                         }
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
+                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
@@ -360,7 +361,6 @@ public class Order
                         }
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
-                        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
                         OrderLogic.UpdateStock();
@@ -657,7 +657,7 @@ public class Order
                 var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
                 if (selectedOrder.FineDate != null)
                 {
-                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:yyyy-MM-dd HH:mm}[/] to pay.[/]\n");
+                    AnsiConsole.MarkupLine($"[yellow]You have till [red]{selectedOrder.FineDate:dd-MM-yyyy HH:mm}[/] to pay.[/]\n");
                 }
                 
                 var payChoice = AnsiConsole.Prompt(

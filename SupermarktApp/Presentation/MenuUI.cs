@@ -35,7 +35,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounts", "Shop Details", "Settings", "Logout", "Exit"});
+                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Rewards", "Discounts", "Shop Reviews", "Shop Details", "Settings", "Logout", "Exit"});
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -45,7 +45,7 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
                 // Options when you're logged in as a superadmin
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Manage Users", "Shop Details", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
             }
             else
             {
@@ -68,6 +68,9 @@ public static class MenuUI
                     break;
                 case "Shop Details":
                     ShopDetailsUI.Show();
+                    break;
+                case "Shop Reviews":
+                    ShopReviewUI.ShowMenu();
                     break;
                 case "Order":
                     ProductUI.SearchProduct();
