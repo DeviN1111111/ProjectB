@@ -90,7 +90,7 @@ public static class CouponUI
             int number = i + 1;
             double credit = Math.Round(coupons[i].Credit, 2);
 
-            table.AddRow($"#{number} €[green]{credit}[/]");
+            table.AddRow($"#{number}", $"€[green]{credit}[/]");
 
             string label = $"Coupon #{number} - €[green]{credit}[/]";
             labels.Add(label);
