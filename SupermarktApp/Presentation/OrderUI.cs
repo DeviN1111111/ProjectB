@@ -324,7 +324,10 @@ public class Order
 
 
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
-                        OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
+                        if (allOrderEntries.Count > 0)
+                        {
+                            OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
+                        }
                         PayLaterLogic.Pay();
                         if (SelectedCouponId.HasValue)
                         {
