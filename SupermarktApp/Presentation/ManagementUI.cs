@@ -163,56 +163,6 @@ public static class ManagementUI
                 return;
         }
     }
-        // var period = AnsiConsole.Prompt(
-        //     new SelectionPrompt<string>()
-        //         .HighlightStyle(new Style(Hover))
-        //         .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
-        // Change management menu ( organize it with sub menus, add dropdown menu, )
-        // switch (period)
-        // {
-        //     case "Go back":
-        //         return;
-
-        //     case "Add new product":
-        //         AddProduct();
-        //         break;
-
-        //     case "Delete product":
-        //         DeleteProduct();
-        //         break;
-
-        //     case "Edit product details":
-        //         ChangeProductDetails();
-        //         break;
-
-        //     case "Edit Shop Description":
-        //         ShopDetailsUI.PromptDescription();
-        //         break;
-
-        //     case "Edit Opening Hours":
-        //         ShopDetailsUI.PromptOpeningHours();
-        //         break;
-
-        //     case "Add discount on a specific date":
-        //         DiscountSpecificDate();
-        //         break;
-
-        //     case "Delete discount on a specific date":
-        //         DeleteDiscountSpecificDate();
-        //         break;
-
-        //     case "Create Coupon":
-        //         CreateCouponForUser();
-        //         break;
-
-        //     case "Edit Coupons":
-        //         EditCoupons();
-        //         break;
-                
-        //     default:
-        //         AnsiConsole.MarkupLine("[red]Invalid selection[/]");
-        //         break;
-        // }
 
     public static void CreateCouponForUser()
     {
@@ -597,6 +547,13 @@ public static class ManagementUI
                 .Color(AsciiPrimary));
         
         List<DiscountsModel> AllDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
+        if (AllDiscounts.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]There are no weekly discounts to delete.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
         List<string> DiscountedProductsList = [];
 
         foreach (DiscountsModel discount in AllDiscounts)

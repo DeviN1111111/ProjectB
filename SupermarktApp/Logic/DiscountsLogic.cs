@@ -1,11 +1,13 @@
 using System.Dynamic;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.VisualBasic;
 using NUnit.Framework.Internal.Execution;
 using Spectre.Console;
 
 public class DiscountsLogic
 {
-    private static bool EmailSent = false;
+
+    private static bool DiscountMailSent = false;
     private static string DiscountTemplatePath = "EmailTemplates/DiscountTemplate.html";
     private static string DiscountTemplate = File.ReadAllText(DiscountTemplatePath);
     public static void AddDiscount(DiscountsModel Discount)
@@ -41,19 +43,6 @@ public class DiscountsLogic
         }
         return validDiscounts;
     }
-    public static List<ProductModel> GetPersonalDiscountsProducts(int userID) // returns a List with products that have a personal discount for the User
-    {
-        var personalDiscountsList = GetValidPersonalDiscounts(userID);
-        List<ProductModel> personalDiscountsProducts = [];
-        foreach (DiscountsModel personalDiscounts in personalDiscountsList)
-        {
-            if(personalDiscounts != null && DateTime.Now >= personalDiscounts.StartDate && DateTime.Now <= personalDiscounts.EndDate)
-            {
-                personalDiscountsProducts.Add(ProductAccess.GetProductByID(personalDiscounts.ProductID));
-            }
-        }
-        return personalDiscountsProducts;
-    }
 
     public static bool CheckUserIDForPersonalDiscount(int productID) // this checks if a product is in the personal discounts for currentUser
     {
@@ -67,6 +56,10 @@ public class DiscountsLogic
         }
         return false;
     }
+    public static DiscountsModel GetWeeklyDiscountByProductID(int productID)
+    {
+        return DiscountsAccess.GetWeeklyDiscountByProductID(productID);
+    }
     public static void SeedPersonalDiscounts(int userID)
     {
         if (UserAccess.GetUserByID(userID) == null)
@@ -74,9 +67,9 @@ public class DiscountsLogic
             return;
         }
 
-        RemoveAllPersonalDiscountsByUserID(userID); 
+        RemoveAllPersonalDiscountsByUserID(userID);
         List<ProductModel> top5Products = OrderAccess.GetTop5MostBoughtProducts(userID);
-        
+
         if (top5Products.Count < 5)
             return;
 
@@ -84,7 +77,7 @@ public class DiscountsLogic
 
         foreach (ProductModel product in top5Products)
         {
-            double discountPercentage = rand.Next(1, 5);
+            double discountPercentage = rand.Next(5, 41); 
             DateTime startDate = DateTime.MinValue;
             DateTime endDate = DateTime.MaxValue;
 
@@ -96,36 +89,40 @@ public class DiscountsLogic
                 endDate: endDate,
                 userId: userID
             );
-            product.DiscountType = "Personal";
-            product.DiscountPercentage = discountPercentage;
             AddDiscount(discount);
         }
-        if (!EmailSent && top5Products.Count >= 5)
-        {
-            SentDiscountEmail(top5Products);
-        }
-        
-    }
 
-    public static async Task SentDiscountEmail(List<ProductModel> Top5List)
+        SentPersonalDiscountEmail(top5Products);
+    }
+    
+    public static DiscountsModel GetPeronsalDiscountByProductAndUserID(int productID, int UserID)
     {
-        EmailSent = true;
+        return DiscountsAccess.GetPeronsalDiscountByProductAndUserID(productID, UserID);
+    }
+    public static async Task SentPersonalDiscountEmail(List<ProductModel> Top5List)
+    {
         for (int i = 0; i < Top5List.Count; i++)
         {
+            var discount = GetPeronsalDiscountByProductAndUserID(Top5List[i].ID, SessionManager.CurrentUser!.ID);
+
             DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.PRODUCT{i}--", Top5List[i].Name);
-            DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.PERCENTAGE{i}--", Top5List[i].DiscountPercentage.ToString());
+            DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.PERCENTAGE{i}--", discount.DiscountPercentage.ToString());
             DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.BEFORE{i}--", Top5List[i].Price.ToString());
-            DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.AFTER{i}--", Math.Round(Top5List[i].Price * (1 - Top5List[i].DiscountPercentage / 100.0), 2).ToString());
+            DiscountTemplate = DiscountTemplate.Replace($"--DISCOUNT.AFTER{i}--", Math.Round(Top5List[i].Price * (1 - discount.DiscountPercentage / 100.0), 2).ToString());
         }
 
-        DiscountTemplate = DiscountTemplate.Replace("{{DISCOUNT.TYPE}}", Top5List[0].DiscountType);
-
-        await EmailLogic.SendEmailAsync(
+        DiscountTemplate = DiscountTemplate.Replace("{{DISCOUNT.TYPE}}", "Personal");
+        if(!DiscountMailSent)
+        {
+            await EmailLogic.SendEmailAsync(
             to: UserAccess.GetUserEmail(SessionManager.CurrentUser!.ID)!,
             subject: "Your Discounts!",
             body: DiscountTemplate,
             isHtml: true
-        );
+            );
+            
+            DiscountMailSent = true;
+        }
     }
 
     public static bool IsDiscountActive(DiscountsModel discount)
