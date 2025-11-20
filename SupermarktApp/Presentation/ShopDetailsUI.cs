@@ -115,11 +115,10 @@ public static class ShopDetailsUI
                 ShopReviewUI.AddReview(new ShopReviewLogic());
                 break;
             case "No":
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+                Console.ReadKey();
                 break;
         }
-        
-        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
-        Console.ReadKey();
     }
     public static void PromptDescription()
     {
