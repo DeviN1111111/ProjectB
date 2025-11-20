@@ -18,31 +18,31 @@ public static class LoginUI
             UserModel Account = LoginLogic.Login(email, password);
             if (Account != null)
             {
-                if (TwoFALogic.Is2FAEnabled(Account.ID))
+            if (TwoFALogic.Is2FAEnabled(Account.ID))
+            {
+                TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
+                AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
+                while (true)
                 {
-                    TwoFALogic.CreateInsertAndEmailSend2FACode(Account.ID);
-                    AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
-                    while (true)
+                    string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                    if (inputCode.ToUpper() == "EXIT")
                     {
-                        string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
-                        if (inputCode.ToUpper() == "EXIT")
-                        {
-                            return;
-                        }
-                        if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
-                        {
-                            AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
-                        }
-                        else
-                        {
-                            SessionManager.CurrentUser = Account;
-                            AnsiConsole.MarkupLine("[green]Login successful![/]");
-                            AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
-                            Console.ReadKey();
-                            break;
-                        }
+                        return;
+                    }
+                    if (!TwoFALogic.Validate2FACode(Account.ID, inputCode))
+                    {
+                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
+                    }
+                    else
+                    {
+                        SessionManager.CurrentUser = Account;
+                        AnsiConsole.MarkupLine("[green]Login successful![/]");
+                        AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue...");
+                        Console.ReadKey();
+                        break;
                     }
                 }
+            }
                 else
                 {
                     SessionManager.CurrentUser = Account;
@@ -68,11 +68,7 @@ public static class LoginUI
                             AnsiConsole.MarkupLine("[yellow] You’ve already received your birthday gift this year![/]");
                         }
                     }
-
-
-
                 }
-
             }
             else
             {
@@ -111,57 +107,56 @@ public static class LoginUI
                             if (result == null)
                             {
                                 AnsiConsole.MarkupLine("[red]Email not found![/]");
-                                
+
                                 // If this was their last allowed attempt
                                 if (resetAttempts == 1)
                                 {
                                     AnsiConsole.MarkupLine("[red]Too many failed attempts! Returning to main menu.[/]");
+                                    Console.ReadKey();
                                     attempts = 0;
                                     return;
                                 }
-
                                 continue;
                             }
-                                // Send 2FA code to email using logic layer
-                                LoginLogic.ForgetPassword2FAEmail(result.ID, result.Email);
-
-                                // Type in the 2FA code
-                                AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
-                                while (true)
+                            // Send 2FA code to email using logic layer
+                            LoginLogic.ForgetPassword2FAEmail(result.ID, result.Email);
+                            // Type in the 2FA code
+                            AnsiConsole.MarkupLine("[italic yellow]A 2FA code has been sent to your email![/]");
+                            while (true)
+                            {
+                                // Exit the loop option
+                                string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                                if (inputCode.ToUpper() == "EXIT")
                                 {
-                                    // Exit the loop option
-                                    string inputCode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
-                                    if (inputCode.ToUpper() == "EXIT")
+                                    return;
+                                }
+                                // Wrong code entered
+                                if (!TwoFALogic.Validate2FACode(result.ID, inputCode))
+                                {
+                                    AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
+                                }
+                                // Correct code entered
+                                else
+                                {
+                                    string newPassword;
+                                    do
                                     {
-                                        return;
-                                    }
-                                    // Wrong code entered
-                                    if (!TwoFALogic.Validate2FACode(result.ID, inputCode))
-                                    {
-                                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code or code expired[/]");
-                                    }
-                                    // Correct code entered
-                                    else
-                                    {
-                                        string newPassword;
-                                        do
-                                        {
-                                            AnsiConsole.MarkupLine("[blue]Password must contain at least 1 digit and has to be 6 characters long (Example: Cheese1).[/]");
-                                            newPassword = AnsiConsole.Prompt(
-                                                new TextPrompt<string>("Create a new password:")
-                                                    .Secret());
-                                        } while (ValidaterLogic.ValidatePassword(newPassword) == false);
-                                        // Update password in database
-                                        result.Password = newPassword;
-                                        LoginLogic.UpdateUserPassword(result.ID, newPassword);
-                                        AnsiConsole.MarkupLine("[green]Password reset successful! You can now log in with your new password.[/]");
-                                        AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
-                                        attempts = 0;
-                                        Console.ReadKey();
-                                        return;
-                                    }
+                                        AnsiConsole.MarkupLine("[blue]Password must contain at least 1 digit and has to be 6 characters long (Example: Cheese1).[/]");
+                                        newPassword = AnsiConsole.Prompt(
+                                            new TextPrompt<string>("Create a new password:")
+                                                .Secret());
+                                    } while (ValidaterLogic.ValidatePassword(newPassword) == false);
+                                    // Update password in database
+                                    result.Password = newPassword;
+                                    LoginLogic.UpdateUserPassword(result.ID, newPassword);
+                                    AnsiConsole.MarkupLine("[green]Password reset successful! You can now log in with your new password.[/]");
+                                    AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
+                                    attempts = 0;
+                                    Console.ReadKey();
+                                    return;
                                 }
                             }
+                        }
                         break;
                     case "Back to Main Menu":
                         attempts = 0;

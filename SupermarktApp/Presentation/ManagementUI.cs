@@ -163,56 +163,6 @@ public static class ManagementUI
                 return;
         }
     }
-        // var period = AnsiConsole.Prompt(
-        //     new SelectionPrompt<string>()
-        //         .HighlightStyle(new Style(Hover))
-        //         .AddChoices(new[] { "Edit product details", "Add new product", "Delete product", "Edit Shop Description", "Edit Opening Hours","Create Coupon", "Edit Coupons", "Add discount on a specific date", "Delete discount on a specific date", "Go back" }));
-        // Change management menu ( organize it with sub menus, add dropdown menu, )
-        // switch (period)
-        // {
-        //     case "Go back":
-        //         return;
-
-        //     case "Add new product":
-        //         AddProduct();
-        //         break;
-
-        //     case "Delete product":
-        //         DeleteProduct();
-        //         break;
-
-        //     case "Edit product details":
-        //         ChangeProductDetails();
-        //         break;
-
-        //     case "Edit Shop Description":
-        //         ShopDetailsUI.PromptDescription();
-        //         break;
-
-        //     case "Edit Opening Hours":
-        //         ShopDetailsUI.PromptOpeningHours();
-        //         break;
-
-        //     case "Add discount on a specific date":
-        //         DiscountSpecificDate();
-        //         break;
-
-        //     case "Delete discount on a specific date":
-        //         DeleteDiscountSpecificDate();
-        //         break;
-
-        //     case "Create Coupon":
-        //         CreateCouponForUser();
-        //         break;
-
-        //     case "Edit Coupons":
-        //         EditCoupons();
-        //         break;
-                
-        //     default:
-        //         AnsiConsole.MarkupLine("[red]Invalid selection[/]");
-        //         break;
-        // }
 
     public static void CreateCouponForUser()
     {
@@ -242,7 +192,7 @@ public static class ManagementUI
                     .AddChoices(choices.Select(c => c.Label).Concat(new[] { "Go back" })));
 
             if (selection == "Go back")
-                DisplayMenu();
+                break;
 
             var chosen = choices.FirstOrDefault(c => c.Label == selection);
             if (chosen.User == null)
@@ -286,7 +236,7 @@ public static class ManagementUI
                     .HighlightStyle(new Style(Hover))
                     .PageSize(10)
                     .AddChoices(allUsers.Select(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]").Concat(new[] { "Go back" })));
-            if (userSelection == "Go back") DisplayMenu();
+            if (userSelection == "Go back") break;
 
             var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]" == userSelection);
             if (selectedUser == null)
@@ -312,7 +262,7 @@ public static class ManagementUI
                     .HighlightStyle(new Style(Hover))
                     .PageSize(10)
                     .AddChoices(userCoupons.Select(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}").Concat(new[] { "Go back" })));
-            if (couponSelection == "Go back") continue;
+            if (couponSelection == "Go back") return;
 
             var selectedCoupon = userCoupons.FirstOrDefault(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}" == couponSelection);
             if (selectedCoupon == null)

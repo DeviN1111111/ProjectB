@@ -40,15 +40,27 @@ public class Order
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
+                var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(Product.ID);
+                var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(Product.ID, SessionManager.CurrentUser!.ID);
                 if (cartProduct.ProductId == Product.ID)
                 {
                     if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
                     {
                         cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
                     }
-                    else if (Product.DiscountType == "Weekly" || Product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(Product.ID))
+                    else if (WeeklyDiscount != null && WeeklyDiscount.DiscountType == "Weekly")
                     {
-                        double priceAfterDiscount = Math.Round((Product.Price * (1 - Product.DiscountPercentage / 100)), 2);
+                        double priceAfterDiscount = Math.Round((Product.Price * (1 - WeeklyDiscount.DiscountPercentage / 100)), 2);
+                        double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
+
+                        totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
+
+                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * cartProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (priceAfterDiscount * cartProduct.Quantity);
+                    }
+                    else if(PersonalDiscount != null && PersonalDiscount.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(Product.ID))
+                    {
+                        double priceAfterDiscount = Math.Round((Product.Price * (1 - PersonalDiscount.DiscountPercentage / 100)), 2);
                         double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
 
                         totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
@@ -117,7 +129,7 @@ public class Order
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
-        TotalPrice = totalAmount + deliveryFee - totalDiscount + UnpaidFine;
+        TotalPrice = totalAmount + deliveryFee + UnpaidFine;
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
@@ -312,14 +324,16 @@ public class Order
 
 
                         // Save them to the database — all products share one OrderHistory entry (OrderId)
-                        OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
+                        if (allOrderEntries.Count > 0)
+                        {
+                            OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
+                        }
                         PayLaterLogic.Pay();
                         if (SelectedCouponId.HasValue)
                         {
                             CouponLogic.UseCoupon(SelectedCouponId.Value);
                             CouponLogic.ResetCouponSelection();
                         }
-                        RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -444,37 +458,12 @@ public class Order
                     AnsiConsole.MarkupLine($"[green]Quantity for [yellow]{selectedProduct.Name}[/] updated to [yellow]{newQuantity}[/].[/]");
                     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                     Console.ReadKey();
-                    ShowCart();
+                    break;
                 }
                 break;
 
             case "Add coupon":
-                var coupon = CouponUI.DisplayMenu(CouponLogic.ApplyCouponToCart);
-                if (coupon != null)
-                {
-                    var user = SessionManager.CurrentUser;
-                    var couponNumber = coupon.Id;
-                    if (user != null)
-                    {
-                        var numberedCoupon = CouponLogic.GetAllCoupons(user.ID)
-                            .Where(c => c.IsValid && c.Credit > 0)
-                            .Select((c, index) => new { Id = c.Id, Number = index + 1 })
-                            .FirstOrDefault(entry => entry.Id == coupon.Id);
-                        if (numberedCoupon != null)
-                        {
-                            couponNumber = numberedCoupon.Number;
-                        }
-                    }
-
-                    AnsiConsole.MarkupLine($"[green]Coupon #{couponNumber} applied with [yellow]€{Math.Round(coupon.Credit, 2)}[/] credit.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("[yellow]No coupon selected.[/]");
-                }
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                Console.ReadKey(true);
-                await ShowCart();
+                CouponUI.DisplayMenu();
                 return;
 
             case "Go back":
@@ -576,8 +565,8 @@ public class Order
 
             var orderChoices = userOrders
                 .Select(order => order.IsPaid
-                    ? $"Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm}"
-                    : $"[red]Order #{order.Id} - {order.Date:yyyy-MM-dd HH:mm} (Unpaid)[/]")
+                    ? $"Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm}"
+                    : $"[red]Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm} (Unpaid)[/]")
                 .ToList();
             
             string selectedOrderLabel = AnsiConsole.Prompt(
@@ -628,7 +617,6 @@ public class Order
                     productCounts[item.ProductID] = 1;
             }
 
-
             // Second pass: build the table using the counted quantities
             foreach (var keyValuePair in productCounts)
             {
@@ -640,11 +628,24 @@ public class Order
                 {
                     double price = product.Price;
 
-                    // Apply discounts if needed
-                    if (product.DiscountType == "Weekly" ||
-                        (product.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID)))
+                    var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
+                    var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
+
+                    double DiscountPercentage = 0;
+
+                    if(WeeklyDiscount != null)
                     {
-                        price = Math.Round(product.Price * (1 - product.DiscountPercentage / 100), 2);
+                        DiscountPercentage = WeeklyDiscount.DiscountPercentage;
+                    }
+                    else if(PersonalDiscount != null)
+                    {
+                        DiscountPercentage = PersonalDiscount.DiscountPercentage;
+                    }
+
+                    // Apply discounts if needed
+                    if (DiscountPercentage > 0)
+                    {
+                        price = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
                         // TODO: update the price in OrderHistory database if needed
                     }
 
@@ -659,6 +660,7 @@ public class Order
                     );
                 }
             }
+
 
             // Add total row
             orderTable.AddEmptyRow();

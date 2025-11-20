@@ -12,11 +12,11 @@ public class ChecklistAccess
         db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity });
     }
 
-    public static List<ChecklistModel> GetAllUserProducts(int userId)
+    public static List<ChecklistModel> GetAllUserProducts(int userID)
     {
         using var db = new SqliteConnection(ConnectionString);
-        var sql = $"SELECT * FROM {Table} WHERE Userid = @UserID ";
-        return db.Query<ChecklistModel>(sql, new { UserId = userId }).ToList();
+        var sql = $"SELECT * FROM {Table} WHERE UserId = @UserID";
+        return db.Query<ChecklistModel>(sql, new { UserID = userID }).ToList();
     }
     
     public static ChecklistModel? GetUserProductByProductId(int userId, int productId)
