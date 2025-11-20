@@ -108,11 +108,14 @@ public class Order
         {
             unpaidOrdersTotal = UnpaidFine - unpaidFineAmount;
         }
-
+        var TotalAmount = Math.Round(totalAmount + deliveryFee + UnpaidFine - CouponCredit, 2);
+        if (TotalAmount < 0)
+        {
+            TotalAmount = 0;
+        }
         var headerText = unpaidOrdersCount > 0
             ? $"[bold white]You have {unpaidOrdersCount} unpaid orders[/]"
             : "[bold white]Summary[/]";
-
         var panel = new Panel(
             new Markup(
                 $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
@@ -120,7 +123,7 @@ public class Order
                 $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(unpaidFineAmount, 2)}[/]\n" +
                 $"[bold white]Unpaid Order:[/] [yellow]€{Math.Round(unpaidOrdersTotal, 2)}[/]\n" +
                 $"[bold white]Coupon Credit:[/] [green]€{Math.Round(CouponCredit, 2)}[/]\n" +
-                $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee + UnpaidFine - CouponCredit, 2)}[/]"))
+                $"[bold white]Total price:[/] [bold green]€{TotalAmount}[/]"))
             .Header(headerText, Justify.Left)
             .Border(BoxBorder.Rounded)
             .BorderColor(AsciiPrimary)
@@ -130,6 +133,7 @@ public class Order
         AnsiConsole.WriteLine();
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
         TotalPrice = totalAmount + deliveryFee + UnpaidFine;
+
 
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
