@@ -31,7 +31,6 @@ public static class ShopDetailsUI
         panel.Expand = true;
         panel.Header = new PanelHeader("[bold #1B98E0]Info[/]").Centered();
         table.AddColumn(new TableColumn("[bold #00014d]Day[/]").Centered());
-        table.AddColumn(new TableColumn("[bold #00014d]Date[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Opening Hours[/]").Centered());
 
         foreach (var day in ShopInfoLogic.getDayDate())
@@ -41,30 +40,30 @@ public static class ShopDetailsUI
 
             if (dayName == "Monday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourMonday} - {shopInfo.ClosingHourMonday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourMonday} - {shopInfo.ClosingHourMonday}[/]");
             }
             else if (dayName == "Tuesday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourTuesday} - {shopInfo.ClosingHourTuesday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourTuesday} - {shopInfo.ClosingHourTuesday}[/]");
             }
             else if (dayName == "Wednesday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourWednesday} - {shopInfo.ClosingHourWednesday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourWednesday} - {shopInfo.ClosingHourWednesday}[/]");
             }
             else if (dayName == "Thursday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourThursday} - {shopInfo.ClosingHourThursday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourThursday} - {shopInfo.ClosingHourThursday}[/]");
             }
             else if (dayName == "Friday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourFriday} - {shopInfo.ClosingHourFriday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourFriday} - {shopInfo.ClosingHourFriday}[/]");
             }
             else if (dayName == "Saturday")
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSaturday} - {shopInfo.ClosingHourSaturday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSaturday} - {shopInfo.ClosingHourSaturday}[/]");
             }
             else
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#125e81]{day[1]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSunday} - {shopInfo.ClosingHourSunday}[/]");
+                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSunday} - {shopInfo.ClosingHourSunday}[/]");
         }
         table.Border(TableBorder.Heavy);
         AnsiConsole.WriteLine();
