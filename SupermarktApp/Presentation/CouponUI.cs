@@ -12,17 +12,24 @@ public static class CouponUI
 
         // --- Fetch and filter valid coupons ---
         var user = SessionManager.CurrentUser;
-        var allCoupons = CouponLogic.GetAllCoupons(user!.ID);
+        if (user == null)
+        {
+            AnsiConsole.MarkupLine("[red]You must be logged in to view coupons.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            return;
+        }
+
+        var allCoupons = CouponLogic.GetAllCoupons(user.ID);
         List<Coupon> coupons = new List<Coupon>();
 
         for (int i = 0; i < allCoupons.Count; i++)
         {
-            var coupon = allCoupons[i];
-            if (coupon.IsValid && coupon.Credit > 0)
-                coupons.Add(coupon);
+            var c = allCoupons[i];
+            if (c.IsValid && c.Credit > 0)
+                coupons.Add(c);
         }
         // coupons has now only valid coupons
-            
+
         if (coupons.Count == 0)
         {
             AnsiConsole.MarkupLine("[yellow]You have no valid coupons.[/]");
@@ -31,58 +38,61 @@ public static class CouponUI
             return;
         }
 
-        CheckCurrentCoupon(coupons);
-        AddCoupon(coupons);
+        if (HandleAlreadyAppliedCoupon(coupons))
+            return;
+
+        ShowCouponSelection(coupons);
     }
 
-    public static void CheckCurrentCoupon(List<Coupon> coupons)
+    private static bool HandleAlreadyAppliedCoupon(List<Coupon> coupons)
     {
         // check if user has already applied a coupon for the current order
         var appliedCouponId = Order.SelectedCouponId; // # maybe change OrderModel to hold applied coupon id #
 
+        if (!appliedCouponId.HasValue)
+            return false;
+
         // find the applied coupon in the coupons list
-        if (appliedCouponId.HasValue)
+        Coupon appliedCoupon = null;
+
+        for (int i = 0; i < coupons.Count; i++)
         {
-            Coupon appliedCoupon = null;
-
-            for (int i = 0; i < coupons.Count; i++)
+            if (coupons[i].Id == appliedCouponId.Value)
             {
-                if (coupons[i].Id == appliedCouponId.Value)
-                {
-                    appliedCoupon = coupons[i];
-                    break;
-                }
-            }
-            // appliedCoupon is now either the applied coupon or null if not found
-
-            if (appliedCoupon != null)
-            {
-                var credit = Math.Round(appliedCoupon.Credit, 2);
-                AnsiConsole.MarkupLine(
-                    $"[green]You already have a coupon applied with [yellow]€{credit} credit.[/]"); 
-            }
-            else
-            {
-                AnsiConsole.MarkupLine("[green]You already have a coupon applied to your cart.[/]");
-            }
-
-            var action = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("What do you want to do?")
-                    .AddChoices("Remove coupon", "Back"));
-
-            if (action == "Remove coupon")
-            {
-                CouponLogic.ResetCouponSelection();
-                AnsiConsole.MarkupLine("[yellow]Coupon removed[/]");
-                AnsiConsole.MarkupLine("Press ENTER to continue");
-                Console.ReadKey();
+                appliedCoupon = coupons[i];
+                break;
             }
         }
-        return;
+        // appliedCoupon is now either the applied coupon or null if not found
+
+        if (appliedCoupon != null)
+        {
+            var credit = Math.Round(appliedCoupon.Credit, 2);
+            AnsiConsole.MarkupLine(
+                "[green]You already have a coupon applied with [yellow]€" +
+                credit + "[/] credit.[/]");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your cart.[/]");
+        }
+
+        var action = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("What do you want to do?")
+                .AddChoices("Remove coupon", "Back"));
+
+        if (action == "Remove coupon")
+        {
+            CouponLogic.ResetCouponSelection();
+            AnsiConsole.MarkupLine("[yellow]Coupon removed[/]");
+            AnsiConsole.MarkupLine("Press ENTER to continue");
+        }
+
+        return true;
     }
 
-    public static void AddCoupon(List<Coupon> coupons)
+    private static void ShowCouponSelection(List<Coupon> coupons)
     {
         var table = new Table()
             .BorderColor(MenuUI.AsciiPrimary)
@@ -132,9 +142,7 @@ public static class CouponUI
 
         CouponLogic.ApplyCouponToCart(selectedCoupon);
 
-        AnsiConsole.MarkupLine($"[green]Coupon applied with [yellow]€{selectedRounded} credit.[/]");
-        AnsiConsole.MarkupLine("Press ENTER to continue");    
-        Console.ReadKey();
-        return;    
+        AnsiConsole.MarkupLine("[green]Coupon applied with [yellow]€" + selectedRounded + "[/] credit.[/]");
+        AnsiConsole.MarkupLine("Press ENTER to continue");
     }
 }
