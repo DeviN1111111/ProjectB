@@ -4,38 +4,35 @@ public static class CouponUI
 {
     public static void DisplayMenu()
     {
-        while (true)
+        Console.Clear();
+        AnsiConsole.Write(
+            new FigletText("Coupons")
+                .Centered()
+                .Color(MenuUI.AsciiPrimary));
+
+        // --- Fetch and filter valid coupons ---
+        var user = SessionManager.CurrentUser;
+        var allCoupons = CouponLogic.GetAllCoupons(user!.ID);
+        List<Coupon> coupons = new List<Coupon>();
+
+        for (int i = 0; i < allCoupons.Count; i++)
         {
-            Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Coupons")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
-
-            // --- Fetch and filter valid coupons ---
-            var user = SessionManager.CurrentUser;
-            var allCoupons = CouponLogic.GetAllCoupons(user!.ID);
-            List<Coupon> coupons = new List<Coupon>();
-
-            for (int i = 0; i < allCoupons.Count; i++)
-            {
-                var coupon = allCoupons[i];
-                if (coupon.IsValid && coupon.Credit > 0)
-                    coupons.Add(coupon);
-            }
-            // coupons has now only valid coupons
-            
-            if (coupons.Count == 0)
-            {
-                AnsiConsole.MarkupLine("[yellow]You have no valid coupons.[/]");
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                Console.ReadKey();
-                return;
-            }
-
-            CheckCurrentCoupon(coupons);
-            AddCoupon(coupons);
+            var coupon = allCoupons[i];
+            if (coupon.IsValid && coupon.Credit > 0)
+                coupons.Add(coupon);
         }
+        // coupons has now only valid coupons
+            
+        if (coupons.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[yellow]You have no valid coupons.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        CheckCurrentCoupon(coupons);
+        AddCoupon(coupons);
     }
 
     public static void CheckCurrentCoupon(List<Coupon> coupons)
@@ -46,7 +43,7 @@ public static class CouponUI
         // find the applied coupon in the coupons list
         if (appliedCouponId.HasValue)
         {
-            Coupon? appliedCoupon = null;
+            Coupon appliedCoupon = null;
 
             for (int i = 0; i < coupons.Count; i++)
             {
@@ -81,67 +78,63 @@ public static class CouponUI
                 AnsiConsole.MarkupLine("Press ENTER to continue");
                 Console.ReadKey();
             }
-
-            return;
         }
+        return;
     }
 
     public static void AddCoupon(List<Coupon> coupons)
     {
-        while (true)
+        var table = new Table()
+            .BorderColor(MenuUI.AsciiPrimary)
+            .AddColumn("Coupon")
+            .AddColumn("Credit");
+
+        List<string> labels = new List<string>();
+
+        for (int i = 0; i < coupons.Count; i++)
         {
-            var table = new Table()
-                .BorderColor(MenuUI.AsciiPrimary)
-                .AddColumn("Coupon")
-                .AddColumn("Credit");
+            int number = i + 1;
+            double credit = Math.Round(coupons[i].Credit, 2);
 
-            List<string> labels = new List<string>();
+            table.AddRow($"#{number}", $"€[green]{credit}[/]");
 
-            for (int i = 0; i < coupons.Count; i++)
-            {
-                int number = i + 1;
-                double credit = Math.Round(coupons[i].Credit, 2);
-
-                table.AddRow($"#{number}", $"€[green]{credit}[/]");
-
-                string label = $"Coupon #{number} - €[green]{credit}[/]";
-                labels.Add(label);
-            }
-
-            labels.Add("Go back");
-
-            AnsiConsole.Write(table);
-
-            var selectedLabel = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Select a coupon to apply")
-                    .AddChoices(labels));
-
-            if (selectedLabel == "Go back")
-                break;
-
-            // find selected coupon index
-            int selectedIndex = -1;
-
-            for (int i = 0; i < labels.Count; i++)
-            {
-                if (labels[i] == selectedLabel)
-                {
-                    selectedIndex = i;
-                    break;
-                }
-            }
-
-            // selected coupon is now the one at selectedIndex
-            Coupon selectedCoupon = coupons[selectedIndex];
-            double selectedRounded = Math.Round(selectedCoupon.Credit, 2);
-
-            CouponLogic.ApplyCouponToCart(selectedCoupon);
-
-            AnsiConsole.MarkupLine($"[green]Coupon applied with [yellow]€{selectedRounded} credit.[/]");
-            AnsiConsole.MarkupLine("Press ENTER to continue");    
-            Console.ReadKey();
-            break;    
+            string label = $"Coupon #{number} - €[green]{credit}[/]";
+            labels.Add(label);
         }
+
+        labels.Add("Go back");
+
+        AnsiConsole.Write(table);
+
+        var selectedLabel = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Select a coupon to apply")
+                .AddChoices(labels));
+
+        if (selectedLabel == "Go back")
+            return;
+
+        // find selected coupon index
+        int selectedIndex = -1;
+
+        for (int i = 0; i < labels.Count; i++)
+        {
+            if (labels[i] == selectedLabel)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        // selected coupon is now the one at selectedIndex
+        Coupon selectedCoupon = coupons[selectedIndex];
+        double selectedRounded = Math.Round(selectedCoupon.Credit, 2);
+
+        CouponLogic.ApplyCouponToCart(selectedCoupon);
+
+        AnsiConsole.MarkupLine($"[green]Coupon applied with [yellow]€{selectedRounded} credit.[/]");
+        AnsiConsole.MarkupLine("Press ENTER to continue");    
+        Console.ReadKey();
+        return;    
     }
 }
