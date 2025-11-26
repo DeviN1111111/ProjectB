@@ -91,9 +91,7 @@ public static class ProductAccess
     public static void DeleteProductByID(int ID)
     {
         using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"UPDATE Products SET Visible = 0
-            WHERE
-            ID = @ID", new { ID });
+        db.Execute(@"DELETE FROM Products WHERE ID = @ID", new { ID });
     }
 
         public static void SetProductVisibility(int productId, bool isVisible)
