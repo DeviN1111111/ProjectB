@@ -727,4 +727,57 @@ public class Order
             Console.ReadKey();
         }
     }
+
+    public static void ReOrderPastOrder(List<CartModel> orderItems)
+    {
+        List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
+        double totalAmount = 0;
+        // Title
+        AnsiConsole.Write(
+            new FigletText("Checkout")
+                .Centered()
+                .Color(AsciiPrimary));
+
+        // Cart table
+        var cartTable = new Table()
+            .BorderColor(AsciiPrimary)
+            .AddColumn("[white]Product[/]")
+            .AddColumn("[white]Quantity[/]")
+            .AddColumn("[white]Price[/]")
+            .AddColumn("[white]Total[/]");
+
+        foreach (var Item in orderItems)
+        {
+            // Get Product id and find match in all products
+            foreach (ProductModel Product in allProducts)
+            {
+                if (Item.ProductId == Product.ID)
+                {
+                    {
+                        cartTable.AddRow(Product.Name, Item.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * Item.Quantity, 2)}");
+                        totalAmount = totalAmount + (Product.Price * Item.Quantity);
+                    }
+                }
+            }
+        }
+        AnsiConsole.Write(cartTable);
+        AnsiConsole.WriteLine();
+
+        double deliveryFee = orderItems.Count == 0 ? 0 : OrderLogic.DeliveryFee(totalAmount);
+        
+        var headerText = "[bold white]Summary[/]";
+        var panel = new Panel(
+            new Markup(
+                $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
+                $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee, 2)}[/]"))
+            .Header(headerText, Justify.Left)
+            .Border(BoxBorder.Rounded)
+            .BorderColor(AsciiPrimary)
+            .Expand();
+
+        AnsiConsole.Write(panel);
+        AnsiConsole.WriteLine();
+        Checkout(orderItems, allProducts, totalAmount + deliveryFee, 0);
+
+    }
 }
