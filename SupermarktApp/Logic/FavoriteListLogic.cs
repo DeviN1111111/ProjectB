@@ -4,4 +4,8 @@ static class FavoriteListLogic
     {
         return FavoriteListAccess.GetAllFavoriteListsByUserId(userId);
     }
+    public static int GetProductQuantity(List<ProductModel> products, int id)
+    {
+        return products.Count(p => p.ID == id);
+    }
 }

@@ -37,13 +37,8 @@ static class FavoriteListUI
     }
     public static void ViewLists()
     {
-        /*
-        1. First I need to call the logic layer to get the favorite lists of the user using user ID from session manager,
-        2. Then I need to display the lists names in a selection prompt just like coupons,
-        3. After the user selects a list we will call another method that will display the products in that list so that method will have to work
-        with any list passed to it, call it DisplayProductsInList(FavoriteList list),
-        */
         Console.Clear();
+
         var userId = SessionManager.CurrentUser.ID;
         List<FavoriteListModel> lists = FavoriteListLogic.GetAllListsByUserId(userId);
     
@@ -100,19 +95,16 @@ static class FavoriteListUI
         4. 
         */
         Console.Clear();
-        Utils.Title(list.Name);
-        var table = Utils.Table("Product", "Quantity", "Total Price");
+
+        Utils.PrintTitle(list.Name);
+        var table = Utils.CreateTable(new [] {"Product", "Quantity", "Total Price"});
 
         var allProductsInList = list.Products;
-        Dictionary<int, int> productQuantities = allProductsInList  // #Pass ID to use#
-            .GroupBy(p => p.ID) // Create a groups of ProductModels with the same ID's
-            .ToDictionary(
-                g => g.Key, // Store the ID's as keys
-                g => g.Count());    // Store the count of ProductModels as value
-
-        foreach (ProductModel product in allProductsInList)
+        
+        foreach (var kv in allProductsInList)
         {
-            int quantity = productQuantities[product.ID];
+            var product = kv.Key;
+            int quantity = kv.Value;
             double totalPrice = Math.Round(product.Price * quantity, 2);
 
             table.AddRow(
@@ -123,6 +115,82 @@ static class FavoriteListUI
 
         AnsiConsole.Write(table);
 
-        // Create the options in step 3.
+        var choices = new [] {
+            "Add products to cart",
+            "Edit list",
+            "Go back"
+        };
+        var selectedChoice = Utils.CreateSelectionPrompt(choices);
+
+        switch (selectedChoice)
+        {
+            case "Add products to cart":
+                // AddProductsToCart()
+                break;
+            case "Edit list":
+                // EditList()
+                break;
+            case "Go back":
+                return;
+        }
+    }
+    public static void AddProductsToCart(FavoriteListModel list)
+    {
+        /*
+        1. First display choices "Add all products" "Add specific products"
+        2. Add all products: loop through all ProductModels in list.Products and call OrderLogic.AddToCart()
+        3. Add specific products: 
+            create MultiSelectionPrompt with each product name and quantity
+            prompt the user to select products to add to cart and quantity
+            leave the selected products with new quantity marked
+            use space to select and enter to proceed
+            loop through each selected product and call OrderLogic.AddToCart()
+        */
+        Console.Clear();
+
+        Utils.PrintTitle(list.Name);
+        var selectedOption = Utils.CreateSelectionPrompt(new [] {"Add all products", "Add specific products"});
+
+        var allProductsInList = list.Products;
+        
+        if (selectedOption == "Add all products")
+        {
+            foreach (var kv in allProductsInList)
+            {
+                var product = kv.Key;
+                var quantity = kv.Value;
+
+                OrderLogic.AddToCart(product, quantity);
+            }
+        }
+        else
+        {
+            var products = allProductsInList.Keys;
+            var title = "Select products";
+
+            var selectedProducts = Utils.CreateMultiSelectionPrompt(
+                products,
+                title,
+                product => $"{product.Name} | x{allProductsInList[product]}" // allProductsInList[product] is the value of the dictonary in this case quantity
+            );
+
+            var editQuantity = Utils.Create_YesNo_SelectionPrompt("Edit Quantity?");
+
+            if (editQuantity)
+            {
+                /*
+                First loop to each product and prompt to select the product to edit quantity. Then proceed with the rest.
+                Create new method for EditQuantity
+                */
+                // We make a validation lambda to pass as whole
+                Func<int, ValidationResult> quantityValidator = quantity =>
+                    quantity < 1 || quantity > 9 ?
+                        ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
+                        ValidationResult.Success();
+                string textPrompt = $"Enter new quantity for [yellow][/]:";
+                var newQuantity = Utils.CreateTextPrompt<int>(textPrompt, quantityValidator);
+            }
+
+        }
     }
 }
