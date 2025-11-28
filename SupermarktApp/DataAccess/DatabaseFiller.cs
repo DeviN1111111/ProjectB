@@ -227,10 +227,11 @@ public class DatabaseFiller
             );
         ");
         db.Execute(@"
-            CREATE TABLE IF NOT EXISTS FavoriteLists (
+            CREATE TABLE IF NOT EXISTS FavoriteList (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 Name TEXT NOT NULL,
+                Products TEXT  (JSON)
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
             );
         ");

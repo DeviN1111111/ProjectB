@@ -21,31 +21,30 @@ static class Utils
     /// </summary>
     /// <param name="choices">The IEnumerable of choices to print.</param>
     /// <param name="title">The title of the prompt.</param>
+    /// <param name="format">The format to be printed.</param>
+    /// <typeparam name="T">ProductModel.</typeparam>
     /// <returns>The selected choice as string.</returns>
-    public static string CreateSelectionPrompt(IEnumerable<string> choices, string title= "")
+    public static T CreateSelectionPrompt<T>(IEnumerable<T> choices, string title= "", Func<T, string>? format= null) where T : notnull
     {
-        if (title == "")
-        {
-            return AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .PageSize(10)
-                    .AddChoices(choices));           
-        }
-        else
-        {
-            return AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title(title)
-                    .PageSize(10)
-                    .AddChoices(choices));            
-        }
+        var prompt = new SelectionPrompt<T>()
+            .PageSize(10);
+
+        if (title != "")
+            prompt.Title(title);
+
+        if (format != null)
+            prompt.UseConverter(format);
+
+        prompt.AddChoices(choices);
+
+        return AnsiConsole.Prompt(prompt);
     }
     /// <summary>
     /// Creates a selection prompt for yes or no for fast booleans.
     /// </summary>
     /// <param name="title">The title of the prompt</param>
     /// <returns>True or false</returns>
-    public static bool Create_YesNo_SelectionPrompt(string title= "")
+    public static bool CreateYesNoSelectionPrompt(string title= "")
     {
         if (title == "")
         {
@@ -107,7 +106,7 @@ static class Utils
     /// <param name="format">The format to be printed.</param>
     /// <typeparam name="T">ProductModel.</typeparam>
     /// <returns>The selected choices as a List</returns>
-    public static List<T> CreateMultiSelectionPrompt<T>(IEnumerable<T> choices, string title = "", Func<T, string>? format = null) where T : notnull
+    public static List<T> CreateMultiSelectionPrompt<T>(IEnumerable<T> choices, string title= "", Func<T, string>? format= null) where T : notnull
     {
         var prompt = new MultiSelectionPrompt<T>()
             .PageSize(10);

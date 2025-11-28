@@ -84,16 +84,6 @@ static class FavoriteListUI
     }
     public static void DisplayProductsInList(FavoriteListModel list)
     {
-        /*
-        1. First I need to create the layout, the title should be the name of the chosen list. So I need to pass list.Name into ansiConsole title
-        2. Then I need to get all ProductModels in that list and print them: {Name} {Quantity} {TotalPrice}
-        Loop through all the Products in the list and print them in a table
-        3. The options in this UI are: 
-        {Add products to cart}(User can choose to add all products or specific ones)
-        {Edit list}(Lets user add, remove and edit products in the list)
-        {Go back}(Goes back to lists view)
-        4. 
-        */
         Console.Clear();
 
         Utils.PrintTitle(list.Name);
@@ -125,35 +115,77 @@ static class FavoriteListUI
         switch (selectedChoice)
         {
             case "Add products to cart":
-                // AddProductsToCart()
+                AddProductsToCart(list);
                 break;
             case "Edit list":
-                // EditList()
+                EditList(list);
                 break;
             case "Go back":
                 return;
         }
     }
-    public static void AddProductsToCart(FavoriteListModel list)
+    public static void EditList(FavoriteListModel list)
     {
         /*
-        1. First display choices "Add all products" "Add specific products"
-        2. Add all products: loop through all ProductModels in list.Products and call OrderLogic.AddToCart()
-        3. Add specific products: 
-            create MultiSelectionPrompt with each product name and quantity
-            prompt the user to select products to add to cart and quantity
-            leave the selected products with new quantity marked
-            use space to select and enter to proceed
-            loop through each selected product and call OrderLogic.AddToCart()
+        1. Make layout the options are: add item, remove item, edit quantity, change list name
+        2. Create the data access and logic to access the Products property and Add or Remove the product in the dictionary
+        both methods should take in the quantity
+        3. Use the EditQuantity() method
+        4. Create the data access and logic to access the Name property and let user change it. Validation: can't be longer than 18 characters
+        # Use same pattern as AddProductsToCart so there is no problem with EditQuantity #
         */
-        Console.Clear();
+        var allProductsInList = list.Products;
 
-        Utils.PrintTitle(list.Name);
-        var selectedOption = Utils.CreateSelectionPrompt(new [] {"Add all products", "Add specific products"});
+        var choices = new [] {
+          "Add product",
+          "Remove product",
+          "Edit quantity",
+          "Change list name",
+          "Go back"  
+        };
+        var selectedChoice = Utils.CreateSelectionPrompt(choices);
 
+        switch (selectedChoice)
+        {
+            case "Add product":
+                AddProductToList(list);
+                break;
+            case "Remove product":
+                // RemoveProductFromList(list);
+                break;
+            case "Edit quantity":   // Need to update the database 
+                EditQuantity(allProductsInList.Keys.ToList(), allProductsInList); // We pass both but the first argument expects a List<ProductModel>
+                break;
+            case "Change list name":
+                // ChangeListName();
+                break;
+            case "Go back":
+                return;
+        }
+
+    }
+    public static void AddProductToList(FavoriteListModel list)
+    {
+        Func<int, ValidationResult> quantityValidator = quantity =>
+            quantity < 1 || quantity > 99 ?
+                ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
+                ValidationResult.Success();
+
+        var product = SearchUI.SearchProductByNameOrCategory();
+        int quantity = Utils.CreateTextPrompt("Enter quantity (1-99)", quantityValidator);
+
+        FavoriteListLogic.AddProductToList(product, quantity, list.Id);
+    }
+    public static void RemoveProductFromList(FavoriteListModel list)
+    {
+        
+    }
+    public static void AddProductsToCart(FavoriteListModel list)
+    {
+        var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Add all products", "Add specific products", "Go back"});
         var allProductsInList = list.Products;
         
-        if (selectedOption == "Add all products")
+        if (selectedChoice == "Add all products")
         {
             foreach (var kv in allProductsInList)
             {
@@ -163,8 +195,11 @@ static class FavoriteListUI
                 OrderLogic.AddToCart(product, quantity);
             }
         }
-        else
+        else if (selectedChoice == "Add specific products")
         {
+            Console.Clear();
+            Utils.PrintTitle(list.Name);
+
             var products = allProductsInList.Keys;
             var title = "Select products";
 
@@ -174,23 +209,69 @@ static class FavoriteListUI
                 product => $"{product.Name} | x{allProductsInList[product]}" // allProductsInList[product] is the value of the dictonary in this case quantity
             );
 
-            var editQuantity = Utils.Create_YesNo_SelectionPrompt("Edit Quantity?");
+            var listToAddToCart = EditQuantity(selectedProducts, allProductsInList);
 
-            if (editQuantity)
+            foreach(var kv in listToAddToCart)
             {
-                /*
-                First loop to each product and prompt to select the product to edit quantity. Then proceed with the rest.
-                Create new method for EditQuantity
-                */
-                // We make a validation lambda to pass as whole
-                Func<int, ValidationResult> quantityValidator = quantity =>
-                    quantity < 1 || quantity > 9 ?
-                        ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
-                        ValidationResult.Success();
-                string textPrompt = $"Enter new quantity for [yellow][/]:";
-                var newQuantity = Utils.CreateTextPrompt<int>(textPrompt, quantityValidator);
-            }
+                var product = kv.Key;
+                var quantity = kv.Value;
 
+                OrderLogic.AddToCart(product, quantity);
+            }
         }
+
+        else return;
+
+        AnsiConsole.MarkupLine("Products added to cart.");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();
+    }
+    public static Dictionary<ProductModel, int> EditQuantity(
+        List<ProductModel> selectedProducts, 
+        Dictionary<ProductModel, int> allProductsInList)
+    {
+        var updatedList = new Dictionary<ProductModel, int>();
+
+        foreach(var product in selectedProducts)
+        {
+            updatedList[product] = allProductsInList[product];
+        }
+
+        var editQuantity = Utils.CreateYesNoSelectionPrompt("Edit Quantity?");
+
+        if (!editQuantity)
+        {
+            return updatedList;
+        }   
+
+        bool confirmed = false;
+        while (!confirmed)
+        {               
+            Console.Clear();
+
+            var productToChange = Utils.CreateSelectionPrompt(
+                selectedProducts, 
+                "Choose a product", 
+                product => $"{product.Name} | x{updatedList[product]}");
+
+            // We make a validation lambda to pass as whole
+            Func<int, ValidationResult> quantityValidator = quantity =>
+                quantity < 1 || quantity > 99 ?
+                    ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
+                    ValidationResult.Success();
+            string textPrompt = $"Enter new quantity for [yellow][/]:";
+
+            var newQuantity = Utils.CreateTextPrompt<int>(textPrompt, quantityValidator);
+
+            updatedList[productToChange] = newQuantity;
+
+            confirmed = !AnsiConsole.Confirm("Change another?");
+        }
+
+        AnsiConsole.MarkupLine("Quantity updated");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();        
+
+        return updatedList;             
     }
 }
