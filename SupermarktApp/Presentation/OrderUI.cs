@@ -77,9 +77,6 @@ public class Order
             }
         }
 
-        AnsiConsole.Write(cartTable);
-        AnsiConsole.WriteLine();
-
         double deliveryFee = allUserProducts.Count == 0 ? 0 : OrderLogic.DeliveryFee(totalAmount);
         var currentUser = SessionManager.CurrentUser!;
         double UnpaidFine = PayLaterLogic.Track(currentUser);
@@ -116,25 +113,53 @@ public class Order
         var headerText = unpaidOrdersCount > 0
             ? $"[bold white]You have {unpaidOrdersCount} unpaid orders[/]"
             : "[bold white]Summary[/]";
-        var panel = new Panel(
-            new Markup(
-                $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
-                $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
-                $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(unpaidFineAmount, 2)}[/]\n" +
-                $"[bold white]Unpaid Order:[/] [yellow]€{Math.Round(unpaidOrdersTotal, 2)}[/]\n" +
-                $"[bold white]Coupon Credit:[/] [green]€{Math.Round(CouponCredit, 2)}[/]\n" +
-                $"[bold white]Total price:[/] [bold green]€{TotalAmount}[/]"))
+        
+        var leftSide = new Rows(
+            cartTable,
+            new Panel(
+                new Markup(
+                    $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
+                    $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
+                    $"[bold white]Unpaid Fine:[/] [yellow]€{Math.Round(unpaidFineAmount, 2)}[/]\n" +
+                    $"[bold white]Unpaid Order:[/] [yellow]€{Math.Round(unpaidOrdersTotal, 2)}[/]\n" +
+                    $"[bold white]Coupon Credit:[/] [green]€{Math.Round(CouponCredit, 2)}[/]\n" +
+                    $"[bold white]Total price:[/] [bold green]€{TotalAmount}[/]"
+                )
+            )
             .Header(headerText, Justify.Left)
-            .Border(BoxBorder.Rounded)
+            .Border(BoxBorder.Double)
             .BorderColor(AsciiPrimary)
-            .Expand();
+        );
 
-        AnsiConsole.Write(panel);
+        var rightSide =SuggestionsUI.GetSuggestionsPanel(SessionManager.CurrentUser!.ID);
+        AnsiConsole.Write(
+            new Columns(leftSide, rightSide)
+                .Collapse()
+                .PadRight(2)
+        );
+
         AnsiConsole.WriteLine();
+
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
         TotalPrice = totalAmount + deliveryFee + UnpaidFine;
 
+        // user can choose from the suggested items
+        AnsiConsole.MarkupLine("[grey]Press a number to add a suggested item to your cart.[/]");
+        AnsiConsole.MarkupLine("[grey]Press ENTER to continue to options.[/]\n");
 
+        var suggestions = SuggestionsLogic.GetSuggestedItems(SessionManager.CurrentUser!.ID);
+        var key = Console.ReadKey(true).Key;
+
+        //pressed number
+        int indexPressed = (int)key - (int)ConsoleKey.D1;
+
+        if (indexPressed >= 0 && indexPressed< suggestions.Count)
+        {
+            var selectedProduct = suggestions[indexPressed];
+            OrderLogic.AddToCart(selectedProduct, 1, 0, 0);
+            await ShowCart();
+            return;
+        }
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
 
