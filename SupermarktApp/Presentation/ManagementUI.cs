@@ -25,6 +25,7 @@ public static class ManagementUI
                 "Shop Settings",
                 "Discounts",
                 "Coupons",
+                "Reviews",
                 "Go back"
             };
 
@@ -53,6 +54,9 @@ public static class ManagementUI
                     break;
                 case "Coupons":
                     ShowCouponMenu();
+                    break;
+                case "Reviews":
+                    ShowReviewMenu();
                     break;
                 case "Go back":
                     return;
@@ -160,6 +164,26 @@ public static class ManagementUI
                 break;
 
             case "Back":
+                return;
+        }
+    }
+
+    static void ShowReviewMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Review Options[/]")
+            .AddChoices(
+                "Delete Reviews",
+                "Go Back"));
+
+        switch (choice)
+        {
+            case "Delete Reviews":
+                DeleteReviews();
+                break;
+
+            case "Go Back":
                 return;
         }
     }
@@ -585,6 +609,60 @@ public static class ManagementUI
                 DiscountsLogic.RemoveDiscountByID(Convert.ToInt32(weekID[0]));
             }
             AnsiConsole.MarkupLine("[green]Succesfully deleted selected discounts.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+        }
+    }
+
+    public static void DeleteReviews()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Delete Reviews")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            var reviewLogic = new ShopReviewLogic();
+            var allReviews = reviewLogic.GetAllReviews();
+
+            if (allReviews.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]There are no reviews to delete.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
+            }
+            List<string> ReviewList = [];
+
+            foreach (var review in allReviews)
+            {
+                UserModel user = UserAccess.GetUserByID(review.UserId)!;
+                ReviewList.Add($"ReviewID: {review.Id} User: [yellow]{user.Name}[/] Stars: [green]{review.Stars}[/] Text: [blue]{review.Text}[/]");
+            }
+
+            var prompt = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
+                .PageSize(10)
+                .Title("[bold white]Select reviews to delete:[/]")
+                .NotRequired()
+                .AddChoices(ReviewList));
+            
+            if (prompt.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]No reviews selected.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
+            }
+
+            foreach (var review in prompt)
+            {
+                var reviewID = review.Split(" ");
+                ShopReviewLogic.DeleteReviewByID(Convert.ToInt32(reviewID[1]));
+            }
+
+            AnsiConsole.MarkupLine("[green]Selected reviews have been deleted successfully.[/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
         }
