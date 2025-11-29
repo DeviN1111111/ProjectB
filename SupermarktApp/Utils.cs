@@ -135,4 +135,16 @@ static class Utils
                 .Validate(validator)
         );
     }
+    /// <summary>
+    /// Prompts a text and gets user input.
+    /// </summary>
+    /// <param name="text">The text prompt</param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>User input.</returns>
+    public static T CreateTextPrompt<T>(string text)
+    {
+        return AnsiConsole.Prompt(
+            new TextPrompt<T>(text)
+        );
+    }
 }

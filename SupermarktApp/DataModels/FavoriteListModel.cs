@@ -13,4 +13,8 @@ class FavoriteListModel
         Name = name;
         Products = new Dictionary<ProductModel, int>();
     }
+    public FavoriteListModel()
+    {
+        Products = new Dictionary<ProductModel, int>();
+    }
 }

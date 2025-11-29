@@ -25,7 +25,7 @@ static class FavoriteListUI
                     ViewLists();
                     break;
                 case "Create list":
-                    // CreateList();
+                    CreateList();
                     break;
                 case "Remove list":
                     // RemoveList();
@@ -35,9 +35,24 @@ static class FavoriteListUI
             }
         }    
     }
+    public static void CreateList()
+    {
+        Console.Clear();
+        Utils.PrintTitle("Create List");
+
+        var userId = SessionManager.CurrentUser.ID;
+
+        var listName = Utils.CreateTextPrompt<string>("Enter list name");
+
+        var newList = new FavoriteListModel(userId, listName);
+        FavoriteListLogic.CreateList(newList);
+
+        AddProductToList(newList);
+    }
     public static void ViewLists()
     {
         Console.Clear();
+        Utils.PrintTitle("Favorite Lists");
 
         var userId = SessionManager.CurrentUser.ID;
         List<FavoriteListModel> lists = FavoriteListLogic.GetAllListsByUserId(userId);
@@ -56,7 +71,7 @@ static class FavoriteListUI
             switch (choice)
             {
                 case "Yes":
-                    // CreateList();
+                    CreateList();
                     break;
                 case "No":
                     return;
@@ -126,14 +141,6 @@ static class FavoriteListUI
     }
     public static void EditList(FavoriteListModel list)
     {
-        /*
-        1. Make layout the options are: add item, remove item, edit quantity, change list name
-        2. Create the data access and logic to access the Products property and Add or Remove the product in the dictionary
-        both methods should take in the quantity
-        3. Use the EditQuantity() method
-        4. Create the data access and logic to access the Name property and let user change it. Validation: can't be longer than 18 characters
-        # Use same pattern as AddProductsToCart so there is no problem with EditQuantity #
-        */
         var allProductsInList = list.Products;
 
         var choices = new [] {
@@ -151,34 +158,85 @@ static class FavoriteListUI
                 AddProductToList(list);
                 break;
             case "Remove product":
-                // RemoveProductFromList(list);
+                RemoveProductFromList(list);
                 break;
-            case "Edit quantity":   // Need to update the database 
-                EditQuantity(allProductsInList.Keys.ToList(), allProductsInList); // We pass both but the first argument expects a List<ProductModel>
+            case "Edit quantity":
+                EditQuantity(list, allProductsInList.Keys.ToList(), allProductsInList, true);
                 break;
             case "Change list name":
-                // ChangeListName();
+                ChangeListName(list);
                 break;
             case "Go back":
                 return;
         }
 
     }
+    public static void ChangeListName(FavoriteListModel list)
+    {
+        Console.Clear();
+        Utils.PrintTitle(list.Name);
+
+        var newName = Utils.CreateTextPrompt<string>("Enter new name");
+
+        FavoriteListLogic.ChangeListName(list.Id, newName);
+
+        AnsiConsole.MarkupLine($"List name changed to {newName}.");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();
+        return;
+    }
     public static void AddProductToList(FavoriteListModel list)
     {
-        Func<int, ValidationResult> quantityValidator = quantity =>
-            quantity < 1 || quantity > 99 ?
-                ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
-                ValidationResult.Success();
+        bool confirmed = false;
+        while(!confirmed)
+        {        
+            Func<int, ValidationResult> quantityValidator = quantity =>
+                quantity < 1 || quantity > 99 ?
+                    ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
+                    ValidationResult.Success();
 
-        var product = SearchUI.SearchProductByNameOrCategory();
-        int quantity = Utils.CreateTextPrompt("Enter quantity (1-99)", quantityValidator);
+            var product = SearchUI.SearchProductByNameOrCategory();
+            int quantity = Utils.CreateTextPrompt("Enter quantity (1-99)", quantityValidator);
 
-        FavoriteListLogic.AddProductToList(product, quantity, list.Id);
+            FavoriteListLogic.AddProductToList(product, quantity, list.Id);
+
+            confirmed = !AnsiConsole.Confirm("Add more products?");
+        }
+        AnsiConsole.MarkupLine("Product added to list.");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();
+        return;
     }
     public static void RemoveProductFromList(FavoriteListModel list)
     {
+        Console.Clear();
+
+        var products = list.Products.Keys;
+        var title = "Choose a products to remove";
         
+        var selectedProducts = Utils.CreateMultiSelectionPrompt(
+            products,
+            title,
+            product => $"{product.Name} | x{list.Products[product]}"
+        );
+
+        foreach (var product in selectedProducts)
+        {
+            FavoriteListLogic.RemoveProductFromList(product, list.Id);
+        }
+
+        if (selectedProducts is null)
+        {
+            AnsiConsole.MarkupLine("No product selected.");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            return;           
+        }
+
+        AnsiConsole.MarkupLine("Products removed from list.");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();
+        return;        
     }
     public static void AddProductsToCart(FavoriteListModel list)
     {
@@ -209,7 +267,7 @@ static class FavoriteListUI
                 product => $"{product.Name} | x{allProductsInList[product]}" // allProductsInList[product] is the value of the dictonary in this case quantity
             );
 
-            var listToAddToCart = EditQuantity(selectedProducts, allProductsInList);
+            var listToAddToCart = EditQuantity(list, selectedProducts, allProductsInList, false);
 
             foreach(var kv in listToAddToCart)
             {
@@ -227,8 +285,10 @@ static class FavoriteListUI
         Console.ReadKey();
     }
     public static Dictionary<ProductModel, int> EditQuantity(
+        FavoriteListModel list,
         List<ProductModel> selectedProducts, 
-        Dictionary<ProductModel, int> allProductsInList)
+        Dictionary<ProductModel, int> allProductsInList,
+        bool updateToDatabase)
     {
         var updatedList = new Dictionary<ProductModel, int>();
 
@@ -266,6 +326,11 @@ static class FavoriteListUI
             updatedList[productToChange] = newQuantity;
 
             confirmed = !AnsiConsole.Confirm("Change another?");
+        }
+
+        if (updateToDatabase)
+        {
+            FavoriteListLogic.EditProductQuantity(allProductsInList, updatedList, list.Id);
         }
 
         AnsiConsole.MarkupLine("Quantity updated");

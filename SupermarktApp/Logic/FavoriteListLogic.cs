@@ -5,9 +5,9 @@ static class FavoriteListLogic
     {
         return FavoriteListAccess.GetAllFavoriteListsByUserId(userId);
     }
-    public static int GetProductQuantity(List<ProductModel> products, int id)
+    public static int GetProductQuantity(List<ProductModel> products, int productId)
     {
-        return products.Count(p => p.ID == id);
+        return products.Count(p => p.ID == productId);
     }
     public static void AddProductToList(ProductModel product, int quantity, int listId)
     {
@@ -42,5 +42,28 @@ static class FavoriteListLogic
         string updatedJson = JsonSerializer.Serialize(products);
 
         FavoriteListAccess.RemoveProductFromList(listId, updatedJson);
+    }
+    public static void EditProductQuantity(
+        Dictionary<ProductModel, int> originalProducts,
+        Dictionary<ProductModel, int> updatedProducts,
+        int listId)
+    {
+        var merged = new Dictionary<ProductModel, int>(originalProducts);
+
+        foreach (var kvp in updatedProducts)
+        {
+            merged[kvp.Key] = kvp.Value; 
+        }
+
+        FavoriteListAccess.EditProductQuantity(merged, listId);
+    }
+    public static void ChangeListName(int listId, string newName)
+    {
+        FavoriteListAccess.ChangeListName(listId, newName);
+    }
+    public static void CreateList(FavoriteListModel list)
+    {
+        var id = FavoriteListAccess.CreateList(list.Name, list.UserId);
+        list.Id = id;
     }
 }
