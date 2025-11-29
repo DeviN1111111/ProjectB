@@ -665,6 +665,7 @@ public static class ManagementUI
             AnsiConsole.MarkupLine("[green]Selected reviews have been deleted successfully.[/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
+            break;
         }
     }
 }
