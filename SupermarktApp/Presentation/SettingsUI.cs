@@ -16,7 +16,7 @@ public static class SettingsUI
             AnsiConsole.MarkupLine($"[italic yellow]Changing settings for:[/] [bold green]{SessionManager.CurrentUser.Name}[/]");
             Console.WriteLine();
 
-            var options = new List<string> { "Security Settings", "Go back" }; ;
+            var options = new List<string> { "Security Settings", "Profile Settings", "Go back" }; ;
 
             var prompt = AnsiConsole.Prompt(new SelectionPrompt<string>()
                 .PageSize(10)
@@ -26,6 +26,9 @@ public static class SettingsUI
             {
                 case "Security Settings":
                     SecuritySettingsMenu();
+                    break;
+                case "Profile Settings":
+                    ProfileSettingsMenu();
                     break;
                 case "Go back":
                     return;
@@ -169,6 +172,82 @@ public static class SettingsUI
         else
         {
             return;
+        }
+    }
+
+    public static void ProfileSettingsMenu()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Profile Settings Menu")
+                    .Centered()
+                    .Color(MenuUI.AsciiPrimary));
+
+            AnsiConsole.MarkupLine($"Name: [blue]{SessionManager.CurrentUser!.Name}[/]");
+            AnsiConsole.MarkupLine($"Last Name: [blue]{SessionManager.CurrentUser!.LastName}[/]");
+            AnsiConsole.MarkupLine($"Email: [blue]{SessionManager.CurrentUser!.Email}[/]");
+            AnsiConsole.MarkupLine($"Address: [blue]{SessionManager.CurrentUser!.Address}[/]");
+            AnsiConsole.MarkupLine($"Zipcode: [blue]{SessionManager.CurrentUser!.Zipcode}[/]");
+            AnsiConsole.MarkupLine($"City: [blue]{SessionManager.CurrentUser!.City}[/]");
+            AnsiConsole.MarkupLine($"Phone Number: [blue]{SessionManager.CurrentUser!.PhoneNumber}[/]");
+            AnsiConsole.MarkupLine($"Birthdate: [blue]{SessionManager.CurrentUser!.Birthdate.ToString("dd-MM-yyyy")}[/]");
+
+            Console.WriteLine();
+            var options = new List<string> { "Change Profile Settings", "Go back" }; ;
+
+            var prompt = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .PageSize(10)
+                .AddChoices(options));
+
+            switch (prompt)
+            {
+                case "Change Profile Settings":
+                    ChangeProfileSettingsMenu();
+                    break;
+                case "Go back":
+                    return;
+            }
+        }
+    }
+
+    public static void ChangeProfileSettingsMenu()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Profile Settings Menu")
+                    .Centered()
+                    .Color(MenuUI.AsciiPrimary));
+
+            string NewName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Name[/]:").DefaultValue(SessionManager.CurrentUser!.Name).DefaultValue(SessionManager.CurrentUser.Name));
+            string NewLastName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Last Name[/]:").DefaultValue(SessionManager.CurrentUser.LastName).DefaultValue(SessionManager.CurrentUser.LastName));
+            string NewEmail = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Email[/]:").DefaultValue(SessionManager.CurrentUser.Email).DefaultValue(SessionManager.CurrentUser.Email));
+            string NewAddress = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Address[/]:").DefaultValue(SessionManager.CurrentUser.Address).DefaultValue(SessionManager.CurrentUser.Address));
+            string NewZipcode = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Zipcode[/]:").DefaultValue(SessionManager.CurrentUser.Zipcode).DefaultValue(SessionManager.CurrentUser.Zipcode));
+            string NewCity = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]City[/]:").DefaultValue(SessionManager.CurrentUser.City).DefaultValue(SessionManager.CurrentUser.City));
+            string NewPhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Phone Number[/]:").DefaultValue(SessionManager.CurrentUser.PhoneNumber).DefaultValue(SessionManager.CurrentUser.PhoneNumber));
+            string newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate (DD-MM-YYYY)[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
+
+            DateTime parsedBirthdate = DateTime.Parse(newBirthdate);
+
+            bool change = UserSettingsLogic.ChangeProfileSettings(NewName, NewLastName, NewEmail, NewAddress, NewZipcode, NewPhoneNumber, NewCity, parsedBirthdate);
+            if (change)
+            {
+                AnsiConsole.MarkupLine("[green]Profile settings changed successfully![/]");
+                AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue");
+                Console.ReadKey();
+                break;
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Error: Could not change profile settings. Please check your input and try again.[/]");
+                AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue");
+                Console.ReadKey();
+                break;
+            }
         }
     }
 }
