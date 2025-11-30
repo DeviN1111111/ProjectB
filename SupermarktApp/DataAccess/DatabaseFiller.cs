@@ -238,7 +238,7 @@ public class DatabaseFiller
         // USERS
         var users = new List<UserModel>
         {
-            new() { Name = "Mark", LastName = "Dekker", Email = "chouchenghong@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
             new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
             new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam" },
             new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
@@ -384,7 +384,7 @@ public class DatabaseFiller
                     Location = random.Next(1, 16),
                     Quantity = random.Next(20, 300),
                     Visible = 1,
-                    ExpiryDate = DateTime.Today.AddDays(random.Next(-5, 30))
+                    ExpiryDate = DateTime.Today.AddDays(random.Next(1, 120))
                 });
             }
         }

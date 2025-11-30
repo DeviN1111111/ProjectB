@@ -13,23 +13,14 @@ public static class ProductDetailsUI
                 .Centered()
                 .Color(AsciiPrimary));
         var body = string.Empty;
-        var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
-        var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
-        double DiscountPercentage = 0;
-        string discountType = "None";
-        if(WeeklyDiscount != null)
-        {
-            discountType = WeeklyDiscount.DiscountType;
-            DiscountPercentage = WeeklyDiscount.DiscountPercentage;
-        }
-        else if(PersonalDiscount != null && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID))
-        {
-            discountType = PersonalDiscount.DiscountType;
-            DiscountPercentage = PersonalDiscount.DiscountPercentage;
-        }
 
-        if (DiscountPercentage > 0) // if u got a discount print the discounted price
+        ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+        
+        if(productDiscount != null) // if u got a discount print the discounted price
         {
+            string discountType = productDiscount.Discount!.DiscountType;
+            double DiscountPercentage = productDiscount.Discount.DiscountPercentage;
+
             ProductPrice = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +

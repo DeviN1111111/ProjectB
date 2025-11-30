@@ -40,27 +40,17 @@ public class Order
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
-                var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(Product.ID);
-                var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(Product.ID, SessionManager.CurrentUser!.ID);
+                ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(Product);
+        
                 if (cartProduct.ProductId == Product.ID)
                 {
                     if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
                     {
                         cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
                     }
-                    else if (WeeklyDiscount != null && WeeklyDiscount.DiscountType == "Weekly")
+                    else if(productDiscount != null)
                     {
-                        double priceAfterDiscount = Math.Round((Product.Price * (1 - WeeklyDiscount.DiscountPercentage / 100)), 2);
-                        double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
-
-                        totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
-
-                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * cartProduct.Quantity, 2)}");
-                        totalAmount = totalAmount + (priceAfterDiscount * cartProduct.Quantity);
-                    }
-                    else if(PersonalDiscount != null && PersonalDiscount.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(Product.ID))
-                    {
-                        double priceAfterDiscount = Math.Round((Product.Price * (1 - PersonalDiscount.DiscountPercentage / 100)), 2);
+                        double priceAfterDiscount = Math.Round((Product.Price * (1 - productDiscount.Discount.DiscountPercentage / 100)), 2);
                         double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
 
                         totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
@@ -632,20 +622,14 @@ public class Order
                 {
                     double price = product.Price;
 
-                    var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
-                    var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
-
+                    ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+                    
                     double DiscountPercentage = 0;
 
-                    if(WeeklyDiscount != null)
+                    if(productDiscount != null)
                     {
-                        DiscountPercentage = WeeklyDiscount.DiscountPercentage;
+                        DiscountPercentage = productDiscount.Discount.DiscountPercentage;
                     }
-                    else if(PersonalDiscount != null)
-                    {
-                        DiscountPercentage = PersonalDiscount.DiscountPercentage;
-                    }
-
                     // Apply discounts if needed
                     if (DiscountPercentage > 0)
                     {

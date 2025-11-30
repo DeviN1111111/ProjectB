@@ -30,6 +30,14 @@ public static class DiscountsAccess
 
         return products;
     }
+    public static List<DiscountsModel> GetAllExpiryDiscounts()
+    {
+        var products = _sharedConnection.Query<DiscountsModel>(
+        "SELECT * FROM Discounts WHERE DiscountType = @DiscountType",
+        new { DiscountType = "Expiry" }).ToList();
+
+        return products;
+    }
     public static DiscountsModel GetPeronsalDiscountByProductAndUserID(int productID, int userID)
     {
         var products = _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
@@ -51,13 +59,7 @@ public static class DiscountsAccess
             "SELECT * FROM Discounts WHERE ProductId = @ProductID",
             new { ProductID = productID });
     }
-    // public static List<DiscountsModel> GetDiscountsByProductID(int productID)
-    // {
-    //     return _sharedConnection.Query<DiscountsModel>(
-    //         "SELECT * FROM Discounts WHERE ProductId = @ProductID",
-    //         new { ProductID = productID }).ToList();
-    // }
-
+    
     public static void RemoveDiscountByProductID(int productID)
     {
         _sharedConnection.Execute(
@@ -100,5 +102,11 @@ public static class DiscountsAccess
         return _sharedConnection.QueryFirstOrDefault<DiscountsModel>(
             "SELECT * FROM Discounts WHERE ProductId = @ProductID",
             new { ProductID = productID });
+    }
+    public static List<DiscountsModel> GetAllDiscountByProductID(int productID)
+    {
+        return _sharedConnection.Query<DiscountsModel>(
+            "SELECT * FROM Discounts WHERE ProductId = @ProductID",
+            new { ProductID = productID }).ToList();
     }
 }
