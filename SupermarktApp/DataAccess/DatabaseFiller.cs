@@ -14,7 +14,7 @@ public class DatabaseFiller
     {
         "Cart", "Users", "Products", "Orders", "RewardItems",
         "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
-        "FavoriteLists"
+        "FavoriteLists", "FavoriteListProducts"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -231,8 +231,17 @@ public class DatabaseFiller
                 Id       INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId   INTEGER NOT NULL,
                 Name     TEXT NOT NULL,
-                Products TEXT,
                 FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS FavoriteListProducts (
+                Id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                FavoriteListId INTEGER NOT NULL,
+                ProductId      INTEGER NOT NULL,
+                Quantity       INTEGER NOT NULL,
+                FOREIGN KEY (FavoriteListId) REFERENCES FavoriteLists(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId)      REFERENCES Products(Id)
             );
         ");
     }

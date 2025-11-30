@@ -12,7 +12,7 @@ static class FavoriteListUI
                     .Color(MenuUI.AsciiPrimary));
             
             var options = new List<string>();
-            options.AddRange(new[] { "View lists", "Create list", "Remove list", "Go back" });
+            options.AddRange(new[] { "View lists", "Create list", "Remove list", $"[red]Go back[/]" });
 
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -28,12 +28,49 @@ static class FavoriteListUI
                     CreateList();
                     break;
                 case "Remove list":
-                    // RemoveList();
+                    RemoveList();
                     break;
-                case "Go back":
+                case "[red]Go back[/]":
                     return;
             }
         }    
+    }
+    public static void RemoveList()
+    {
+        Console.Clear();
+        Utils.PrintTitle("Remove List");
+
+        var userId = SessionManager.CurrentUser.ID;
+        List<FavoriteListModel> lists = FavoriteListLogic.GetAllListsByUserId(userId);
+
+        var labels = lists
+            .Select(l => l.Name)
+            .ToList();
+        labels.Add($"[red]Go back[/]");
+
+        var selectedLabel = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Select list to remove")
+                .AddChoices(labels));
+
+        if (selectedLabel == $"[red]Go back[/]")
+            return;
+
+        int selectedIndex = labels.IndexOf(selectedLabel);
+        FavoriteListModel selectedList = lists[selectedIndex];
+
+        var confirm = Utils.CreateYesNoSelectionPrompt(
+            $"Are you sure you want to remove [yellow]{selectedList.Name}[/]?");
+
+        if (!confirm)
+            return;
+
+        FavoriteListLogic.RemoveList(selectedList.Id);
+
+        AnsiConsole.MarkupLine($"List [yellow]{selectedList.Name}[/] removed.");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+        Console.ReadKey();
+        return;
     }
     public static void CreateList()
     {
@@ -42,7 +79,7 @@ static class FavoriteListUI
 
         var userId = SessionManager.CurrentUser.ID;
 
-        var listName = Utils.CreateTextPrompt<string>("Enter list name");
+        var listName = Utils.CreateTextPrompt<string>("Enter list name: ");
 
         var newList = new FavoriteListModel(userId, listName);
         FavoriteListLogic.CreateList(newList);
@@ -72,6 +109,7 @@ static class FavoriteListUI
             {
                 case "Yes":
                     CreateList();
+                    ViewLists();
                     break;
                 case "No":
                     return;
@@ -82,14 +120,14 @@ static class FavoriteListUI
         var labels = lists
                         .Select(l => l.Name)
                         .ToList();
-        labels.Add("Go back");
+        labels.Add($"[red]Go back[/]");
 
         var selectedLabel = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Select list to view")
                 .AddChoices(labels));
 
-        if (selectedLabel == "Go back") return;
+        if (selectedLabel == "[red]Go back[/]") return;
 
         // Find selected list
         int selectedIndex = labels.IndexOf(selectedLabel);
@@ -106,10 +144,10 @@ static class FavoriteListUI
 
         var allProductsInList = list.Products;
         
-        foreach (var kv in allProductsInList)
+        foreach (var item in allProductsInList)
         {
-            var product = kv.Key;
-            int quantity = kv.Value;
+            var product = item.Product;
+            int quantity = item.Quantity;
             double totalPrice = Math.Round(product.Price * quantity, 2);
 
             table.AddRow(
@@ -123,7 +161,7 @@ static class FavoriteListUI
         var choices = new [] {
             "Add products to cart",
             "Edit list",
-            "Go back"
+            $"[red]Go back[/]"
         };
         var selectedChoice = Utils.CreateSelectionPrompt(choices);
 
@@ -131,9 +169,11 @@ static class FavoriteListUI
         {
             case "Add products to cart":
                 AddProductsToCart(list);
+                ViewLists();
                 break;
             case "Edit list":
                 EditList(list);
+                ViewLists();
                 break;
             case "Go back":
                 return;
@@ -148,7 +188,7 @@ static class FavoriteListUI
           "Remove product",
           "Edit quantity",
           "Change list name",
-          "Go back"  
+          $"[red]Go back[/]"  
         };
         var selectedChoice = Utils.CreateSelectionPrompt(choices);
 
@@ -161,7 +201,7 @@ static class FavoriteListUI
                 RemoveProductFromList(list);
                 break;
             case "Edit quantity":
-                EditQuantity(list, allProductsInList.Keys.ToList(), allProductsInList, true);
+                EditQuantity(list, allProductsInList, true);
                 break;
             case "Change list name":
                 ChangeListName(list);
@@ -211,26 +251,26 @@ static class FavoriteListUI
     {
         Console.Clear();
 
-        var products = list.Products.Keys;
+        var products = list.Products;
         var title = "Choose a products to remove";
         
         var selectedProducts = Utils.CreateMultiSelectionPrompt(
             products,
             title,
-            product => $"{product.Name} | x{list.Products[product]}"
+            item => $"{item.Product.Name} | x{item.Quantity}"
         );
 
-        foreach (var product in selectedProducts)
-        {
-            FavoriteListLogic.RemoveProductFromList(product, list.Id);
-        }
-
-        if (selectedProducts is null)
+        if (selectedProducts is null || !selectedProducts.Any())
         {
             AnsiConsole.MarkupLine("No product selected.");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
             return;           
+        }
+
+        foreach (var item in selectedProducts)
+        {
+            FavoriteListLogic.RemoveProductFromList(item.Product, list.Id);
         }
 
         AnsiConsole.MarkupLine("Products removed from list.");
@@ -245,12 +285,9 @@ static class FavoriteListUI
         
         if (selectedChoice == "Add all products")
         {
-            foreach (var kv in allProductsInList)
+            foreach (var item in allProductsInList)
             {
-                var product = kv.Key;
-                var quantity = kv.Value;
-
-                OrderLogic.AddToCart(product, quantity);
+                OrderLogic.AddToCart(item.Product, item.Quantity);
             }
         }
         else if (selectedChoice == "Add specific products")
@@ -258,44 +295,35 @@ static class FavoriteListUI
             Console.Clear();
             Utils.PrintTitle(list.Name);
 
-            var products = allProductsInList.Keys;
+            var products = allProductsInList;
             var title = "Select products";
 
             var selectedProducts = Utils.CreateMultiSelectionPrompt(
                 products,
                 title,
-                product => $"{product.Name} | x{allProductsInList[product]}" // allProductsInList[product] is the value of the dictonary in this case quantity
+                item => $"{item.Product.Name} | x{item.Quantity}"
             );
 
-            var listToAddToCart = EditQuantity(list, selectedProducts, allProductsInList, false);
+            var listToAddToCart = EditQuantity(list, selectedProducts, false);
 
-            foreach(var kv in listToAddToCart)
+            foreach(var item in listToAddToCart)
             {
-                var product = kv.Key;
-                var quantity = kv.Value;
-
-                OrderLogic.AddToCart(product, quantity);
+                OrderLogic.AddToCart(item.Product, item.Quantity);
             }
         }
-
         else return;
 
         AnsiConsole.MarkupLine("Products added to cart.");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
+        return;
     }
-    public static Dictionary<ProductModel, int> EditQuantity(
+    public static List<FavoriteListProductModel> EditQuantity(
         FavoriteListModel list,
-        List<ProductModel> selectedProducts, 
-        Dictionary<ProductModel, int> allProductsInList,
+        List<FavoriteListProductModel> selectedProducts, 
         bool updateToDatabase)
     {
-        var updatedList = new Dictionary<ProductModel, int>();
-
-        foreach(var product in selectedProducts)
-        {
-            updatedList[product] = allProductsInList[product];
-        }
+        var updatedList = selectedProducts;
 
         var editQuantity = Utils.CreateYesNoSelectionPrompt("Edit Quantity?");
 
@@ -312,7 +340,7 @@ static class FavoriteListUI
             var productToChange = Utils.CreateSelectionPrompt(
                 selectedProducts, 
                 "Choose a product", 
-                product => $"{product.Name} | x{updatedList[product]}");
+                item => $"{item.Product.Name} | x{item.Quantity}");
 
             // We make a validation lambda to pass as whole
             Func<int, ValidationResult> quantityValidator = quantity =>
@@ -323,14 +351,14 @@ static class FavoriteListUI
 
             var newQuantity = Utils.CreateTextPrompt<int>(textPrompt, quantityValidator);
 
-            updatedList[productToChange] = newQuantity;
+            productToChange.Quantity = newQuantity;
 
             confirmed = !AnsiConsole.Confirm("Change another?");
         }
 
         if (updateToDatabase)
         {
-            FavoriteListLogic.EditProductQuantity(allProductsInList, updatedList, list.Id);
+            FavoriteListLogic.EditProductQuantity(list, updatedList);
         }
 
         AnsiConsole.MarkupLine("Quantity updated");
