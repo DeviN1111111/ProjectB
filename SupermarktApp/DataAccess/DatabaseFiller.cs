@@ -118,6 +118,7 @@ public class DatabaseFiller
                 Description TEXT,
                 Category TEXT,
                 Location INTEGER,
+                ExpiryDate DATETIME,
                 Quantity INTEGER NOT NULL DEFAULT 0,
                 Visible INTEGER NOT NULL DEFAULT 1
             );");
@@ -382,6 +383,8 @@ public class DatabaseFiller
                     Category = category,
                     Location = random.Next(1, 16),
                     Quantity = random.Next(20, 300),
+                    Visible = 1,
+                    ExpiryDate = DateTime.Today.AddDays(random.Next(-5, 30))
                 });
             }
         }
@@ -537,8 +540,8 @@ public class DatabaseFiller
     public static void InsertProduct(ProductModel product)
     {
         _sharedConnection!.Execute(@"
-        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
-        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);", product);
+        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity, ExpiryDate, Visible)
+        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @ExpiryDate, @Visible);", product);
     }
 
     // public static void InsertOrder(OrdersModel order)

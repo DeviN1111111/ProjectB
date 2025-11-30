@@ -56,6 +56,32 @@ public class DiscountsLogic
         }
         return false;
     }
+
+    public static void AddExpiryDateDiscounts(int daysBeforeExpiry = 3)
+    {
+        var allProducts = ProductAccess.GetAllProducts();
+
+        foreach(var product in allProducts)
+        {
+            if(product == null || product.ExpiryDate == null) continue;
+
+            int daysUntilExpiry = (product.ExpiryDate.Date - DateTime.Today).Days;
+
+            if (daysUntilExpiry >= 0 && daysUntilExpiry <= daysBeforeExpiry)
+            {
+                var discount = new DiscountsModel(
+                    productId: product.ID,
+                    discountPercentage: 20.0,
+                    discountType: "Expiry",
+                    startDate: DateTime.Now,
+                    endDate: product.ExpiryDate,
+                    userId: null
+                    );
+                AddDiscount(discount);
+            }
+        }
+    }
+
     public static DiscountsModel GetWeeklyDiscountByProductID(int productID)
     {
         return DiscountsAccess.GetWeeklyDiscountByProductID(productID);
