@@ -15,7 +15,8 @@ public static class ProductDetailsUI
         var body = string.Empty;
 
         ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
-        
+        string expiryText = product.ExpiryDate.Date.ToString("dd-MM-yyyy");
+
         if(productDiscount != null) // if u got a discount print the discounted price
         {
             string discountType = productDiscount.Discount!.DiscountType;
@@ -25,6 +26,7 @@ public static class ProductDetailsUI
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
                 $"[bold #00014d]Price:[/] [#5dabcf][red strike]€{product.Price}[/] €{ProductPrice} [italic yellow]({discountType} Discount)[/][/]\n" +
+                $"[bold #00014d]Expiry Date:[/] [#5dabcf]{expiryText}[/]\n" +
                 $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
                 $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
                 $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
@@ -35,15 +37,17 @@ public static class ProductDetailsUI
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
                 $"[bold #00014d]Price:[/] [#5dabcf]€{ProductPrice}[/]\n" +
+                $"[bold #00014d]Expiry Date:[/] [#5dabcf]{expiryText}[/]\n" +
                 $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
                 $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
                 $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
                 $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{product.Quantity}[/]";
         }
-        else
+        else if(SessionManager.CurrentUser.AccountStatus == "Admin" || SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
                 $"[bold #00014d]Price:[/] [#5dabcf]€{ProductPrice}[/]\n" +
+                $"[bold #00014d]Expiry Date:[/] [#5dabcf]{expiryText}[/]\n" +
                 $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
                 $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +
                 $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
