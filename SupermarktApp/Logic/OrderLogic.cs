@@ -156,4 +156,44 @@ public class OrderLogic
         return OrderAccess.GetOrderssByOrderId(orderId);
     }
     public static OrderHistoryModel GetOrderByUserId(int userId) => OrderHistoryAccess.GetOrderByUserId(userId);
+    public static void ProcessPay(List<CartModel> cartProducts, List<ProductModel> allProducts, int? selectedCouponId)
+    {
+        List<OrdersModel> allOrderItems = new List<OrdersModel>();
+
+        foreach (var item in cartProducts)
+        {
+            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
+            if (product == null)
+                continue;
+
+            // Create OrdersModel per quantity
+            for (int i = 0; i < item.Quantity; i++)
+            {
+                allOrderItems.Add(new OrdersModel
+                {
+                    UserID = SessionManager.CurrentUser!.ID,
+                    ProductID = product.ID,
+                    Price = product.Price
+                });
+            }
+        }
+
+        // 2. Save the order to the database
+        if (allOrderItems.Count > 0)
+        {
+            OrderLogic.AddOrderWithItems(allOrderItems, allProducts);
+        }
+
+        // 4. Apply coupon if selected
+        if (selectedCouponId.HasValue)
+        {
+            CouponLogic.UseCoupon(selectedCouponId.Value);
+            CouponLogic.ResetCouponSelection();
+        }
+
+        // 5. Final steps
+        OrderLogic.UpdateStock();
+        OrderLogic.ClearCart();
+    }
+        
 }

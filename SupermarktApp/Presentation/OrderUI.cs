@@ -304,85 +304,16 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        // Create an empty list to hold all "flattened" order entries
-                        List<OrdersModel> allOrderEntries = new List<OrdersModel>();
-
-                        foreach (var item in cartProducts)
-                        {
-                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
-                            if (product != null)
-                            {
-                                // Repeat per quantity — since each product is stored as a separate row
-                                for (int i = 0; i < item.Quantity; i++)
-                                {
-                                    var newOrder = new OrdersModel
-                                    {
-                                        UserID = SessionManager.CurrentUser!.ID,
-                                        ProductID = product.ID,
-                                        Price = product.Price,
-                                    };
-                                    allOrderEntries.Add(newOrder);
-                                }
-                            }
-                        }
-
-
-                        // Save them to the database — all products share one OrderHistory entry (OrderId)
-                        if (allOrderEntries.Count > 0)
-                        {
-                            OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
-                        }
-                        PayLaterLogic.Pay();
-                        if (SelectedCouponId.HasValue)
-                        {
-                            CouponLogic.UseCoupon(SelectedCouponId.Value);
-                            CouponLogic.ResetCouponSelection();
-                        }
+                        OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                        Console.ReadKey();
-                        OrderLogic.UpdateStock();
-                        OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
-                                                // Create an empty list to hold all "flattened" order entries
-                        List<OrdersModel> allOrderEntrie= new List<OrdersModel>();
-
-                        foreach (var item in cartProducts)
-                        {
-                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
-                            if (product != null)
-                            {
-                                        // Repeat per quantity — since each product is stored as a separate row
-                                        for (int i = 0; i < item.Quantity; i++)
-                                        {
-                                            var newOrder = new OrdersModel
-                                            {
-                                                UserID = SessionManager.CurrentUser!.ID,
-                                                ProductID = product.ID,
-                                                Price = product.Price,
-
-                                            };
-                                            allOrderEntrie.Add(newOrder);
-                                        }
-                                    }
-                                }
-
-                        // Save them to the database — all products share one OrderHistory entry (OrderId)
-                        OrderLogic.AddOrderWithItems(allOrderEntrie, allProducts);
-                        if (SelectedCouponId.HasValue)
-                        {
-                            CouponLogic.UseCoupon(SelectedCouponId.Value);
-                            CouponLogic.ResetCouponSelection();
-                        }
-                        RewardLogic.AddRewardPointsToUser(rewardPoints);
+                        OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                        Console.ReadKey();
-                        OrderLogic.UpdateStock();
-                        OrderLogic.ClearCart();
                         break;
                     case "Pay Later":
                         List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
