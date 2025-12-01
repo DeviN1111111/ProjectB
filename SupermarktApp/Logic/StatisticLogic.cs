@@ -162,11 +162,16 @@ public static class StatisticLogic
 
         return table;
     }
-    
+
     public static DateTime GetDateOfFirstOrder()
     {
         DateTime firstOrderDate = OrderAccess.GetDateOfFirstOrder();
         return firstOrderDate;
+    }
+    public static double TotalRevenue(DateTime start, DateTime end)
+    {
+        double result = OrderAccess.GetTotalRevenue(start, end);
+        return Math.Round(result, 2);
     }
 
 }

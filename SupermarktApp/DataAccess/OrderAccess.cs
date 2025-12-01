@@ -202,5 +202,20 @@ public static class OrderAccess
         return topProducts;
     }
 
+        public static double GetTotalRevenue(DateTime startDate, DateTime endDate)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        double revenue = db.ExecuteScalar<double>(
+            @"SELECT SUM(Products.Price)
+            FROM Orders
+            JOIN Products ON Orders.ProductID = Products.ID
+            WHERE DATE(Orders.Date) >= DATE(@StartDate)
+            AND DATE(Orders.Date) <= DATE(@EndDate);
+            ",
+            new { StartDate = startDate, EndDate = endDate }
+        );
+        return revenue;
+    }
+
 
 }
