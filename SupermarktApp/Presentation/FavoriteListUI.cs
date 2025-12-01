@@ -236,6 +236,9 @@ static class FavoriteListUI
                     ValidationResult.Success();
 
             var product = SearchUI.SearchProductByNameOrCategory();
+
+            if (product == null) continue;
+        
             int quantity = Utils.CreateTextPrompt("Enter quantity (1-99)", quantityValidator);
 
             FavoriteListLogic.AddProductToList(product, quantity, list.Id);
