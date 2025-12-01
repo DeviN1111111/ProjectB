@@ -185,14 +185,27 @@ public static class SettingsUI
                     .Centered()
                     .Color(MenuUI.AsciiPrimary));
 
-            AnsiConsole.MarkupLine($"Name: [blue]{SessionManager.CurrentUser!.Name}[/]");
-            AnsiConsole.MarkupLine($"Last Name: [blue]{SessionManager.CurrentUser!.LastName}[/]");
-            AnsiConsole.MarkupLine($"Email: [blue]{SessionManager.CurrentUser!.Email}[/]");
-            AnsiConsole.MarkupLine($"Address: [blue]{SessionManager.CurrentUser!.Address}[/]");
-            AnsiConsole.MarkupLine($"Zipcode: [blue]{SessionManager.CurrentUser!.Zipcode}[/]");
-            AnsiConsole.MarkupLine($"City: [blue]{SessionManager.CurrentUser!.City}[/]");
-            AnsiConsole.MarkupLine($"Phone Number: [blue]{SessionManager.CurrentUser!.PhoneNumber}[/]");
-            AnsiConsole.MarkupLine($"Birthdate: [blue]{SessionManager.CurrentUser!.Birthdate.ToString("dd-MM-yyyy")}[/]");
+            var grid = new Grid();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddRow("Name:", $"[blue]{SessionManager.CurrentUser!.Name}[/]");
+            grid.AddRow("Lastname:", $"[blue]{SessionManager.CurrentUser.LastName}[/]");
+            grid.AddRow("Email:", $"[blue]{SessionManager.CurrentUser.Email}[/]");
+            grid.AddRow("Address:", $"[blue]{SessionManager.CurrentUser.Address}[/]");
+            grid.AddRow("Zipcode:", $"[blue]{SessionManager.CurrentUser.Zipcode}[/]");
+            grid.AddRow("City:", $"[blue]{SessionManager.CurrentUser.City}[/]");
+            grid.AddRow("Phonenumber:", $"[blue]{SessionManager.CurrentUser.PhoneNumber}[/]");
+            grid.AddRow("Birthdate:", $"[blue]{SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")}[/]");
+            var panel = new Panel(grid)
+                .Header("[bold cyan]Account details[/]")
+                .Border(BoxBorder.Double);
+            AnsiConsole.Write(panel);
 
             Console.WriteLine();
             var options = new List<string> { "Change Profile Settings", "Go back" }; ;
@@ -224,16 +237,108 @@ public static class SettingsUI
 
             string NewName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Name[/]:").DefaultValue(SessionManager.CurrentUser!.Name).DefaultValue(SessionManager.CurrentUser.Name));
             string NewLastName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Last Name[/]:").DefaultValue(SessionManager.CurrentUser.LastName).DefaultValue(SessionManager.CurrentUser.LastName));
-            string NewEmail = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Email[/]:").DefaultValue(SessionManager.CurrentUser.Email).DefaultValue(SessionManager.CurrentUser.Email));
+            string NewEmail;
+            do
+            {
+                AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
+                NewEmail = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Email[/]:").DefaultValue(SessionManager.CurrentUser.Email));
+
+                if (NewEmail == SessionManager.CurrentUser.Email)
+                {
+                    break;
+                }
+
+                if (!ValidaterLogic.ValidateEmail(NewEmail))
+                {
+                    AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
+                    continue;
+                }
+
+                if (UserAccess.EmailExists(NewEmail))
+                {
+                    AnsiConsole.MarkupLine($"[red]The email [yellow]{NewEmail}[/] is already registered. Please use a different one![/]");
+                    continue;
+                }
+                break;
+
+            } while (true);
+
             string NewAddress = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Address[/]:").DefaultValue(SessionManager.CurrentUser.Address).DefaultValue(SessionManager.CurrentUser.Address));
-            string NewZipcode = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Zipcode[/]:").DefaultValue(SessionManager.CurrentUser.Zipcode).DefaultValue(SessionManager.CurrentUser.Zipcode));
+            string NewZipcode;
+            do
+            {
+                NewZipcode = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Zipcode[/]:").DefaultValue(SessionManager.CurrentUser.Zipcode).DefaultValue(SessionManager.CurrentUser.Zipcode));
+            } while (ValidaterLogic.ValidateZipcode(NewZipcode) == false);
+            
             string NewCity = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]City[/]:").DefaultValue(SessionManager.CurrentUser.City).DefaultValue(SessionManager.CurrentUser.City));
-            string NewPhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Phone Number[/]:").DefaultValue(SessionManager.CurrentUser.PhoneNumber).DefaultValue(SessionManager.CurrentUser.PhoneNumber));
-            string newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate (DD-MM-YYYY)[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
+            string NewPhoneNumber;
+            do
+            {
+                NewPhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Phone Number[/]:").DefaultValue(SessionManager.CurrentUser.PhoneNumber).DefaultValue(SessionManager.CurrentUser.PhoneNumber));
+            } while (ValidaterLogic.ValidatePhoneNumber(NewPhoneNumber) == false);
 
-            DateTime parsedBirthdate = DateTime.Parse(newBirthdate);
+            string newBirthdate;
+            DateTime Birthdate;
+            do
+            {
+                newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate (DD-MM-YYYY)[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
+            } while (DateTime.TryParse(newBirthdate, out Birthdate) == false);
 
-            bool change = UserSettingsLogic.ChangeProfileSettings(NewName, NewLastName, NewEmail, NewAddress, NewZipcode, NewPhoneNumber, NewCity, parsedBirthdate);
+
+            
+            AnsiConsole.WriteLine();
+            var beforeEditTable = new Table()
+                .Title("[red]Before EDIT:[/]")
+                .AddColumn("Field")
+                .AddColumn("Value");
+
+            beforeEditTable.AddRow("Name", $"[red]{SessionManager.CurrentUser.Name}[/]");
+            beforeEditTable.AddRow("Lastname", $"[red]{SessionManager.CurrentUser.LastName}[/]");
+            beforeEditTable.AddRow("Email", $"[red]{SessionManager.CurrentUser.Email}[/]");
+            beforeEditTable.AddRow("Address", $"[red]{SessionManager.CurrentUser.Address}[/]");
+            beforeEditTable.AddRow("Zipcode", $"[red]{SessionManager.CurrentUser.Zipcode}[/]");
+            beforeEditTable.AddRow("City", $"[red]{SessionManager.CurrentUser.City}[/]");
+            beforeEditTable.AddRow("Phonenumber", $"[red]{SessionManager.CurrentUser.PhoneNumber}[/]");
+            beforeEditTable.AddRow("Birthdate", $"[red]{SessionManager.CurrentUser.Birthdate:dd-MM-yyyy}[/]");
+
+            var afterTable = new Table()
+                .Title("[green]After EDIT:[/]")
+                .AddColumn("Field")
+                .AddColumn("Value");
+
+            afterTable.AddRow("Name", $"[green]{NewName}[/]");
+            afterTable.AddRow("Lastname", $"[green]{NewLastName}[/]");
+            afterTable.AddRow("Email", $"[green]{NewEmail}[/]");
+            afterTable.AddRow("Address", $"[green]{NewAddress}[/]");
+            afterTable.AddRow("Zipcode", $"[green]{NewZipcode}[/]");
+            afterTable.AddRow("City", $"[green]{NewCity}[/]");
+            afterTable.AddRow("Phonenumber", $"[green]{NewPhoneNumber}[/]");
+            afterTable.AddRow("Birthdate", $"[green]{Birthdate:dd-MM-yyyy}[/]");
+
+            var grid = new Grid();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddRow(beforeEditTable, afterTable);
+            
+            var panel = new Panel(grid)
+                .Header("[bold cyan]Account details Edit Comparison[/]")
+                .Border(BoxBorder.Double);
+                AnsiConsole.Write(panel);
+
+            AnsiConsole.MarkupLine("Are you sure you want to apply these changes?");
+            var confirmChange = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .HighlightStyle(new Style(Hover))
+                    .AddChoices(new[] { "Yes", "No" }));
+
+            if (confirmChange == "No")
+            {
+                AnsiConsole.MarkupLine("Profile settings [red]have not been changed[/] press [green]ANY KEY[/] to continue");
+                Console.ReadKey();
+                break;
+            }
+
+            bool change = UserSettingsLogic.ChangeProfileSettings(NewName, NewLastName, NewEmail, NewAddress, NewZipcode, NewPhoneNumber, NewCity, Birthdate);
             if (change)
             {
                 AnsiConsole.MarkupLine("[green]Profile settings changed successfully![/]");
