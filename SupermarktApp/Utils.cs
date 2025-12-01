@@ -46,17 +46,19 @@ static class Utils
     /// <returns>True or false</returns>
     public static bool CreateYesNoSelectionPrompt(string title= "")
     {
+        string yes = $"[green]Yes[/]";
+        string no =  $"[red]No[/]";
         if (title == "")
         {
             var prompt = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .PageSize(10)
-                    .AddChoices("Yes", "No"));
+                    .AddChoices(yes, no));
 
             bool result = prompt switch
             {
-                "Yes" => true,
-                "No" => false,
+                $"[green]Yes[/]" => true,
+                $"[red]No[/]" => false,
                 _ => false
             };
 
@@ -68,12 +70,12 @@ static class Utils
                 new SelectionPrompt<string>()
                     .Title(title)
                     .PageSize(10)
-                    .AddChoices("Yes", "No")); 
+                    .AddChoices(yes, no)); 
 
             bool result = prompt switch
             {
-                "Yes" => true,
-                "No" => false,
+                $"[green]Yes[/]" => true,
+                $"[red]No[/]" => false,
                 _ => false
             };
 

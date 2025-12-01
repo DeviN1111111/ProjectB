@@ -59,8 +59,7 @@ static class FavoriteListUI
         int selectedIndex = labels.IndexOf(selectedLabel);
         FavoriteListModel selectedList = lists[selectedIndex];
 
-        var confirm = Utils.CreateYesNoSelectionPrompt(
-            $"Are you sure you want to remove [yellow]{selectedList.Name}[/]?");
+        var confirm = Utils.CreateYesNoSelectionPrompt($"Are you sure you want to remove [yellow]{selectedList.Name}[/]?");
 
         if (!confirm)
             return;
@@ -153,7 +152,7 @@ static class FavoriteListUI
             table.AddRow(
                 $"[#5dabcf]{product.Name}[/]", 
                 $"{quantity}",
-                $"[green]{totalPrice}[/]");
+                $"[green]€{totalPrice}[/]");
         }
 
         AnsiConsole.Write(table);
@@ -206,7 +205,7 @@ static class FavoriteListUI
             case "Change list name":
                 ChangeListName(list);
                 break;
-            case "Go back":
+            case $"[red]Go back[/]":
                 return;
         }
 
@@ -220,7 +219,7 @@ static class FavoriteListUI
 
         FavoriteListLogic.ChangeListName(list.Id, newName);
 
-        AnsiConsole.MarkupLine($"List name changed to {newName}.");
+        AnsiConsole.MarkupLine($"List name changed to [yellow]{newName}[/].");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
         return;
@@ -243,7 +242,8 @@ static class FavoriteListUI
 
             FavoriteListLogic.AddProductToList(product, quantity, list.Id);
 
-            confirmed = !AnsiConsole.Confirm("Add more products?");
+            var decision = Utils.CreateSelectionPrompt(["Add more products", $"[red]Go back[/]"]);
+            if (decision == $"[red]Go back[/]") confirmed = true;
         }
         AnsiConsole.MarkupLine("Product added to list.");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
@@ -256,6 +256,7 @@ static class FavoriteListUI
 
         var products = list.Products;
         var title = "Choose a products to remove";
+        DisplayOnlyProductsTable(list);
         
         var selectedProducts = Utils.CreateMultiSelectionPrompt(
             products,
@@ -283,7 +284,7 @@ static class FavoriteListUI
     }
     public static void AddProductsToCart(FavoriteListModel list)
     {
-        var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Add all products", "Add specific products", "Go back"});
+        var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Add all products", "Add specific products", "[red]Go back[/]"});
         var allProductsInList = list.Products;
         
         if (selectedChoice == "Add all products")
@@ -339,6 +340,8 @@ static class FavoriteListUI
         while (!confirmed)
         {               
             Console.Clear();
+            Utils.PrintTitle(list.Name);
+            DisplayOnlyProductsTable(list);
 
             var productToChange = Utils.CreateSelectionPrompt(
                 selectedProducts, 
@@ -350,18 +353,19 @@ static class FavoriteListUI
                 quantity < 1 || quantity > 99 ?
                     ValidationResult.Error("[red]Must be between 1 and 99.[/]"):
                     ValidationResult.Success();
-            string textPrompt = $"Enter new quantity for [yellow][/]:";
+            string textPrompt = $"Enter new quantity for [yellow]{productToChange.Product.Name}[/]:";
 
             var newQuantity = Utils.CreateTextPrompt<int>(textPrompt, quantityValidator);
 
             productToChange.Quantity = newQuantity;
 
-            confirmed = !AnsiConsole.Confirm("Change another?");
-        }
+            if (updateToDatabase)
+            {
+                FavoriteListLogic.EditProductQuantity(list, updatedList);
+            }            
 
-        if (updateToDatabase)
-        {
-            FavoriteListLogic.EditProductQuantity(list, updatedList);
+            var decision = Utils.CreateSelectionPrompt(["Change another?", $"[red]Go back[/]"]);
+            if (decision == $"[red]Go back[/]") confirmed = true;
         }
 
         AnsiConsole.MarkupLine("Quantity updated");
@@ -369,5 +373,25 @@ static class FavoriteListUI
         Console.ReadKey();        
 
         return updatedList;             
+    }
+    public static void DisplayOnlyProductsTable(FavoriteListModel list)
+    {
+        var table = Utils.CreateTable(new [] {"Product", "Quantity", "Total Price"});
+
+        var allProductsInList = list.Products;
+        
+        foreach (var item in allProductsInList)
+        {
+            var product = item.Product;
+            int quantity = item.Quantity;
+            double totalPrice = Math.Round(product.Price * quantity, 2);
+
+            table.AddRow(
+                $"[#5dabcf]{product.Name}[/]", 
+                $"{quantity}",
+                $"[green]€{totalPrice}[/]");
+        }
+
+        AnsiConsole.Write(table);
     }
 }
