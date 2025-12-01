@@ -76,67 +76,69 @@ public static class StatisticsUI
         DateTime end = DateTime.Today;
 
         double revenue = StatisticLogic.TotalRevenue(startDate, endDate);
+        double cost = StatisticLogic.TotalPurchaseCost(startDate, endDate);
 
         ShowTotalRevenue(revenue);
+        ShowTotalPurchaseCost(cost);
 
 
-        // ProductModel mostSold = StatisticLogic.MostSoldItem(startDate, endDate);
-        // int count = StatisticLogic.MostSoldItemCount(startDate, endDate);
-        // List<ProductSalesDto> sales = StatisticLogic.GetProductSalesData(startDate, endDate);
-        // double totalProfit = StatisticLogic.TotalProfitSince(startDate, endDate);
+        ProductModel mostSold = StatisticLogic.MostSoldItem(startDate, endDate);
+        int count = StatisticLogic.MostSoldItemCount(startDate, endDate);
+        List<ProductSalesDto> sales = StatisticLogic.GetProductSalesData(startDate, endDate);
+        double totalProfit = StatisticLogic.TotalProfitSince(startDate, endDate);
 
-        // if (sales != null && sales.Count > 0 && totalProfit > 0)
-        // {
-        //     AnsiConsole.WriteLine();
-        //     AnsiConsole.WriteLine();
-        //     if (startDate == DateTime.MinValue)
-        //     {
-        //         AnsiConsole.WriteLine($"Your total turnover of all time is {totalProfit} euro!");
-        //     }
-        //     else
-        //     {
-        //         AnsiConsole.WriteLine($"Your total turnover from {startDate.ToShortDateString()} till {endDate.ToShortDateString()} is {totalProfit} euro!");
-        //     }
-        //     AnsiConsole.WriteLine();
-        //     AnsiConsole.WriteLine();
-        //     AnsiConsole.WriteLine("Amount of sales per category:");
-        //     AnsiConsole.WriteLine();
-        //     AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Category"));
-        //     AnsiConsole.WriteLine();
-        //     AnsiConsole.WriteLine("Total turnover per category in €:");
-        //     AnsiConsole.WriteLine();
-        //     AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Profit"));
+        if (sales != null && sales.Count > 0 && totalProfit > 0)
+        {
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+            if (startDate == DateTime.MinValue)
+            {
+                AnsiConsole.WriteLine($"Your total turnover of all time is {totalProfit} euro!");
+            }
+            else
+            {
+                AnsiConsole.WriteLine($"Your total turnover from {startDate.ToShortDateString()} till {endDate.ToShortDateString()} is {totalProfit} euro!");
+            }
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine("Amount of sales per category:");
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Category"));
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine("Total turnover per category in €:");
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Profit"));
 
-        // }
+        }
 
-        // if (mostSold != null)
-        // {
-        //     var Table = StatisticLogic.CreateMostSoldTable(startDate, endDate);
-        //     if (Table == null)
-        //     {
-        //         AnsiConsole.MarkupLine("No data available for the selected period.");
-        //     }
-        //     else
-        //     {
-        //         AnsiConsole.WriteLine();
-        //         AnsiConsole.WriteLine();
-        //         if (startDate == DateTime.MinValue)
-        //         {
-        //             AnsiConsole.Write($"Top 5 most sold items of all time were: ");
-        //         }
-        //         else
-        //         {
-        //             AnsiConsole.Write($"Top 5 most sold items from {startDate.ToShortDateString()} to {endDate.ToShortDateString()} were: ");
-        //         }
-        //         AnsiConsole.WriteLine();
-        //         AnsiConsole.Write(Table);
-        //     }
+        if (mostSold != null)
+        {
+            var Table = StatisticLogic.CreateMostSoldTable(startDate, endDate);
+            if (Table == null)
+            {
+                AnsiConsole.MarkupLine("No data available for the selected period.");
+            }
+            else
+            {
+                AnsiConsole.WriteLine();
+                AnsiConsole.WriteLine();
+                if (startDate == DateTime.MinValue)
+                {
+                    AnsiConsole.Write($"Top 5 most sold items of all time were: ");
+                }
+                else
+                {
+                    AnsiConsole.Write($"Top 5 most sold items from {startDate.ToShortDateString()} to {endDate.ToShortDateString()} were: ");
+                }
+                AnsiConsole.WriteLine();
+                AnsiConsole.Write(Table);
+            }
 
-        // }
-        // else
-        // {
-        //     AnsiConsole.MarkupLine("No data available for the selected period.");
-        // }
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("No data available for the selected period.");
+        }
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to return to the menu.");
         Console.ReadLine();
         DisplayMenu();
@@ -205,7 +207,7 @@ public static class StatisticsUI
         AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[bold underline]Total Revenue[/]");
         AnsiConsole.WriteLine();
-        double maxRevenue = 1000.0;                 // Max value = full bar
+        double maxRevenue = 10000.0;                 // Max value = full bar
         double percent = Math.Min(revenue / maxRevenue, 1.0); // Convert revenue to percantage
 
         int barWidth = 40;                          // Total bar length
@@ -223,7 +225,35 @@ public static class StatisticsUI
         AnsiConsole.MarkupLine(legend);
         AnsiConsole.WriteLine();
 
-        AnsiConsole.MarkupLine($"[green]€{revenue:F2}[/]");
+        AnsiConsole.MarkupLine($"Total Revenue: [green]€{revenue:F2}[/]");
     }
+
+    public static void ShowTotalPurchaseCost(double cost)
+    {
+        double maxCost = 10000.0;
+        double percent = Math.Min(cost / maxCost, 1); // Convert to percentage
+
+        int width = 40;
+        int filled = (int)(width * percent);
+        int empty = width - filled;
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine("[bold underline]Total Purchase Cost[/]");
+        AnsiConsole.WriteLine();
+
+        string bar = 
+                "[red]" + new string('█', filled) + "[/]" +
+                "[grey]" + new string('░', empty) + "[/]";
+
+        AnsiConsole.MarkupLine(bar);
+        AnsiConsole.WriteLine();
+
+        var legend = "[red]■[/] Purchase Cost";
+        AnsiConsole.MarkupLine(legend);
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine($"Total Purchase Cost: [Red]€{cost:F2}[/]");
+    }
+
 
 }

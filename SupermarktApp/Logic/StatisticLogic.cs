@@ -173,5 +173,9 @@ public static class StatisticLogic
         double result = OrderAccess.GetTotalRevenue(start, end);
         return Math.Round(result, 2);
     }
-
+    public static double TotalPurchaseCost(DateTime start, DateTime end)
+    {
+        var cost = OrderAccess.GetTotalPurchaseCost(start, end);
+        return Math.Round(cost, 2);
+    }
 }

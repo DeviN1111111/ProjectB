@@ -216,6 +216,20 @@ public static class OrderAccess
         );
         return revenue;
     }
+    public static double GetTotalPurchaseCost(DateTime start, DateTime end)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        double purchaseCost = db.ExecuteScalar<double>(
+            @"SELECT SUM(CostPerUnit * QuantityAdded)
+            FROM RestockHistory
+            WHERE DATE(RestockDate) >= DATE(@Start)
+            AND DATE(RestockDate) <= DATE(@End);
+            ",
+            new { Start = start, End = end }
+        );
+        return purchaseCost;
+    }
+
 
 
 }
