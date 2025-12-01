@@ -178,22 +178,40 @@ public class OrderLogic
             }
         }
 
-        // 2. Save the order to the database
+        // Save the order to the database
         if (allOrderItems.Count > 0)
         {
             OrderLogic.AddOrderWithItems(allOrderItems, allProducts);
         }
 
-        // 4. Apply coupon if selected
+        // Apply coupon if selected
         if (selectedCouponId.HasValue)
         {
             CouponLogic.UseCoupon(selectedCouponId.Value);
             CouponLogic.ResetCouponSelection();
         }
 
-        // 5. Final steps
+        //  clean up
         OrderLogic.UpdateStock();
         OrderLogic.ClearCart();
     }
         
+    public static void ReorderPastOrder(int orderHistoryId)
+    {
+        List<OrdersModel> pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
+        foreach (var item in pastOrderItems)
+        {
+            var product = ProductAccess.GetProductByID(item.ProductID);
+            if (product != null)
+            {
+                //check for visible products only
+                if (product.Visible == 0)
+                {
+                    AnsiConsole.MarkupLine($"[red]Product '{product.Name}' is no longer available and was not added to your cart.[/]");
+                    continue;
+                }
+                AddToCart(product, 1);
+            }
+        }
+    }
 }

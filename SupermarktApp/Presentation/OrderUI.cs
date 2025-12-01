@@ -472,11 +472,11 @@ public class Order
             var firstOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
             if (firstOrders != null && firstOrders.Count == 1)
             {
-            var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
-            if (userCoupons == null || userCoupons.Count == 0)
-            {
-                CouponLogic.CreateCoupon(currentUser.ID, 5);
-            }
+                var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
+                if (userCoupons == null || userCoupons.Count == 0)
+                {
+                    CouponLogic.CreateCoupon(currentUser.ID, 5);
+                }
             }
             
             AnsiConsole.Write(
@@ -612,6 +612,40 @@ public class Order
 
             AnsiConsole.Write(orderTable);
 
+            var userChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]What would you like to do?[/]")
+                .AddChoices("Reorder", "Back")
+            );
+
+            if (userChoice == "Reorder")
+            {
+                // check if the user really wants to reorder
+                var confirmReorder = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[red]Are you sure you want to reorder this past order?[/]")
+                        .AddChoices("Yes", "No")
+                );
+                if (confirmReorder == "Yes")
+                {
+                    // check if order already paid
+                    if(userOrders.First(o => o.Id == selectedOrderId).IsPaid)
+                    {
+                        OrderLogic.ReorderPastOrder(selectedOrderId);
+                        AnsiConsole.MarkupLine("[green]Items added to cart![/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[red]Cannot reorder an unpaid order. Please complete payment first.[/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                }
+                return;
+            }
+
             if (!userOrders.First(o => o.Id == selectedOrderId).IsPaid)
             {
                 var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
@@ -657,58 +691,5 @@ public class Order
             AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
             Console.ReadKey();
         }
-    }
-
-    public static void ReOrderPastOrder(List<CartModel> orderItems)
-    {
-        List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
-        double totalAmount = 0;
-        // Title
-        AnsiConsole.Write(
-            new FigletText("Checkout")
-                .Centered()
-                .Color(AsciiPrimary));
-
-        // Cart table
-        var cartTable = new Table()
-            .BorderColor(AsciiPrimary)
-            .AddColumn("[white]Product[/]")
-            .AddColumn("[white]Quantity[/]")
-            .AddColumn("[white]Price[/]")
-            .AddColumn("[white]Total[/]");
-
-        foreach (var Item in orderItems)
-        {
-            // Get Product id and find match in all products
-            foreach (ProductModel Product in allProducts)
-            {
-                if (Item.ProductId == Product.ID)
-                {
-                    {
-                        cartTable.AddRow(Product.Name, Item.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * Item.Quantity, 2)}");
-                        totalAmount = totalAmount + (Product.Price * Item.Quantity);
-                    }
-                }
-            }
-        }
-        AnsiConsole.Write(cartTable);
-        AnsiConsole.WriteLine();
-
-        double deliveryFee = orderItems.Count == 0 ? 0 : OrderLogic.DeliveryFee(totalAmount);
-        
-        var headerText = "[bold white]Summary[/]";
-        var panel = new Panel(
-            new Markup(
-                $"[bold white]Delivery Fee:[/] [yellow]€{Math.Round(deliveryFee, 2)}[/]\n" +
-                $"[bold white]Total price:[/] [bold green]€{Math.Round(totalAmount + deliveryFee, 2)}[/]"))
-            .Header(headerText, Justify.Left)
-            .Border(BoxBorder.Rounded)
-            .BorderColor(AsciiPrimary)
-            .Expand();
-
-        AnsiConsole.Write(panel);
-        AnsiConsole.WriteLine();
-        Checkout(orderItems, allProducts, totalAmount + deliveryFee, 0);
-
     }
 }
