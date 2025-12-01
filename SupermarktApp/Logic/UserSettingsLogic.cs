@@ -20,4 +20,9 @@ public class UserSettingsLogic
         SessionManager.CurrentUser.Birthdate = birthdate;
         return true;
     }
+
+    public static bool EmailExists(string email)
+    {
+        return UserAccess.EmailExists(email);
+    }
 }

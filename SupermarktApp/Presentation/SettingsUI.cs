@@ -254,7 +254,7 @@ public static class SettingsUI
                     continue;
                 }
 
-                if (UserAccess.EmailExists(NewEmail))
+                if (UserSettingsLogic.EmailExists(NewEmail))
                 {
                     AnsiConsole.MarkupLine($"[red]The email [yellow]{NewEmail}[/] is already registered. Please use a different one![/]");
                     continue;
