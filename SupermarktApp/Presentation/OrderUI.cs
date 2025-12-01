@@ -744,7 +744,7 @@ public class Order
 
     public static async Task ShowSuggestedItems()
     {
-        // Console.Clear();
+        Console.Clear();
 
         var suggestions = SuggestionsLogic.GetSuggestedItems(SessionManager.CurrentUser!.ID);
 
