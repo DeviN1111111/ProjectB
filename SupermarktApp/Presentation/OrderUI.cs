@@ -143,23 +143,6 @@ public class Order
         double finalAmount = totalAmount + deliveryFee - totalDiscount + UnpaidFine - CouponCredit;
         TotalPrice = totalAmount + deliveryFee + UnpaidFine;
 
-        // user can choose from the suggested items
-        AnsiConsole.MarkupLine("[grey]Press a number to add a suggested item to your cart.[/]");
-        AnsiConsole.MarkupLine("[grey]Press ENTER to continue to options.[/]\n");
-
-        var suggestions = SuggestionsLogic.GetSuggestedItems(SessionManager.CurrentUser!.ID);
-        var key = Console.ReadKey(true).Key;
-
-        //pressed number
-        int indexPressed = (int)key - (int)ConsoleKey.D1;
-
-        if (indexPressed >= 0 && indexPressed< suggestions.Count)
-        {
-            var selectedProduct = suggestions[indexPressed];
-            OrderLogic.AddToCart(selectedProduct, 1, 0, 0);
-            await ShowCart();
-            return;
-        }
         await Checkout(allUserProducts, allProducts, finalAmount, UnpaidFine);
     }
 
@@ -293,6 +276,7 @@ public class Order
             "Checkout",
             "Remove items",
             "Change quantity",
+            "Suggested items", 
             "Add coupon",
             "Go back"
         }));
@@ -490,6 +474,11 @@ public class Order
                     break;
                 }
                 break;
+            
+            case "Suggested items":
+                await ShowSuggestedItems();
+                await ShowCart();
+                return;
 
             case "Add coupon":
                 CouponUI.DisplayMenu();
@@ -751,5 +740,45 @@ public class Order
             AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
             Console.ReadKey();
         }
+    }
+
+    public static async Task ShowSuggestedItems()
+    {
+        // Console.Clear();
+
+        var suggestions = SuggestionsLogic.GetSuggestedItems(SessionManager.CurrentUser!.ID);
+
+        if (suggestions.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[yellow]No suggestions available right now.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to go back.");
+            Console.ReadKey(true);
+            return;
+        }
+
+        // dispay the suggestion list to the right
+        var panel = SuggestionsUI.GetSuggestionsPanel(SessionManager.CurrentUser!.ID);
+        AnsiConsole.Write(panel);
+
+        AnsiConsole.MarkupLine("\n[grey]Press a number (1–9) to add an item.[/]");
+        AnsiConsole.MarkupLine("[grey]Press ENTER to return.[/]");
+
+        var key = Console.ReadKey(true).Key;
+
+        if (key == ConsoleKey.Enter)
+            return;
+        
+        // convert key to index
+        int indexPressed = (int)key - (int)ConsoleKey.D1;
+
+        if(indexPressed >= 0 && indexPressed< suggestions.Count)
+        {
+            var product = suggestions[indexPressed];
+            // fill 0 in for the discount and reward
+            OrderLogic.AddToCart(product, 1, 0, 0);
+            AnsiConsole.MarkupLine($"\n[green]Added [yellow]{Markup.Escape(product.Name)}[/] to cart![/]");
+            Thread.Sleep(800);
+        }
+        return;
     }
 }
