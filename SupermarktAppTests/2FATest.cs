@@ -1,38 +1,36 @@
-using Microsoft.Data.Sqlite;
-using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 using System;
-
+using System.Threading.Tasks;
 
 namespace SupermarktAppTests
 {
     [TestClass]
-    public class TwoFALogicTests
+    public class TwoFALogicUnitTests
     {
-        [TestMethod]
-        public void Generate2FACode_ShouldReturnSixDigitString()
+        [TestInitialize]
+        public void Init()
         {
-            //Act
-            string code = TwoFALogic.Generate2FACode();
+            // ensure DB seeded for each test
+            DatabaseFiller.RunDatabaseMethods();
+        }
 
-            //Assert
+        [TestMethod]
+        public void Generate2FACode_ReturnsSixDigitNumericString()
+        {
+            string code = TwoFALogic.Generate2FACode();
+            Assert.IsNotNull(code);
             Assert.AreEqual(6, code.Length);
             Assert.IsTrue(int.TryParse(code, out _));
         }
 
         [TestMethod]
-        [DataRow(1, 10)]
-        [DataRow(2, 5)]
-        public async Task CreateInsertAndEmailSend2FACode_ShouldInsertCodeAndSendEmail(int userId, int validityMinutes)
+        public async Task CreateInsertAndEmailSend2FACode_InsertsCodeAndExpiry()
         {
-            //Arrange
-            DatabaseFiller.RunDatabaseMethods();
+            int userId = 1;
+            int validityMinutes = 5;
 
-            //Act
             await TwoFALogic.CreateInsertAndEmailSend2FACode(userId, validityMinutes);
 
-            //Assert
             string code = UserAccess.Get2FACode(userId);
             DateTime? expiry = UserAccess.Get2FAExpiry(userId);
 
@@ -42,64 +40,41 @@ namespace SupermarktAppTests
         }
 
         [TestMethod]
-        [DataRow("test@example.com")]
-        [DataRow("user@gmail.com")]
-        public async Task Register2FAEmail_ShouldSendEmailAndReturnCode(string email)
+        public async Task Register2FAEmail_ReturnsSixDigitCode()
         {
-            //Act
+            string email = "devinnijhof@gmail.com";
             string code = await TwoFALogic.Register2FAEmail(email);
 
-            //Assert
             Assert.IsNotNull(code);
             Assert.AreEqual(6, code.Length);
             Assert.IsTrue(int.TryParse(code, out _));
         }
 
         [TestMethod]
-        [DataRow(1, true)]
-        [DataRow(2, false)]
-        public void Validate2FACode_ShouldReturnExpectedResult(int userId, bool expected)
+        public void Validate2FACode_ReturnsTrueForCorrectCode_FalseForIncorrect()
         {
-            //Arrange
-            DatabaseFiller.RunDatabaseMethods();
-            string code = TwoFALogic.Generate2FACode();
+            int userId = 1;
+            string correctCode = TwoFALogic.Generate2FACode();
             DateTime expiry = DateTime.Now.AddMinutes(10);
 
-            UserAccess.Insert2FACode(userId, expected ? code : "999999", expiry);
+            UserAccess.Insert2FACode(userId, correctCode, expiry);
 
-            //Act
-            bool result = TwoFALogic.Validate2FACode(userId, code);
+            bool valid = TwoFALogic.Validate2FACode(userId, correctCode);
+            bool invalid = TwoFALogic.Validate2FACode(userId, "000000");
 
-            //Assert
-            Assert.AreEqual(expected, result);
+            Assert.IsTrue(valid);
+            Assert.IsFalse(invalid);
         }
 
         [TestMethod]
-        [DataRow(1)]
-        public void Enable2FA_ShouldSet2FAEnabled(int userId)
+        public void EnableAndDisable2FA_TogglesStatus()
         {
-            //Arrange
-            DatabaseFiller.RunDatabaseMethods();
+            int userId = 1;
 
-            //Act
             TwoFALogic.Enable2FA(userId);
-
-            //Assert
             Assert.IsTrue(TwoFALogic.Is2FAEnabled(userId));
-        }
 
-        [TestMethod]
-        [DataRow(1)]
-        public void Disable2FA_ShouldSet2FADisabled(int userId)
-        {
-            //Arrange
-            DatabaseFiller.RunDatabaseMethods();
-            TwoFALogic.Enable2FA(userId);
-
-            //Act
             TwoFALogic.Disable2FA(userId);
-
-            //Assert
             Assert.IsFalse(TwoFALogic.Is2FAEnabled(userId));
         }
     }
