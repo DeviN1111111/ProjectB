@@ -94,6 +94,12 @@ public class OrderLogic
             {
                 if (cartProduct.ProductId == Product.ID)
                 {
+                    if (Product.Quantity - cartProduct.Quantity < 0)
+                    {
+                        AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{Product.Name}'.[/]");
+                        Console.ReadKey();
+                        continue;
+                    }
                     int newStock = Product.Quantity - cartProduct.Quantity;
                     ProductAccess.UpdateProductStock(Product.ID, newStock);
                 }
@@ -196,9 +202,11 @@ public class OrderLogic
         OrderLogic.ClearCart();
     }
         
-    public static void ReorderPastOrder(int orderHistoryId)
-    {
+    public static List<string> ReorderPastOrder(int orderHistoryId)
+    { 
+
         List<OrdersModel> pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
+        List<string> OutOfStockProducts = new List<string>();
         foreach (var item in pastOrderItems)
         {
             var product = ProductAccess.GetProductByID(item.ProductID);
@@ -210,8 +218,24 @@ public class OrderLogic
                     AnsiConsole.MarkupLine($"[red]Product '{product.Name}' is no longer available and was not added to your cart.[/]");
                     continue;
                 }
+                // check if item is in stock
+                var StockQuantity = ProductAccess.GetProductQuantityByID(product.ID) - 1;
+                if (StockQuantity <= 0)
+                {
+                    if (!OutOfStockProducts.Contains(product.Name))
+                    {
+                        OutOfStockProducts.Add(product.Name);
+                    }
+                    continue;
+                }
                 AddToCart(product, 1);
             }
         }
+        return OutOfStockProducts;
+    }
+    public static List<OrderHistoryModel> GetAllUserOrders(int userId)
+    {
+        List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
+        return allOrders;
     }
 }

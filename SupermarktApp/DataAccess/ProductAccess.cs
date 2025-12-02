@@ -40,9 +40,19 @@ public static class ProductAccess
 
     public static List<ProductModel> GetAllProducts()
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.Query<ProductModel>("SELECT * FROM Products").ToList();
+        return GetAllProducts(includeHidden: false);
     }
+
+    public static List<ProductModel> GetAllProducts(bool includeHidden = false)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        string sql = includeHidden
+            ? "SELECT * FROM Products"
+            : "SELECT * FROM Products WHERE Visible = 1";
+
+        return db.Query<ProductModel>(sql).ToList();
+    }
+
 
     public static ProductModel? GetProductByID(int id)
     {
@@ -91,9 +101,7 @@ public static class ProductAccess
     public static void DeleteProductByID(int ID)
     {
         using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"UPDATE Products SET Visible = 0
-            WHERE
-            ID = @ID", new { ID });
+        db.Execute(@"UPDATE Products SET Visible = 0 WHERE ID = @ID", new { ID });
     }
 
         public static void SetProductVisibility(int productId, bool isVisible)
@@ -101,5 +109,14 @@ public static class ProductAccess
         using var db = new SqliteConnection(ConnectionString);
         db.Execute("UPDATE Products SET Visible = @Visible WHERE Id = @Id;",
             new { Visible = isVisible ? 1 : 0, Id = productId });
+    }
+    // get product quantity by id
+    public static int GetProductQuantityByID(int id)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.ExecuteScalar<int>(
+            "SELECT Quantity FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
     }
 }
