@@ -149,10 +149,22 @@ static class FavoriteListUI
             int quantity = item.Quantity;
             double totalPrice = Math.Round(product.Price * quantity, 2);
 
-            table.AddRow(
-                $"[#5dabcf]{product.Name}[/]", 
-                $"{quantity}",
-                $"[green]€{totalPrice}[/]");
+            ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+
+            if(productDiscount != null)
+            {
+                table.AddRow(
+                    $"[#5dabcf]{product.Name}[/]", 
+                    $"{quantity}",
+                    $"[green]€{Math.Round(totalPrice * (1 - productDiscount.Discount.DiscountPercentage / 100), 2)}[/]");
+            }
+            else
+            {
+                table.AddRow(
+                    $"[#5dabcf]{product.Name}[/]", 
+                    $"{quantity}",
+                    $"[green]€{totalPrice}[/]");
+            }
         }
 
         AnsiConsole.Write(table);
