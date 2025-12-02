@@ -37,4 +37,9 @@ public class ShopReviewLogic
 
         return reviews.Average(r => r.Stars);
     }
+
+    public static void DeleteReviewByID(int reviewID)
+    {
+        ShopReviewAcces.DeleteReviewByID(reviewID);
+    }
 }
