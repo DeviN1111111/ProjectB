@@ -110,4 +110,21 @@ public static class UserAccess
             FROM Users
             WHERE Email = @Email", new { Email = email });
     }
+
+    public static void ChangeProfileSettings(int userID, string newName, string newLastName, string newEmail, string newAddress, string newZipcode, string newPhoneNumber, string newCity, DateTime newBirthdate)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        db.Execute(@"UPDATE Users
+            SET
+            Name = @NewName,
+            LastName = @NewLastName,
+            Email = @NewEmail,
+            Address = @NewAddress,
+            Zipcode = @NewZipcode,
+            PhoneNumber = @NewPhoneNumber,
+            City = @NewCity,
+            Birthdate = @NewBirthdate
+            WHERE 
+            ID = @UserID", new { NewName = newName, NewLastName = newLastName, NewEmail = newEmail, NewAddress = newAddress, NewZipcode = newZipcode, NewPhoneNumber = newPhoneNumber, NewCity = newCity, NewBirthdate = newBirthdate ,UserID = userID });
+    }
 }
