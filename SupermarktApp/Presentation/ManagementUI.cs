@@ -358,7 +358,16 @@ public static class ManagementUI
         {
             location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)").DefaultValue(EditProduct.Location));
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
-        var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:").DefaultValue(EditProduct.Quantity));
+        int quantity;
+        while (true)
+        {
+            quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:").DefaultValue(EditProduct.Quantity));
+            if (quantity < 0)
+                AnsiConsole.MarkupLine("[red]Quantity cannot be negative.[/]");
+            else
+                break;
+        }
+
         var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(EditProduct.Visible));
 
         Console.Clear();
@@ -406,7 +415,16 @@ public static class ManagementUI
         {
             location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)"));
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
-        var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
+        int quantity;
+        while (true)
+        {
+            quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
+            if (quantity < 0)
+                AnsiConsole.MarkupLine("[red]Quantity cannot be negative.[/]");
+            else
+                break;
+        }
+
         var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(1));
 
         if (ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity, visible))
@@ -442,6 +460,9 @@ public static class ManagementUI
             case "Confirm":
                 ProductLogic.DeleteProductByID(EditProduct.ID);
                 Console.Clear();
+                AnsiConsole.MarkupLine($"[green]Successfully deleted [red]{EditProduct.Name}[/].[/]");
+                AnsiConsole.MarkupLine("[green]Press ENTER to continue.[/]");
+                Console.ReadKey();
                 break;
             case "Cancel":
                 return;
