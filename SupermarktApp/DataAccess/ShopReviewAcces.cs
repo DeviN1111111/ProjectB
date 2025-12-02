@@ -31,6 +31,10 @@ public class ShopReviewAcces
         return db.Query<ShopReviewModel>(sql).ToList();
     }
 
-
-    
+    public static void DeleteReviewByID(int reviewID)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        var sql = $"DELETE FROM {Table} WHERE ID = @ID";
+        db.Execute(sql, new { ID = reviewID });
+    }
 }
