@@ -57,24 +57,14 @@ public static class SearchUI
                 //Vul de table met Namen en prijzen.
                 foreach (ProductModel product in productList)
                 {
-                    var PersonalDiscount = DiscountsLogic.GetPeronsalDiscountByProductAndUserID(product.ID, SessionManager.CurrentUser!.ID);
-                    var WeeklyDiscount = DiscountsLogic.GetWeeklyDiscountByProductID(product.ID);
-                    
-                    if(PersonalDiscount != null && PersonalDiscount.DiscountType == "Personal" && DiscountsLogic.CheckUserIDForPersonalDiscount(product.ID))
+                    ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+                    if(productDiscount != null)
                     {
                         string text = product.Price.ToString();
                         var struckPrice = $"[strike][red]€{text}[/][/]";
 
-                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (PersonalDiscount.DiscountPercentage / 100)), 2)}[/]";
+                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (productDiscount.Discount.DiscountPercentage / 100)), 2)}[/]";
                         table.AddRow(product.Name, newPrice);            
-                    }
-                    else if(WeeklyDiscount != null && WeeklyDiscount.DiscountType == "Weekly")
-                    {
-                        string text = product.Price.ToString();
-                        var struckPrice = $"[strike][red]€{text}[/][/]";
-
-                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (WeeklyDiscount.DiscountPercentage / 100)), 2)}[/]";
-                        table.AddRow(product.Name, newPrice);
                     }
                     else
                     {

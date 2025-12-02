@@ -20,7 +20,7 @@ public class DiscountsUI
             var Choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .HighlightStyle(new Style(Hover))
-                    .AddChoices(new[] { "Weekly Discounts", "Personal Discounts", "Go back" }));
+                    .AddChoices(new[] { "Weekly Discounts", "Personal Discounts", "Expiry Date Discounts", "Go back" }));
 
             switch (Choice)
             {
@@ -34,7 +34,9 @@ public class DiscountsUI
                 case "Personal Discounts":
                     DisplayPersonalDiscounts();
                     break;
-
+                case "Expiry Date Discounts":
+                    DisplayExpiryDateDiscounts();
+                    break;
                 default:
                     AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                     break;
@@ -108,6 +110,43 @@ public class DiscountsUI
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
             Console.ReadKey();
             discounts.Clear();
+        }
+    }
+
+    public static void DisplayExpiryDateDiscounts()
+    {
+        Console.Clear();
+        AnsiConsole.Write(
+        new FigletText("Expiry Date Discounts")
+            .Centered()
+            .Color(AsciiPrimary));
+
+        var discounts = DiscountsLogic.GetAllExpiryDiscounts();
+        if (discounts.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[bold red] NO EXPIRY DATE DISCOUNTS[/]");
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
+        }
+        else
+        {
+            var table = new Table();
+            table.AddColumn("[blue]Name[/]");
+            table.AddColumn("[italic yellow]Discount Percentage[/]");
+            table.AddColumn("[red]Original Price[/]");
+            table.AddColumn("[green]Discounted Price[/]");
+            foreach (DiscountsModel discount in discounts)
+            {
+                var product = ProductLogic.GetProductById(discount.ProductID);
+                ProductDiscountDTO discountedProduct = DiscountsLogic.CheckDiscountByProduct(product);
+                if(discountedProduct != null && discountedProduct.Discount.DiscountType == "Expiry") // Maybe make it page system so page doesnt flood with too many discounts
+                {
+                    table.AddRow($"[blue]{discountedProduct.Product.Name}[/]", $"[italic yellow]{discountedProduct.Discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{discountedProduct.Product.Price}[/][/]", $"[green]€{Math.Round(discountedProduct.Product.Price * (1 - (discountedProduct.Discount.DiscountPercentage / 100)), 2)}[/]");
+                }      
+            }
+            AnsiConsole.Write(table);
+            AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+            Console.ReadKey();
         }
     }
 }
