@@ -198,7 +198,7 @@ public static class LoginUI
                     continue;
                 }
 
-                if (UserAccess.EmailExists(email))
+                if (UserSettingsLogic.EmailExists(email))
                 {
                     AnsiConsole.MarkupLine($"[red]The email [yellow]{email}[/] is already registered. Please use a different one![/]");
                     continue;

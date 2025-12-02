@@ -84,7 +84,7 @@ public static class ShopDetailsUI
 
         if (allReviews.Any())
         {
-            double avg = allReviews.Average(r => r.Stars);
+            double avg = reviewLogic.GetAverageStars();
             AnsiConsole.MarkupLine($"[bold yellow]Average Rating:[/] [green]{avg:F1}★[/]");
             AnsiConsole.WriteLine();
 

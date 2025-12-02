@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,8 +10,8 @@ class Program
 {
     static async Task Main()
     { 
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        //DatabaseFiller.RunDatabaseMethods(2500);
+        // Console.OutputEncoding = System.Text.Encoding.UTF8;
+        DatabaseFiller.RunDatabaseMethods(2500);
         await MenuUI.ShowMainMenu();
     }
 }

@@ -28,13 +28,18 @@ public class ShopReviewLogic
 
         ShopReviewAcces.AddReview(userId, stars, text, DateTime.UtcNow);
     }
-    public double GetAverageStars(int userId)
+    public double GetAverageStars()
     {
-        var reviews = GetReviews(userId);
+        var reviews = GetAllReviews();
 
-        if (reviews.Count == 0)
+        if (reviews.Any())
             return 0;
 
         return reviews.Average(r => r.Stars);
+    }
+
+    public static void DeleteReviewByID(int reviewID)
+    {
+        ShopReviewAcces.DeleteReviewByID(reviewID);
     }
 }
