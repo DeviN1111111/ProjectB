@@ -86,7 +86,7 @@ public class Order
         double unpaidFineAmount = 0;
         double unpaidOrdersTotal = 0;
         int unpaidOrdersCount = 0;
-        var userOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
+        var userOrders = OrderLogic.GetAllUserOrders(currentUser.ID);
 
         if (userOrders != null)
         {
@@ -148,7 +148,7 @@ public class Order
             Console.Clear();
 
             var allUserProducts = ChecklistLogic.AllUserProducts();
-            var allProducts = ProductAccess.GetAllProducts();
+            var allProducts = ProductLogic.GetAllProducts();
 
             AnsiConsole.Write(
                 new FigletText("Checklist")
@@ -469,7 +469,7 @@ public class Order
             Console.Clear();
 
             var currentUser = SessionManager.CurrentUser!;
-            var firstOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
+            var firstOrders = OrderLogic.GetAllUserOrders(currentUser.ID);
             if (firstOrders != null && firstOrders.Count == 1)
             {
                 var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
@@ -484,7 +484,7 @@ public class Order
                     .Centered()
                     .Color(AsciiPrimary));
 
-            var userOrders = OrderHistoryAccess.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
+            var userOrders = OrderLogic.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
 
 
             AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
@@ -558,7 +558,7 @@ public class Order
                 int productId = keyValuePair.Key;
                 int quantity = keyValuePair.Value;
 
-                var product = ProductAccess.GetProductByID(productId);
+                var product = ProductLogic.GetProductByID(productId);
                 if (product != null)
                 {
                     double price = product.Price;

@@ -19,7 +19,7 @@ namespace SupermarktAppTests
                                            "Test Address", "1234AB", "1234567890",
                                            birthdate, "Test City");
 
-            LoginAccess.Register(user);
+            LoginAccess.Register(user); 
 
             // Act
             var result = LoginLogic.GetUserByEmail(email);
