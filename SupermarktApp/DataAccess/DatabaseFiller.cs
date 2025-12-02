@@ -14,6 +14,7 @@ public class DatabaseFiller
     {
         "Cart", "Users", "Products", "Orders", "RewardItems",
         "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
+        "FavoriteLists", "FavoriteListProducts"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -222,7 +223,25 @@ public class DatabaseFiller
                 UserId INTERGER NOT NULL,
                 Credit DOUBLE NOT NULL,
                 IsValid BOOLEAN NOT NULL DEFAULT 1,
-                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE
+                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS FavoriteLists (
+                Id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId   INTEGER NOT NULL,
+                Name     TEXT NOT NULL,
+                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS FavoriteListProducts (
+                Id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                FavoriteListId INTEGER NOT NULL,
+                ProductId      INTEGER NOT NULL,
+                Quantity       INTEGER NOT NULL,
+                FOREIGN KEY (FavoriteListId) REFERENCES FavoriteLists(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId)      REFERENCES Products(Id)
             );
         ");
     }
@@ -571,7 +590,7 @@ public class DatabaseFiller
 
     public static void InsertShopReview(ShopReviewModel review)
     {
-        _sharedConnection.Execute(@"
+        _sharedConnection?.Execute(@"
             INSERT INTO ShopReviews (UserId, Stars, Text)
             VALUES (@UserId, @Stars, @Text);
         ", review);
