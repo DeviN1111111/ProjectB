@@ -53,7 +53,8 @@ public static class CouponUI
             return false;
 
         // find the applied coupon in the coupons list
-        Coupon appliedCoupon = null;
+        Coupon appliedCoupon = null
+        ;
 
         for (int i = 0; i < coupons.Count; i++)
         {

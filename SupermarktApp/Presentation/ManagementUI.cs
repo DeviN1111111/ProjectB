@@ -25,6 +25,7 @@ public static class ManagementUI
                 "Shop Settings",
                 "Discounts",
                 "Coupons",
+                "Reviews",
                 "Go back"
             };
 
@@ -53,6 +54,9 @@ public static class ManagementUI
                     break;
                 case "Coupons":
                     ShowCouponMenu();
+                    break;
+                case "Reviews":
+                    ShowReviewMenu();
                     break;
                 case "Go back":
                     return;
@@ -160,6 +164,26 @@ public static class ManagementUI
                 break;
 
             case "Back":
+                return;
+        }
+    }
+
+    static void ShowReviewMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Review Options[/]")
+            .AddChoices(
+                "Delete Reviews",
+                "Go Back"));
+
+        switch (choice)
+        {
+            case "Delete Reviews":
+                DeleteReviews();
+                break;
+
+            case "Go Back":
                 return;
         }
     }
@@ -334,7 +358,16 @@ public static class ManagementUI
         {
             location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)").DefaultValue(EditProduct.Location));
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
-        var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:").DefaultValue(EditProduct.Quantity));
+        int quantity;
+        while (true)
+        {
+            quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:").DefaultValue(EditProduct.Quantity));
+            if (quantity < 0)
+                AnsiConsole.MarkupLine("[red]Quantity cannot be negative.[/]");
+            else
+                break;
+        }
+
         var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(EditProduct.Visible));
 
         Console.Clear();
@@ -382,7 +415,16 @@ public static class ManagementUI
         {
             location = AnsiConsole.Prompt(new TextPrompt<int>("New location of product: (Max 43)"));
         } while (ValidaterLogic.ValidateLocationProduct(location) == false);
-        var quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
+        int quantity;
+        while (true)
+        {
+            quantity = AnsiConsole.Prompt(new TextPrompt<int>("New quantity of product:"));
+            if (quantity < 0)
+                AnsiConsole.MarkupLine("[red]Quantity cannot be negative.[/]");
+            else
+                break;
+        }
+
         var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(1));
 
         if (ProductLogic.AddProduct(name, price, nutritionDetails, description, category, location, quantity, visible))
@@ -418,6 +460,9 @@ public static class ManagementUI
             case "Confirm":
                 ProductLogic.DeleteProductByID(EditProduct.ID);
                 Console.Clear();
+                AnsiConsole.MarkupLine($"[green]Successfully deleted [red]{EditProduct.Name}[/].[/]");
+                AnsiConsole.MarkupLine("[green]Press ENTER to continue.[/]");
+                Console.ReadKey();
                 break;
             case "Cancel":
                 return;
@@ -587,6 +632,61 @@ public static class ManagementUI
             AnsiConsole.MarkupLine("[green]Succesfully deleted selected discounts.[/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
+        }
+    }
+
+    public static void DeleteReviews()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AnsiConsole.Write(
+                new FigletText("Delete Reviews")
+                    .Centered()
+                    .Color(AsciiPrimary));
+
+            var reviewLogic = new ShopReviewLogic();
+            var allReviews = reviewLogic.GetAllReviews();
+
+            if (allReviews.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]There are no reviews to delete.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
+            }
+            List<string> ReviewList = [];
+
+            foreach (var review in allReviews)
+            {
+                UserModel user = UserAccess.GetUserByID(review.UserId)!;
+                ReviewList.Add($"ReviewID: {review.Id} User: [yellow]{user.Name}[/] Stars: [green]{review.Stars}[/] Text: [blue]{review.Text}[/]");
+            }
+
+            var prompt = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
+                .PageSize(10)
+                .Title("[bold white]Select reviews to delete:[/]")
+                .NotRequired()
+                .AddChoices(ReviewList));
+            
+            if (prompt.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]No reviews selected.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+                return;
+            }
+
+            foreach (var review in prompt)
+            {
+                var reviewID = review.Split(" ");
+                ShopReviewLogic.DeleteReviewByID(Convert.ToInt32(reviewID[1]));
+            }
+
+            AnsiConsole.MarkupLine("[green]Selected reviews have been deleted successfully.[/]");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+            Console.ReadKey();
+            break;
         }
     }
 }

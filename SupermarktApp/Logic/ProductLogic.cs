@@ -48,7 +48,10 @@ public class ProductLogic
     }
     public static List<ProductModel> GetAllProducts()
     {
-        return ProductAccess.GetAllProducts();
+        string? user = SessionManager.CurrentUser?.AccountStatus;
+        bool includeHidden = user == "Admin" || user == "SuperAdmin";
+    
+        return ProductAccess.GetAllProducts(includeHidden);
     }
 
     public static ProductModel GetProductByID(int productID)
