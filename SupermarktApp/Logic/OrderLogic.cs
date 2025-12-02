@@ -214,12 +214,9 @@ public class OrderLogic
             }
         }
     }
-    public static void GetAllUserOrders(int userId)
+    public static List<OrderHistoryModel> GetAllUserOrders(int userId)
     {
         List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
-        foreach (var order in allOrders)
-        {
-            AnsiConsole.MarkupLine($"[yellow]Order ID:[/] {order.ID} | [yellow]Date:[/] {order.OrderDate} | [yellow]Total Amount:[/] {order.TotalAmount} EUR");
-        }
+        return allOrders;
     }
 }
