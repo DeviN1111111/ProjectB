@@ -110,4 +110,13 @@ public static class ProductAccess
         db.Execute("UPDATE Products SET Visible = @Visible WHERE Id = @Id;",
             new { Visible = isVisible ? 1 : 0, Id = productId });
     }
+    // get product quantity by id
+    public static int GetProductQuantityByID(int id)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        return db.ExecuteScalar<int>(
+            "SELECT Quantity FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
+    }
 }

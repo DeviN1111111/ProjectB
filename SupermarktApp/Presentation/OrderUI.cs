@@ -318,11 +318,13 @@ public class Order
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         break;
                     case "Pay on pickup":
                         OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         break;
                     case "Pay Later":
                         List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
@@ -626,39 +628,7 @@ public class Order
 
             AnsiConsole.Write(orderTable);
 
-            var userChoice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("[yellow]What would you like to do?[/]")
-                .AddChoices("Reorder", "Back")
-            );
-
-            if (userChoice == "Reorder")
-            {
-                // check if the user really wants to reorder
-                var confirmReorder = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("[red]Are you sure you want to reorder this past order?[/]")
-                        .AddChoices("Yes", "No")
-                );
-                if (confirmReorder == "Yes")
-                {
-                    // check if order already paid
-                    if(userOrders.First(o => o.Id == selectedOrderId).IsPaid)
-                    {
-                        OrderLogic.ReorderPastOrder(selectedOrderId);
-                        AnsiConsole.MarkupLine("[green]Items added to cart![/]");
-                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                        Console.ReadKey();
-                    }
-                    else
-                    {
-                        AnsiConsole.MarkupLine("[red]Cannot reorder an unpaid order. Please complete payment first.[/]");
-                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-                        Console.ReadKey();
-                    }
-                }
-                return;
-            }
+           
 
             if (!userOrders.First(o => o.Id == selectedOrderId).IsPaid)
             {
@@ -671,7 +641,7 @@ public class Order
                 var payChoice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("[yellow]This order is unpaid. What would you like to do?[/]")
-                        .AddChoices("Pay Now", "Return")
+                        .AddChoices("Pay Now", "Reorder", "Return")
                 );
 
                 if (payChoice == "Pay Now")
@@ -701,6 +671,43 @@ public class Order
                         continue;
                     }
                 }
+                 if (payChoice == "Reorder")
+            {
+                // check if the user really wants to reorder
+                var confirmReorder = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[red]Are you sure you want to reorder this past order?[/]")
+                        .AddChoices("Yes", "No")
+                );
+                if (confirmReorder == "Yes")
+                {
+                    // check if order already paid
+                    if(userOrders.First(o => o.Id == selectedOrderId).IsPaid)
+                    {
+                        OrderLogic.ReorderPastOrder(selectedOrderId);
+                        AnsiConsole.MarkupLine("[green]Items added to cart![/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[red]Cannot reorder an unpaid order. Please complete payment first.[/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                }
+                var outOfStockProducts = OrderLogic.ReorderPastOrder(selectedOrderId);
+                if (outOfStockProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("[red]The following products are out of stock and were not added to your cart:[/]");
+                    foreach (var productName in outOfStockProducts)
+                    {
+                        AnsiConsole.MarkupLine($"- {productName}");
+                    }
+                    Console.ReadKey();
+                }
+                return;
+            }
             }
             AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
             Console.ReadKey();
