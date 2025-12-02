@@ -309,11 +309,13 @@ public class Order
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         break;
                     case "Pay on pickup":
                         OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
                         break;
                     case "Pay Later":
                         List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
