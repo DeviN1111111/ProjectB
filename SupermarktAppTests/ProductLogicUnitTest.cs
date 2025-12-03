@@ -14,7 +14,7 @@ namespace SupermarktAppTests
         [DataRow(100000, "TestProduct")]
         public void ValidateSearchProductByName_CorrectName_ReturnsProductModel(int ProductID, string Name)
         {
-            //Arrange
+            //Arrange 
             DatabaseFiller.RunDatabaseMethods();
             string productName = "TestProduct";
             ProductModel product = new ProductModel(ProductID, productName, 10.0, "TestNutrition", "TestDescription", "TestCategory", 1, 0, 1);

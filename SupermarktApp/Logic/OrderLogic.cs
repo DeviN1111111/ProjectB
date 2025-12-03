@@ -261,22 +261,25 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
         List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
         return allOrders;
     }
-    public static void CheckStockBeforeCheckout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+
+// CheckStockBeforeCheckout using tuple
+
+    public static List<string> CheckStockBeforeCheckout(List<CartModel> cartProducts, List<ProductModel> allProducts)
     {
-        foreach (var cartProduct in cartProducts)
+        List<string> outOfStockProducts = new List<string>();
+        foreach (var cartItem in cartProducts)
         {
-            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
-            if (matchingProduct != null)
+            var product = ProductAccess.GetProductByID(cartItem.ProductId);
+            if (product != null)
             {
-                if (matchingProduct.Quantity < cartProduct.Quantity)
+                int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
+                
+                if (availableStock < cartItem.Quantity)
                 {
-                    AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{matchingProduct.Name}'. Available: {matchingProduct.Quantity}, In Cart: {cartProduct.Quantity}[/]");
-                    Console.ReadKey();
-                    throw new InvalidOperationException("Insufficient stock for one or more products in the cart.");
+                    outOfStockProducts.Add(product.Name);
                 }
             }
         }
+        return outOfStockProducts;
     }
-    
-    
 }
