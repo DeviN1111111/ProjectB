@@ -6,11 +6,6 @@ public static class ShopReviewUI
     {
 
         var logic = new ShopReviewLogic();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Shop Reviews")
-                .Centered()
-                .Color(AsciiPrimary));
 
         while (true)
         {
