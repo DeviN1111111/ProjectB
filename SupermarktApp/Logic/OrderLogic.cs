@@ -238,4 +238,25 @@ public class OrderLogic
         List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
         return allOrders;
     }
+
+// CheckStockBeforeCheckout using tuple
+
+    public static List<string> CheckStockBeforeCheckout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    {
+        List<string> outOfStockProducts = new List<string>();
+        foreach (var cartItem in cartProducts)
+        {
+            var product = ProductAccess.GetProductByID(cartItem.ProductId);
+            if (product != null)
+            {
+                int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
+                
+                if (availableStock < cartItem.Quantity)
+                {
+                    outOfStockProducts.Add(product.Name);
+                }
+            }
+        }
+        return outOfStockProducts;
+    }
 }

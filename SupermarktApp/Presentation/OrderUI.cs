@@ -274,6 +274,20 @@ public class Order
         switch (options)
         {
             case "Checkout":
+                // check if all items are in stock
+                var outOfStockProducts = OrderLogic.CheckStockBeforeCheckout(cartProducts, allProducts);
+                if (outOfStockProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("[red]The following products are out of stock or exceed available quantity:[/]");
+                    foreach (var productName in outOfStockProducts)
+                    {
+                        AnsiConsole.MarkupLine($"- {productName}");
+                    }
+                    AnsiConsole.MarkupLine("Please adjust your cart before proceeding to checkout.");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                    return;
+                }
                 // check if cart is empty
                 if (cartProducts.Count == 0 && UnpaidFine <= 0)
                 {
