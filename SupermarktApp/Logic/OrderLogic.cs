@@ -201,41 +201,82 @@ public class OrderLogic
         OrderLogic.UpdateStock();
         OrderLogic.ClearCart();
     }
-        
-    public static List<string> ReorderPastOrder(int orderHistoryId)
-    { 
+public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrder(int orderHistoryId)
+{
+    var pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
 
-        List<OrdersModel> pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
-        List<string> OutOfStockProducts = new List<string>();
-        foreach (var item in pastOrderItems)
+    var outOfStockProducts = new List<string>();
+    var unavailableProducts = new List<string>();
+
+    // 1️⃣ GROUP items by product ID
+    var grouped = pastOrderItems
+        .GroupBy(i => i.ProductID)
+        .Select(g => new { ProductID = g.Key, QuantityNeeded = g.Count() });
+
+    foreach (var group in grouped)
+    {
+        var product = ProductAccess.GetProductByID(group.ProductID);
+        if (product == null)
+            continue;
+
+        // Hidden/unavailable product
+        if (product.Visible == 0)
         {
-            var product = ProductAccess.GetProductByID(item.ProductID);
-            if (product != null)
-            {
-                //check for visible products only
-                if (product.Visible == 0)
-                {
-                    AnsiConsole.MarkupLine($"[red]Product '{product.Name}' is no longer available and was not added to your cart.[/]");
-                    continue;
-                }
-                // check if item is in stock
-                var StockQuantity = ProductAccess.GetProductQuantityByID(product.ID) - 1;
-                if (StockQuantity <= 0)
-                {
-                    if (!OutOfStockProducts.Contains(product.Name))
-                    {
-                        OutOfStockProducts.Add(product.Name);
-                    }
-                    continue;
-                }
-                AddToCart(product, 1);
-            }
+            unavailableProducts.Add(product.Name);
+            continue;
         }
-        return OutOfStockProducts;
+
+        // Check stock
+        int stock = ProductAccess.GetProductQuantityByID(product.ID);
+        int needed = group.QuantityNeeded;
+
+        // Nothing in stock
+        if (stock <= 0)
+        {
+            outOfStockProducts.Add($"{product.Name} (0 in stock)");
+            continue;
+        }
+
+        // Partial stock situation
+        if (stock < needed)
+        {
+            AddToCart(product, stock);
+
+            outOfStockProducts.Add(
+                $"{product.Name} — needed {needed}, only {stock} added"
+            );
+
+            continue;
+        }
+
+        // Full stock available
+        AddToCart(product, needed);
     }
+
+    return (outOfStockProducts, unavailableProducts);
+}
+
     public static List<OrderHistoryModel> GetAllUserOrders(int userId)
     {
         List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
         return allOrders;
     }
+    public static void CheckStockBeforeCheckout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    {
+        foreach (var cartProduct in cartProducts)
+        {
+            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductId);
+            if (matchingProduct != null)
+            {
+                if (matchingProduct.Quantity < cartProduct.Quantity)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{matchingProduct.Name}'. Available: {matchingProduct.Quantity}, In Cart: {cartProduct.Quantity}[/]");
+                    Console.ReadKey();
+                    throw new InvalidOperationException("Insufficient stock for one or more products in the cart.");
+                }
+            }
+        }
+    }
+    
+    
 }

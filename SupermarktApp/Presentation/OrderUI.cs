@@ -284,6 +284,8 @@ public class Order
         switch (options)
         {
             case "Checkout":
+                // check if all products are in stock
+                OrderLogic.CheckStockBeforeCheckout(cartProducts, allProducts);
                 // check if cart is empty
                 if (cartProducts.Count == 0 && UnpaidFine <= 0)
                 {
@@ -627,11 +629,11 @@ public class Order
             orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${finalTotal:F2}[/]");
 
             AnsiConsole.Write(orderTable);
-
+            bool IfTrue = false;
            
-
             if (!userOrders.First(o => o.Id == selectedOrderId).IsPaid)
             {
+                IfTrue = true;
                 var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
                 if (selectedOrder.FineDate != null)
                 {
@@ -696,7 +698,9 @@ public class Order
                         Console.ReadKey();
                     }
                 }
-                var outOfStockProducts = OrderLogic.ReorderPastOrder(selectedOrderId);
+                var reorderResult = OrderLogic.ReorderPastOrder(selectedOrderId);
+                var outOfStockProducts = reorderResult.OutOfStock;
+
                 if (outOfStockProducts.Count > 0)
                 {
                     AnsiConsole.MarkupLine("[red]The following products are out of stock and were not added to your cart:[/]");
@@ -708,11 +712,74 @@ public class Order
                 }
                 return;
             }
-            }
+            
+            
             AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
             Console.ReadKey();
         }
+if (IfTrue == false)
+{
+    var reOrder = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[yellow]This order is unpaid. What would you like to do?[/]")
+            .AddChoices("Reorder", "Return")
+    );
+
+    if (reOrder == "Reorder")
+    {
+        // confirm
+        var confirmReorder = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[red]Are you sure you want to reorder this past order?[/]")
+                .AddChoices("Yes", "No")
+        );
+
+        if (confirmReorder == "Yes")
+        {
+            // Check paid status
+            if (userOrders.First(o => o.Id == selectedOrderId).IsPaid)
+            {
+                // CALL ONLY ONE TIME
+                var reorderResult = OrderLogic.ReorderPastOrder(selectedOrderId);
+
+                var outOfStockProducts = reorderResult.OutOfStock;
+                var unavailableProducts = reorderResult.Unavailable;
+
+                // Success message
+                AnsiConsole.MarkupLine("[green]Items added to cart (where possible)![/]");
+
+                // Show unavailable products
+                if (unavailableProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("\n[red]The following products are no longer available:[/]");
+                    foreach (var productName in unavailableProducts)
+                        AnsiConsole.MarkupLine($"- {productName}");
+                }
+
+                // Show products with limited or no stock
+                if (outOfStockProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("\n[yellow]The following products had stock issues:[/]");
+                    foreach (var productName in outOfStockProducts)
+                        AnsiConsole.MarkupLine($"- {productName}");
+                }
+
+                AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to continue");
+                Console.ReadKey();
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Cannot reorder an unpaid order. Please complete payment first.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+            }
+        }
     }
+}
+
+
+    }
+}
 
     public static async Task ShowSuggestedItems()
     {
