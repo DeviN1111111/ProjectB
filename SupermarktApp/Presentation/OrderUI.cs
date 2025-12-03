@@ -1,6 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
-
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 public class Order
@@ -73,7 +73,7 @@ public class Order
         double unpaidFineAmount = 0;
         double unpaidOrdersTotal = 0;
         int unpaidOrdersCount = 0;
-        var userOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
+        var userOrders = OrderLogic.GetAllUserOrders(currentUser.ID);
 
         if (userOrders != null)
         {
@@ -146,7 +146,7 @@ public class Order
             Console.Clear();
 
             var allUserProducts = ChecklistLogic.AllUserProducts();
-            var allProducts = ProductAccess.GetAllProducts();
+            var allProducts = ProductLogic.GetAllProducts();
 
             AnsiConsole.Write(
                 new FigletText("Checklist")
@@ -274,6 +274,20 @@ public class Order
         switch (options)
         {
             case "Checkout":
+                // check if all items are in stock
+                var outOfStockProducts = OrderLogic.CheckStockBeforeCheckout(cartProducts, allProducts);
+                if (outOfStockProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("[red]The following products are out of stock or exceed available quantity:[/]");
+                    foreach (var productName in outOfStockProducts)
+                    {
+                        AnsiConsole.MarkupLine($"- {productName}");
+                    }
+                    AnsiConsole.MarkupLine("Please adjust your cart before proceeding to checkout.");
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                    Console.ReadKey();
+                    return;
+                }
                 // check if cart is empty
                 if (cartProducts.Count == 0 && UnpaidFine <= 0)
                 {
@@ -303,85 +317,18 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        // Create an empty list to hold all "flattened" order entries
-                        List<OrdersModel> allOrderEntries = new List<OrdersModel>();
-
-                        foreach (var item in cartProducts)
-                        {
-                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
-                            if (product != null)
-                            {
-                                // Repeat per quantity — since each product is stored as a separate row
-                                for (int i = 0; i < item.Quantity; i++)
-                                {
-                                    var newOrder = new OrdersModel
-                                    {
-                                        UserID = SessionManager.CurrentUser!.ID,
-                                        ProductID = product.ID,
-                                        Price = product.Price,
-                                    };
-                                    allOrderEntries.Add(newOrder);
-                                }
-                            }
-                        }
-
-
-                        // Save them to the database — all products share one OrderHistory entry (OrderId)
-                        if (allOrderEntries.Count > 0)
-                        {
-                            OrderLogic.AddOrderWithItems(allOrderEntries, allProducts);
-                        }
-                        PayLaterLogic.Pay();
-                        if (SelectedCouponId.HasValue)
-                        {
-                            CouponLogic.UseCoupon(SelectedCouponId.Value);
-                            CouponLogic.ResetCouponSelection();
-                        }
+                        OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
-                        OrderLogic.UpdateStock();
-                        OrderLogic.ClearCart();
                         break;
                     case "Pay on pickup":
-                                                // Create an empty list to hold all "flattened" order entries
-                        List<OrdersModel> allOrderEntrie= new List<OrdersModel>();
-
-                        foreach (var item in cartProducts)
-                        {
-                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
-                            if (product != null)
-                            {
-                                        // Repeat per quantity — since each product is stored as a separate row
-                                        for (int i = 0; i < item.Quantity; i++)
-                                        {
-                                            var newOrder = new OrdersModel
-                                            {
-                                                UserID = SessionManager.CurrentUser!.ID,
-                                                ProductID = product.ID,
-                                                Price = product.Price,
-
-                                            };
-                                            allOrderEntrie.Add(newOrder);
-                                        }
-                                    }
-                                }
-
-                        // Save them to the database — all products share one OrderHistory entry (OrderId)
-                        OrderLogic.AddOrderWithItems(allOrderEntrie, allProducts);
-                        if (SelectedCouponId.HasValue)
-                        {
-                            CouponLogic.UseCoupon(SelectedCouponId.Value);
-                            CouponLogic.ResetCouponSelection();
-                        }
-                        RewardLogic.AddRewardPointsToUser(rewardPoints);
+                        OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         Console.ReadKey();
-                        OrderLogic.UpdateStock();
-                        OrderLogic.ClearCart();
                         break;
                     case "Pay Later":
                         List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
@@ -542,14 +489,14 @@ public class Order
             Console.Clear();
 
             var currentUser = SessionManager.CurrentUser!;
-            var firstOrders = OrderHistoryAccess.GetAllUserOrders(currentUser.ID);
+            var firstOrders = OrderLogic.GetAllUserOrders(currentUser.ID);
             if (firstOrders != null && firstOrders.Count == 1)
             {
-            var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
-            if (userCoupons == null || userCoupons.Count == 0)
-            {
-                CouponLogic.CreateCoupon(currentUser.ID, 5);
-            }
+                var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
+                if (userCoupons == null || userCoupons.Count == 0)
+                {
+                    CouponLogic.CreateCoupon(currentUser.ID, 5);
+                }
             }
             
             AnsiConsole.Write(
@@ -557,7 +504,7 @@ public class Order
                     .Centered()
                     .Color(AsciiPrimary));
 
-            var userOrders = OrderHistoryAccess.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
+            var userOrders = OrderLogic.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
 
 
             AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]");
@@ -631,7 +578,7 @@ public class Order
                 int productId = keyValuePair.Key;
                 int quantity = keyValuePair.Value;
 
-                var product = ProductAccess.GetProductByID(productId);
+                var product = ProductLogic.GetProductByID(productId);
                 if (product != null)
                 {
                     double price = product.Price;
@@ -678,9 +625,11 @@ public class Order
             orderTable.AddRow("[yellow]Total[/]", "", "", $"[bold green]${finalTotal:F2}[/]");
 
             AnsiConsole.Write(orderTable);
-
+            bool IfTrue = false;
+           
             if (!userOrders.First(o => o.Id == selectedOrderId).IsPaid)
             {
+                IfTrue = true;
                 var selectedOrder = userOrders.First(o => o.Id == selectedOrderId);
                 if (selectedOrder.FineDate != null)
                 {
@@ -690,7 +639,7 @@ public class Order
                 var payChoice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("[yellow]This order is unpaid. What would you like to do?[/]")
-                        .AddChoices("Pay Now", "Return")
+                        .AddChoices("Pay Now", "Reorder", "Return")
                 );
 
                 if (payChoice == "Pay Now")
@@ -720,11 +669,113 @@ public class Order
                         continue;
                     }
                 }
+                 if (payChoice == "Reorder")
+            {
+                // check if the user really wants to reorder
+                var confirmReorder = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[red]Are you sure you want to reorder this past order?[/]")
+                        .AddChoices("Yes", "No")
+                );
+                if (confirmReorder == "Yes")
+                {
+                    // check if order already paid
+                    if(userOrders.First(o => o.Id == selectedOrderId).IsPaid)
+                    {
+                        OrderLogic.ReorderPastOrder(selectedOrderId);
+                        AnsiConsole.MarkupLine("[green]Items added to cart![/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[red]Cannot reorder an unpaid order. Please complete payment first.[/]");
+                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        Console.ReadKey();
+                    }
+                }
+                var reorderResult = OrderLogic.ReorderPastOrder(selectedOrderId);
+                var outOfStockProducts = reorderResult.OutOfStock;
+
+                if (outOfStockProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("[red]The following products are out of stock and were not added to your cart:[/]");
+                    foreach (var productName in outOfStockProducts)
+                    {
+                        AnsiConsole.MarkupLine($"- {productName}");
+                    }
+                    Console.ReadKey();
+                }
+                return;
             }
+            
+            
             AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to return to your orders list");
             Console.ReadKey();
         }
+if (IfTrue == false)
+{
+    var reOrder = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[yellow]This order is unpaid. What would you like to do?[/]")
+            .AddChoices("Reorder", "Return")
+    );
+
+    if (reOrder == "Reorder")
+    {
+        // confirm
+        var confirmReorder = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[red]Are you sure you want to reorder this past order?[/]")
+                .AddChoices("Yes", "No")
+        );
+
+        if (confirmReorder == "Yes")
+        {
+            // Check paid status
+            if (userOrders.First(o => o.Id == selectedOrderId).IsPaid)
+            {
+                // CALL ONLY ONE TIME
+                var reorderResult = OrderLogic.ReorderPastOrder(selectedOrderId);
+
+                var outOfStockProducts = reorderResult.OutOfStock;
+                var unavailableProducts = reorderResult.Unavailable;
+
+                // Success message
+                AnsiConsole.MarkupLine("[green]Items added to cart (where possible)![/]");
+
+                // Show unavailable products
+                if (unavailableProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("\n[red]The following products are no longer available:[/]");
+                    foreach (var productName in unavailableProducts)
+                        AnsiConsole.MarkupLine($"- {productName}");
+                }
+
+                // Show products with limited or no stock
+                if (outOfStockProducts.Count > 0)
+                {
+                    AnsiConsole.MarkupLine("\n[yellow]The following products had stock issues:[/]");
+                    foreach (var productName in outOfStockProducts)
+                        AnsiConsole.MarkupLine($"- {productName}");
+                }
+
+                AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to continue");
+                Console.ReadKey();
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Cannot reorder an unpaid order. Please complete payment first.[/]");
+                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                Console.ReadKey();
+            }
+        }
     }
+}
+
+
+    }
+}
 
     public static async Task ShowSuggestedItems()
     {

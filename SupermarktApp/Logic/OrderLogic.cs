@@ -94,6 +94,12 @@ public class OrderLogic
             {
                 if (cartProduct.ProductId == Product.ID)
                 {
+                    if (Product.Quantity - cartProduct.Quantity < 0)
+                    {
+                        AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{Product.Name}'.[/]");
+                        Console.ReadKey();
+                        continue;
+                    }
                     int newStock = Product.Quantity - cartProduct.Quantity;
                     ProductAccess.UpdateProductStock(Product.ID, newStock);
                 }
@@ -156,4 +162,124 @@ public class OrderLogic
         return OrderAccess.GetOrderssByOrderId(orderId);
     }
     public static OrderHistoryModel GetOrderByUserId(int userId) => OrderHistoryAccess.GetOrderByUserId(userId);
+    public static void ProcessPay(List<CartModel> cartProducts, List<ProductModel> allProducts, int? selectedCouponId)
+    {
+        List<OrdersModel> allOrderItems = new List<OrdersModel>();
+
+        foreach (var item in cartProducts)
+        {
+            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
+            if (product == null)
+                continue;
+
+            // Create OrdersModel per quantity
+            for (int i = 0; i < item.Quantity; i++)
+            {
+                allOrderItems.Add(new OrdersModel
+                {
+                    UserID = SessionManager.CurrentUser!.ID,
+                    ProductID = product.ID,
+                    Price = product.Price
+                });
+            }
+        }
+
+        // Save the order to the database
+        if (allOrderItems.Count > 0)
+        {
+            OrderLogic.AddOrderWithItems(allOrderItems, allProducts);
+        }
+
+        // Apply coupon if selected
+        if (selectedCouponId.HasValue)
+        {
+            CouponLogic.UseCoupon(selectedCouponId.Value);
+            CouponLogic.ResetCouponSelection();
+        }
+
+        //  clean up
+        OrderLogic.UpdateStock();
+        OrderLogic.ClearCart();
+    }
+public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrder(int orderHistoryId)
+{
+    var pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
+
+    var outOfStockProducts = new List<string>();
+    var unavailableProducts = new List<string>();
+
+    // 1️⃣ GROUP items by product ID
+    var grouped = pastOrderItems
+        .GroupBy(i => i.ProductID)
+        .Select(g => new { ProductID = g.Key, QuantityNeeded = g.Count() });
+
+    foreach (var group in grouped)
+    {
+        var product = ProductAccess.GetProductByID(group.ProductID);
+        if (product == null)
+            continue;
+
+        // Hidden/unavailable product
+        if (product.Visible == 0)
+        {
+            unavailableProducts.Add(product.Name);
+            continue;
+        }
+
+        // Check stock
+        int stock = ProductAccess.GetProductQuantityByID(product.ID);
+        int needed = group.QuantityNeeded;
+
+        // Nothing in stock
+        if (stock <= 0)
+        {
+            outOfStockProducts.Add($"{product.Name} (0 in stock)");
+            continue;
+        }
+
+        // Partial stock situation
+        if (stock < needed)
+        {
+            AddToCart(product, stock);
+
+            outOfStockProducts.Add(
+                $"{product.Name} — needed {needed}, only {stock} added"
+            );
+
+            continue;
+        }
+
+        // Full stock available
+        AddToCart(product, needed);
+    }
+
+    return (outOfStockProducts, unavailableProducts);
+}
+
+    public static List<OrderHistoryModel> GetAllUserOrders(int userId)
+    {
+        List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
+        return allOrders;
+    }
+
+// CheckStockBeforeCheckout using tuple
+
+    public static List<string> CheckStockBeforeCheckout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    {
+        List<string> outOfStockProducts = new List<string>();
+        foreach (var cartItem in cartProducts)
+        {
+            var product = ProductAccess.GetProductByID(cartItem.ProductId);
+            if (product != null)
+            {
+                int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
+                
+                if (availableStock < cartItem.Quantity)
+                {
+                    outOfStockProducts.Add(product.Name);
+                }
+            }
+        }
+        return outOfStockProducts;
+    }
 }

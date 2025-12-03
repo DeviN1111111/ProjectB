@@ -14,7 +14,7 @@ public class DatabaseFiller
     {
         "Cart", "Users", "Products", "Orders", "RewardItems",
         "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
-        "FavoriteLists", "FavoriteListProducts"
+        "FavoriteLists", "FavoriteListProducts", "RestockHistory"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -245,6 +245,15 @@ public class DatabaseFiller
                 FOREIGN KEY (ProductId)      REFERENCES Products(Id)
             );
         ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS RestockHistory (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ProductID INTEGER NOT NULL,
+                QuantityAdded INTEGER NOT NULL,
+                RestockDate DATETIME NOT NULL DEFAULT (datetime('now')),
+                CostPerUnit REAL NOT NULL,
+                FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE
+            );");
     }
     public static void SeedData(
         int orderCount,
@@ -474,10 +483,23 @@ public class DatabaseFiller
         {
             DiscountsAccess.AddDiscount(discount);
         }
+        //restock history
+        for (int i = 0; i < 50; i++)
+        {
+            var restockEntry = new RestockHistoryModel
+            {
+                ProductID = i + 1,
+                QuantityAdded = random.Next(1, 25),
+                RestockDate = DateTime.Today.AddDays(-random.Next(1, 100)),
+                CostPerUnit = Math.Round(products[i].Price * (random.NextDouble() * 0.5 + 0.5), 2)
+            };
+
+            InsertRestockHistory(restockEntry);
+        }
         
         // ORDER HISTORY
         var orderHistoryList = new List<OrderHistoryModel>();
-        for (int i = 0; i < orderCount/15; i++)
+        for (int i = 0; i < orderCount/10; i++)
         {
             var history = new OrderHistoryModel
             {
@@ -488,14 +510,14 @@ public class DatabaseFiller
             int orderHistoryId = InsertOrderHistory(history);
             orderHistoryList.Add(history);
 
-            int itemCount = random.Next(1,3); // 1–2 items per order
+            int itemCount = random.Next(1, 20); // 1–2 items per order
             for (int j = 0; j < itemCount; j++)
             {
                 var product = products[random.Next(products.Count)];
                 InsertOrderItem(history.UserId, orderHistoryId, products.IndexOf(product) + 1, product.Price, history.Date);
             }
 
-            // ✅ increment once per order
+            // increment once per order
             reportOrderProgress?.Invoke(1);
         }
 
@@ -562,6 +584,13 @@ public class DatabaseFiller
         _sharedConnection!.Execute(@"
         INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity, ExpiryDate, Visible)
         VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @ExpiryDate, @Visible);", product);
+    }
+
+    public static void InsertRestockHistory(RestockHistoryModel restockEntry)
+    {
+        _sharedConnection!.Execute(@"
+        INSERT INTO RestockHistory (ProductID, QuantityAdded, RestockDate, CostPerUnit)
+        VALUES (@ProductID, @QuantityAdded, @RestockDate, @CostPerUnit);", restockEntry);
     }
 
     // public static void InsertOrder(OrdersModel order)

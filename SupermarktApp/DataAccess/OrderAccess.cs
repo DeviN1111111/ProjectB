@@ -208,6 +208,35 @@ public static class OrderAccess
         return products;
     }
 
+        public static double GetTotalRevenue(DateTime startDate, DateTime endDate)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        double revenue = db.ExecuteScalar<double>(
+            @"SELECT SUM(Products.Price)
+            FROM Orders
+            JOIN Products ON Orders.ProductID = Products.ID
+            WHERE DATE(Orders.Date) >= DATE(@StartDate)
+            AND DATE(Orders.Date) <= DATE(@EndDate);
+            ",
+            new { StartDate = startDate, EndDate = endDate }
+        );
+        return revenue;
+    }
+    public static double GetTotalPurchaseCost(DateTime start, DateTime end)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        double purchaseCost = db.ExecuteScalar<double>(
+            @"SELECT SUM(CostPerUnit * QuantityAdded)
+            FROM RestockHistory
+            WHERE DATE(RestockDate) >= DATE(@Start)
+            AND DATE(RestockDate) <= DATE(@End);
+            ",
+            new { Start = start, End = end }
+        );
+        return purchaseCost;
+    }
+
+
 
 
 }
