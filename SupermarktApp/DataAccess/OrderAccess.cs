@@ -164,6 +164,11 @@ public static class OrderAccess
     }
     public static List<ProductModel> GetTop5MostBoughtProducts(int userId)
     {
+        return GetMostBoughtProducts(userId, 5);
+    }
+
+    public static List<ProductModel> GetMostBoughtProducts(int userId, int limit)
+    {
         using var db = new SqliteConnection(ConnectionString);
 
         var productCounts = db.Query<(int ProductId, int Count)>(@"
@@ -174,7 +179,7 @@ public static class OrderAccess
             ORDER BY Count DESC;",
             new { UserId = userId }).AsList();
 
-        var topProducts = new List<ProductModel>();
+        var products = new List<ProductModel>();
 
         foreach (var item in productCounts)
         {
@@ -182,25 +187,56 @@ public static class OrderAccess
                 "SELECT * FROM Discounts WHERE ProductId = @ProductId",
                 new { ProductId = item.ProductId }
             );
-            var checkReward = RewardItemsAccess.GetRewardItemByProductId(item.ProductId);
-            if (discount == null && checkReward == null) // so if its NOT already a discount or reward item
-            {
-                var product = db.QueryFirstOrDefault<ProductModel>(
+
+            var reward = RewardItemsAccess.GetRewardItemByProductId(item.ProductId);
+
+            // Skip items that are already discounted or rewards
+            if (discount != null || reward != null)
+                continue;
+
+            var product = db.QueryFirstOrDefault<ProductModel>(
                 "SELECT * FROM Products WHERE Id = @Id",
                 new { Id = item.ProductId });
-                if (product != null)
-                {
-                    topProducts.Add(product);
-                }
-                if (topProducts.Count == 5)
-                {
-                    return topProducts;
-                }
-            }
+
+            if (product != null)
+                products.Add(product);
+
+            if (products.Count == limit)
+                break;
         }
 
-        return topProducts;
+        return products;
     }
+
+        public static double GetTotalRevenue(DateTime startDate, DateTime endDate)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        double revenue = db.ExecuteScalar<double>(
+            @"SELECT SUM(Products.Price)
+            FROM Orders
+            JOIN Products ON Orders.ProductID = Products.ID
+            WHERE DATE(Orders.Date) >= DATE(@StartDate)
+            AND DATE(Orders.Date) <= DATE(@EndDate);
+            ",
+            new { StartDate = startDate, EndDate = endDate }
+        );
+        return revenue;
+    }
+    public static double GetTotalPurchaseCost(DateTime start, DateTime end)
+    {
+        using var db = new SqliteConnection(ConnectionString);
+        double purchaseCost = db.ExecuteScalar<double>(
+            @"SELECT SUM(CostPerUnit * QuantityAdded)
+            FROM RestockHistory
+            WHERE DATE(RestockDate) >= DATE(@Start)
+            AND DATE(RestockDate) <= DATE(@End);
+            ",
+            new { Start = start, End = end }
+        );
+        return purchaseCost;
+    }
+
+
 
 
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Spectre.Console;
+using System;
 public static class StatisticsUI
 {
     public static readonly Color Text = Color.FromHex("#E8F1F2");
@@ -71,6 +72,16 @@ public static class StatisticsUI
 
     public static void DisplayStatistics(DateTime startDate, DateTime endDate)
     {
+        DateTime start = DateTime.Today.AddMonths(-1);
+        DateTime end = DateTime.Today;
+
+        double revenue = StatisticLogic.TotalRevenue(startDate, endDate);
+        double cost = StatisticLogic.TotalPurchaseCost(startDate, endDate);
+
+        ShowTotalRevenue(revenue);
+        ShowTotalPurchaseCost(cost);
+
+
         ProductModel mostSold = StatisticLogic.MostSoldItem(startDate, endDate);
         int count = StatisticLogic.MostSoldItemCount(startDate, endDate);
         List<ProductSalesDto> sales = StatisticLogic.GetProductSalesData(startDate, endDate);
@@ -128,7 +139,6 @@ public static class StatisticsUI
         {
             AnsiConsole.MarkupLine("No data available for the selected period.");
         }
-        
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to return to the menu.");
         Console.ReadLine();
         DisplayMenu();
@@ -192,4 +202,58 @@ public static class StatisticsUI
         AnsiConsole.Write(table);
         Console.ReadLine();
     }
+    public static void ShowTotalRevenue(double revenue)
+    {
+        AnsiConsole.Clear();
+        AnsiConsole.MarkupLine("[bold underline]Total Revenue[/]");
+        AnsiConsole.WriteLine();
+        double maxRevenue = 10000.0;                 // Max value = full bar
+        double percent = Math.Min(revenue / maxRevenue, 1.0); // Convert revenue to percantage
+
+        int barWidth = 40;                          // Total bar length
+        int filled = (int)(barWidth * percent);     // Number of filled blocks
+        int empty = barWidth - filled;              // Number of empty blocks
+
+        string bar =
+            "[green]" + new string('█', filled) + "[/]" +
+            "[grey]" + new string('░', empty) + "[/]";
+
+        AnsiConsole.MarkupLine(bar);
+        AnsiConsole.WriteLine();
+
+        var legend = "[green]■[/] Revenue";
+        AnsiConsole.MarkupLine(legend);
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine($"Total Revenue: [green]€{revenue:F2}[/]");
+    }
+
+    public static void ShowTotalPurchaseCost(double cost)
+    {
+        double maxCost = 10000.0;
+        double percent = Math.Min(cost / maxCost, 1); // Convert to percentage
+
+        int width = 40;
+        int filled = (int)(width * percent);
+        int empty = width - filled;
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine("[bold underline]Total Purchase Cost[/]");
+        AnsiConsole.WriteLine();
+
+        string bar = 
+                "[red]" + new string('█', filled) + "[/]" +
+                "[grey]" + new string('░', empty) + "[/]";
+
+        AnsiConsole.MarkupLine(bar);
+        AnsiConsole.WriteLine();
+
+        var legend = "[red]■[/] Purchase Cost";
+        AnsiConsole.MarkupLine(legend);
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine($"Total Purchase Cost: [Red]€{cost:F2}[/]");
+    }
+
+
 }
