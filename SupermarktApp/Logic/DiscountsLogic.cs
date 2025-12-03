@@ -22,23 +22,33 @@ public class DiscountsLogic
 
         foreach(var discount in weeklyProducts)
         {
-            if (discount != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+            var discountedProduct = CheckDiscountByProduct(ProductLogic.GetProductById(discount.ProductID));
+
+            if(discountedProduct != null && discountedProduct.Discount.DiscountType == "Weekly")
             {
-                validWeeklyProducts.Add(discount);
+                if (discount != null && DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+                {
+                    validWeeklyProducts.Add(discount);
+                }
             }
         }
         return validWeeklyProducts;
     }
 
-    public static List<DiscountsModel> GetValidPersonalDiscounts(int userID) // this returns all valid personal discounts for UserID
+    public static List<DiscountsModel> GetValidPersonalDiscounts(int userID) // this returns all valid personal discounts for UserID 
     {
         List<DiscountsModel> personalDiscounts = DiscountsAccess.GetPersonalDiscounts(userID);
         List<DiscountsModel> validDiscounts = new List<DiscountsModel>();
         foreach (DiscountsModel discount in personalDiscounts)
         {
-            if (DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+            var discountedProduct = CheckDiscountByProduct(ProductLogic.GetProductById(discount.ProductID));
+            
+            if(discountedProduct != null && discountedProduct.Discount.DiscountType == "Personal")
             {
+                if (DateTime.Now >= discount.StartDate && DateTime.Now <= discount.EndDate)
+                {
                 validDiscounts.Add(discount);
+                }   
             }
         }
         return validDiscounts;
@@ -55,6 +65,58 @@ public class DiscountsLogic
             }
         }
         return false;
+    }
+
+    public static void AddExpiryDateDiscounts(int daysBeforeExpiry = 3, double discountPercentage = 30.0)
+    {
+        var allProducts = ProductAccess.GetAllProducts();
+
+        foreach(var product in allProducts)
+        {
+            if(product == null || product.ExpiryDate == null) continue;
+
+            int daysUntilExpiry = (product.ExpiryDate.Date - DateTime.Today).Days;
+
+            if (daysUntilExpiry >= 0 && daysUntilExpiry <= daysBeforeExpiry)
+            {
+                var discount = new DiscountsModel(
+                    productId: product.ID,
+                    discountPercentage: discountPercentage,
+                    discountType: "Expiry",
+                    startDate: DateTime.Now,
+                    endDate: product.ExpiryDate,
+                    userId: null
+                    );
+                AddDiscount(discount);
+            }
+        }
+    }
+    public static ProductDiscountDTO? CheckDiscountByProduct(ProductModel product)
+    {
+        List<DiscountsModel> discountModel = DiscountsAccess.GetAllDiscountByProductID(product.ID);
+
+        ProductDiscountDTO? productDiscount = null;
+
+        foreach (var discount in discountModel)
+        {
+            if(IsDiscountActive(discount) && discount.DiscountType == "Expiry")
+            {
+                return new ProductDiscountDTO(product, discount);
+            }
+
+            if(IsDiscountActive(discount) && discount.DiscountType == "Weekly")
+            {
+                if(productDiscount != null && productDiscount.Discount?.DiscountType == "Expiry") continue;
+                productDiscount = new ProductDiscountDTO(product, discount);
+            }
+
+            if(IsDiscountActive(discount) && discount.DiscountType == "Personal" && discount.UserID == SessionManager.CurrentUser?.ID)
+            {
+                if(productDiscount != null && (productDiscount.Discount?.DiscountType == "Expiry" || productDiscount.Discount.DiscountType == "Weekly")) continue;
+                productDiscount = new ProductDiscountDTO(product, discount);
+            }
+        }
+        return productDiscount;
     }
     public static DiscountsModel GetWeeklyDiscountByProductID(int productID)
     {
@@ -77,6 +139,16 @@ public class DiscountsLogic
 
         foreach (ProductModel product in top5Products)
         {
+            var discountedProduct = CheckDiscountByProduct(ProductLogic.GetProductById(product.ID));
+            
+            if(discountedProduct != null)
+            {
+                if(discountedProduct.Discount.DiscountType != "Personal")
+                {
+                    continue;
+                }
+            }
+
             double discountPercentage = rand.Next(5, 41); 
             DateTime startDate = DateTime.MinValue;
             DateTime endDate = DateTime.MaxValue;
@@ -154,6 +226,10 @@ public class DiscountsLogic
         return DiscountsAccess.GetAllWeeklyDiscounts();
     }
     
+    public static List<DiscountsModel> GetAllExpiryDiscounts()
+    {
+        return DiscountsAccess.GetAllExpiryDiscounts();
+    }
     public static void RemoveDiscountByID(int discountID)
     {
         DiscountsAccess.RemoveDiscountByID(discountID);

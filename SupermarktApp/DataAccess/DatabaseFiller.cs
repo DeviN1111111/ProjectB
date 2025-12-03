@@ -13,7 +13,8 @@ public class DatabaseFiller
     public static List<string> allTables = new List<string>()
     {
         "Cart", "Users", "Products", "Orders", "RewardItems",
-        "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon", "RestockHistory"
+        "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
+        "FavoriteLists", "FavoriteListProducts", "RestockHistory"
     };
 
     public static void RunDatabaseMethods(int orderCount = 50)
@@ -118,6 +119,7 @@ public class DatabaseFiller
                 Description TEXT,
                 Category TEXT,
                 Location INTEGER,
+                ExpiryDate DATETIME,
                 Quantity INTEGER NOT NULL DEFAULT 0,
                 Visible INTEGER NOT NULL DEFAULT 1
             );");
@@ -222,7 +224,25 @@ public class DatabaseFiller
                 UserId INTERGER NOT NULL,
                 Credit DOUBLE NOT NULL,
                 IsValid BOOLEAN NOT NULL DEFAULT 1,
-                FOREIGN KEY (UserID) REFERENCES Users(ID) ON DELETE CASCADE
+                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS FavoriteLists (
+                Id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId   INTEGER NOT NULL,
+                Name     TEXT NOT NULL,
+                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Execute(@"
+            CREATE TABLE IF NOT EXISTS FavoriteListProducts (
+                Id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                FavoriteListId INTEGER NOT NULL,
+                ProductId      INTEGER NOT NULL,
+                Quantity       INTEGER NOT NULL,
+                FOREIGN KEY (FavoriteListId) REFERENCES FavoriteLists(Id) ON DELETE CASCADE,
+                FOREIGN KEY (ProductId)      REFERENCES Products(Id)
             );
         ");
         db.Execute(@"
@@ -246,11 +266,12 @@ public class DatabaseFiller
         // USERS
         var users = new List<UserModel>
         {
-            new() { Name = "Mark", LastName = "Dekker", Email = "chouchenghong@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
-            new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
-            new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
-            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "31432567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
+            new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256787", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "chouchenghong@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256797", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = true }, // 2FA TEST ACCOUNT
+            new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143257897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
+            new() { Name = "Ben", LastName = "Dekker", Email = "sa", Password = "sa", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3142567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "SuperAdmin" }
         };
 
         // PRODUCT CATEGORIES
@@ -391,6 +412,8 @@ public class DatabaseFiller
                     Category = category,
                     Location = random.Next(1, 16),
                     Quantity = random.Next(20, 300),
+                    Visible = 1,
+                    ExpiryDate = DateTime.Today.AddDays(random.Next(1, 120))
                 });
             }
         }
@@ -559,8 +582,8 @@ public class DatabaseFiller
     public static void InsertProduct(ProductModel product)
     {
         _sharedConnection!.Execute(@"
-        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity)
-        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity);", product);
+        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity, ExpiryDate, Visible)
+        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @ExpiryDate, @Visible);", product);
     }
 
     public static void InsertRestockHistory(RestockHistoryModel restockEntry)
@@ -600,7 +623,7 @@ public class DatabaseFiller
 
     public static void InsertShopReview(ShopReviewModel review)
     {
-        _sharedConnection.Execute(@"
+        _sharedConnection?.Execute(@"
             INSERT INTO ShopReviews (UserId, Stars, Text)
             VALUES (@UserId, @Stars, @Text);
         ", review);
