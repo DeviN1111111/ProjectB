@@ -32,7 +32,7 @@ public class ShopReviewLogic
     {
         var reviews = GetAllReviews();
 
-        if (reviews.Any())
+        if (!reviews.Any())
             return 0;
 
         return reviews.Average(r => r.Stars);
