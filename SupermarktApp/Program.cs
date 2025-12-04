@@ -10,9 +10,11 @@ class Program
 {
     static async Task Main()
     { 
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        DatabaseFiller.RunDatabaseMethods(100);
-        DiscountsLogic.AddExpiryDateDiscounts(daysBeforeExpiry: 3, discountPercentage: 50); // Give products discounts that are about to expire in 3 days
-        await MenuUI.ShowMainMenu();
+        // Console.OutputEncoding = System.Text.Encoding.UTF8;
+        // DatabaseFiller.RunDatabaseMethods(100);
+        // DiscountsLogic.AddExpiryDateDiscounts(daysBeforeExpiry: 3, discountPercentage: 50); // Give products discounts that are about to expire in 3 days
+        // await MenuUI.ShowMainMenu();
+        var price = Utils.ChangePriceFormat(2.00);
+        System.Console.WriteLine(price);
     }
 }

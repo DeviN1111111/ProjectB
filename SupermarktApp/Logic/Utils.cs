@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Spectre.Console;
 /// <summary>
@@ -148,5 +150,15 @@ static class Utils
         return AnsiConsole.Prompt(
             new TextPrompt<T>(text)
         );
+    }
+    /// <summary>
+    /// Formats price to 0,00
+    /// </summary>
+    /// <param name="price">The price</param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static string ChangePriceFormat<T>(T price)
+    {
+        return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",");
     }
 }

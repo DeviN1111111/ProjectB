@@ -578,7 +578,7 @@ public class Order
                 int productId = keyValuePair.Key;
                 int quantity = keyValuePair.Value;
 
-                var product = ProductLogic.GetProductByID(productId);
+                var product = ProductLogic.GetProductById(productId);
                 if (product != null)
                 {
                     double price = product.Price;
