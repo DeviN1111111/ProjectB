@@ -12,11 +12,7 @@ public static class StatisticsUI
     public static void DisplayMenu()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("SuperMart Analytics")
-                .Centered()
-                .Color(AsciiPrimary));
-
+        Utils.PrintTitle("Supermarket Analytics");
 
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -161,10 +157,7 @@ public static class StatisticsUI
                     if (startDate1 <= endDate1)
                     {
                         Console.Clear();
-                        AnsiConsole.Write(
-                        new FigletText("SuperMart Analytics")
-                            .Centered()
-                            .Color(AsciiPrimary));
+                        Utils.PrintTitle("Supermarket Analytics");
                         return (startDate1, endDate1);
                     }
                     else
@@ -188,10 +181,7 @@ public static class StatisticsUI
     public static void DisplayStatisticsPerProduct(ProductModel product)
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("SuperMart Analytics")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Supermarket Analytics");
 
         var table = StatisticLogic.CreateBreakdownChartForSingleProduct(product);
         if (table == null)

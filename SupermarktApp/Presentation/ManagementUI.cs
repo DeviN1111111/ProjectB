@@ -14,10 +14,7 @@ public static class ManagementUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Product Management")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Management");
 
             var items = new List<string>
             {
@@ -193,10 +190,7 @@ public static class ManagementUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Create Coupon")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Create Coupon");
 
             List<UserModel> allUsers = AdminLogic.GetAllUsers();
 
@@ -248,10 +242,7 @@ public static class ManagementUI
         while (true)
             {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Edit Coupon")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Edit Coupons");
             
             var allUsers = AdminLogic.GetAllUsers();
             var userSelection = AnsiConsole.Prompt(
@@ -312,10 +303,8 @@ public static class ManagementUI
                     .AddChoices(new[] { "Valid", "Invalid" }));
             var newIsValid = validityChoice == "Valid";
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Confirm Changes")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Confirm Changes");
+
             AnsiConsole.MarkupLine($"Id: [yellow]{selectedCoupon.Id}[/]");
             AnsiConsole.MarkupLine($"UserId: [blue]{selectedCoupon.UserId}[/]");
             AnsiConsole.MarkupLine($"Credit: [red]{selectedCoupon.Credit}[/] -> [green]{newCredit}[/]");
@@ -343,10 +332,7 @@ public static class ManagementUI
             return;
         }
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Change Product Details")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Change Product Details");
 
         var name = AnsiConsole.Prompt(new TextPrompt<string>("New name of product:").DefaultValue(EditProduct.Name));
         var price = AnsiConsole.Prompt(new TextPrompt<double>("New price of product:").DefaultValue(EditProduct.Price));
@@ -371,10 +357,7 @@ public static class ManagementUI
         var visible = AnsiConsole.Prompt(new TextPrompt<int>("New visibility of product (1 = visible, 0 = hidden):").DefaultValue(EditProduct.Visible));
 
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Compare Product Changes")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Compare Product Changes");
 
         ProductDetailsUI.CompareTwoProducts(EditProduct, new ProductModel(name, price, nutritionDetails, description, category, location, quantity, visible));
         AnsiConsole.MarkupLine($"Are you sure you want to save changes to [red]{EditProduct.Name}[/]?");
@@ -387,11 +370,12 @@ public static class ManagementUI
         switch (confirm)
         {
             case "Confirm":
-                AnsiConsole.Write(
-                new FigletText("Edit Product")
-                    .Centered()
-                    .Color(AsciiPrimary));
+                Console.Clear();
+                Utils.PrintTitle("Change Product Details");
                 ProductLogic.ChangeProductDetails(EditProduct.ID, name, price, nutritionDetails, description, category, location, quantity, visible);
+                AnsiConsole.MarkupLine($"[green]Successfully changed product details from: [red]{EditProduct.Name}[/].[/]");
+                AnsiConsole.MarkupLine("Press [green]Any KEY[/] to continue.");
+                Console.ReadKey();
                 break;
             case "Cancel":
                 return;
@@ -400,10 +384,7 @@ public static class ManagementUI
     public static void AddProduct()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Add Product")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Add Product");
 
         var name = AnsiConsole.Prompt(new TextPrompt<string>("New name of product:"));
         var price = AnsiConsole.Prompt(new TextPrompt<double>("New price of product:"));
@@ -445,23 +426,22 @@ public static class ManagementUI
             return;
         }
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Delete Product")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Delete Product");     
 
         AnsiConsole.MarkupLine($"Are you sure you want to delete [red]{EditProduct.Name}[/]? This action cannot be undone.");
         var confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .HighlightStyle(new Style(Hover))
                 .AddChoices(new[] { "Confirm", "Cancel" }));
+        
         switch (confirm)
         {
             case "Confirm":
-                ProductLogic.DeleteProductByID(EditProduct.ID);
                 Console.Clear();
+                Utils.PrintTitle("Delete Product"); 
+                ProductLogic.DeleteProductByID(EditProduct.ID);
                 AnsiConsole.MarkupLine($"[green]Successfully deleted [red]{EditProduct.Name}[/].[/]");
-                AnsiConsole.MarkupLine("[green]Press ENTER to continue.[/]");
+                AnsiConsole.MarkupLine("Press [green]Any KEY[/] to continue.");
                 Console.ReadKey();
                 break;
             case "Cancel":
@@ -471,10 +451,7 @@ public static class ManagementUI
     public static void DiscountSpecificDate()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Add discount on a specific date")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Add Discount on Specific Date");
 
         ProductModel Product = SearchUI.SearchProductByNameOrCategory();
         if (Product == null)
@@ -493,10 +470,7 @@ public static class ManagementUI
         int thisweek = ISOWeek.GetWeekOfYear(DateTime.Now);
         int intweek = 0;
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Choose week number")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Choose week number");
         
         AnsiConsole.MarkupLine($"[blue]How many weeks from now, do you want the discount to be active?: [/]");
         AnsiConsole.MarkupLine($"Currently week: {thisweek}");
@@ -514,10 +488,7 @@ public static class ManagementUI
 
             Console.Clear();
 
-            AnsiConsole.Write(
-            new FigletText("Choose week number")
-                .Centered()
-                .Color(AsciiPrimary));
+            Utils.PrintTitle("Choose week number");
 
             int year = DateTime.Now.Year;
             if (week.Length != 0 && week.Length < 4)
@@ -586,10 +557,7 @@ public static class ManagementUI
     public static void DeleteDiscountSpecificDate()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Delete discount on a specific date")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Delete Discount on Specific Date");
         
         List<DiscountsModel> AllDiscounts = DiscountsLogic.GetAllWeeklyDiscounts();
         if (AllDiscounts.Count == 0)
@@ -640,10 +608,7 @@ public static class ManagementUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Delete Reviews")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Delete Reviews");
 
             var reviewLogic = new ShopReviewLogic();
             var allReviews = reviewLogic.GetAllReviews();

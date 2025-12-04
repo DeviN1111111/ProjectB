@@ -8,10 +8,7 @@ public static class MenuUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Supermarket App")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Supermarket App");
             var options = new List<string>();
 
             List<ProductModel> products = NotificationLogic.GetAllLowQuantityProducts(50);

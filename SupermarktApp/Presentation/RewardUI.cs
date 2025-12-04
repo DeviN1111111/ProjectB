@@ -7,10 +7,7 @@ public static class RewardUI
         {
 
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Reward System")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
+            Utils.PrintTitle("Reward System");
 
             AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser.AccountPoints}[/]");
 

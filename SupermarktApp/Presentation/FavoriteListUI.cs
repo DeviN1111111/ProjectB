@@ -6,10 +6,7 @@ static class FavoriteListUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Favorite List")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
+            Utils.PrintTitle("Favorite List");
             
             var options = new List<string>();
             options.AddRange(new[] { "View lists", "Create list", "Remove list", $"[red]Go back[/]" });

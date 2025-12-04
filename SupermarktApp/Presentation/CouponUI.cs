@@ -5,10 +5,7 @@ public static class CouponUI
     public static void DisplayMenu()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Coupons")
-                .Centered()
-                .Color(MenuUI.AsciiPrimary));
+        Utils.PrintTitle("Coupons");
 
         // --- Fetch and filter valid coupons ---
         var user = SessionManager.CurrentUser;
