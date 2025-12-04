@@ -80,6 +80,9 @@ public static class StatisticsUI
 
         ShowTotalRevenue(revenue);
         ShowTotalPurchaseCost(cost);
+        
+        double profit = revenue - cost;
+        ShowTotalProfit(profit);
 
 
         ProductModel mostSold = StatisticLogic.MostSoldItem(startDate, endDate);
@@ -204,7 +207,7 @@ public static class StatisticsUI
     }
     public static void ShowTotalRevenue(double revenue)
     {
-        AnsiConsole.Clear();
+        AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold underline]Total Revenue[/]");
         AnsiConsole.WriteLine();
         double maxRevenue = 10000.0;                 // Max value = full bar
@@ -255,5 +258,54 @@ public static class StatisticsUI
         AnsiConsole.MarkupLine($"Total Purchase Cost: [Red]€{cost:F2}[/]");
     }
 
+    public static void ShowTotalProfit(double profit)
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("[bold underline]Total Profit[/]");
+        AnsiConsole.WriteLine();
+        double maxProfit = 10000.0;                 // Max value = full bar
+        // if profit is negetive bar turn red and shows it negative
+        if (profit < 0)
+        {
+            profit = Math.Abs(profit);
+            double percentNeg = Math.Min(profit / maxProfit, 1.0); // Convert profit to percantage
+
+            int barWidthNeg = 40;                          // Total bar length
+            int filledNeg = (int)(barWidthNeg * percentNeg);     // Number of filled blocks
+            int emptyNeg = barWidthNeg - filledNeg;              // Number of empty blocks
+
+            string barNeg =
+                "[red]" + new string('█', filledNeg) + "[/]" +
+                "[grey]" + new string('░', emptyNeg) + "[/]";
+
+            AnsiConsole.MarkupLine(barNeg);
+            AnsiConsole.WriteLine();
+
+            var legendNeg = "[red]■[/] Loss";
+            AnsiConsole.MarkupLine(legendNeg);
+            AnsiConsole.WriteLine();
+
+            AnsiConsole.MarkupLine($"Total Loss: [red]€{profit:F2}[/]");
+            return;
+        }
+        double percent = Math.Min(profit / maxProfit, 1.0); // Convert profit to percantage
+
+        int barWidth = 40;                          // Total bar length
+        int filled = (int)(barWidth * percent);     // Number of filled blocks
+        int empty = barWidth - filled;              // Number of empty blocks
+
+        string bar =
+            "[yellow]" + new string('█', filled) + "[/]" +
+            "[grey]" + new string('░', empty) + "[/]";
+
+        AnsiConsole.MarkupLine(bar);
+        AnsiConsole.WriteLine();
+
+        var legend = "[yellow]■[/] Profit";
+        AnsiConsole.MarkupLine(legend);
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine($"Total Profit: [green]€{profit:F2}[/]");
+    }
 
 }
