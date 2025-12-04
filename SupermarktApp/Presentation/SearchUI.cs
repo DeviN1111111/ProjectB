@@ -60,10 +60,7 @@ public static class SearchUI
                     ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
                     if(productDiscount != null)
                     {
-                        string text = product.Price.ToString();
-                        var struckPrice = $"[strike][red]€{text}[/][/]";
-
-                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (productDiscount.Discount.DiscountPercentage / 100)), 2)}[/]";
+                        string newPrice = Utils.CalculateDiscountedPriceString(product.Price, productDiscount.Discount.DiscountPercentage);
                         table.AddRow(product.Name, newPrice);            
                     }
                     else
