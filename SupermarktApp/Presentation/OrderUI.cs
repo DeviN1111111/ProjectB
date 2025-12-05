@@ -500,7 +500,7 @@ public class Order
                     .Replace("#", "")
             );
 
-            var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId); // geen access aanroepen in de presentation layer
+            var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId);
 
             if (orderItems.Count == 0)
             {

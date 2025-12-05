@@ -2,17 +2,16 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 static class FavoriteListAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
 
     public static List<FavoriteListModel> GetAllFavoriteListsByUserId(int userId)
     {
-        using var db = new SqliteConnection(ConnectionString);
         const string sql = "SELECT * FROM FavoriteLists WHERE UserId = @UserId";
-        return db.Query<FavoriteListModel>(sql, new { UserId = userId }).ToList();
+        return _connection.Query<FavoriteListModel>(sql, new { UserId = userId }).ToList();
     }
     public static void ChangeListName(int listId, string newName)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             UPDATE FavoriteLists
@@ -20,11 +19,10 @@ static class FavoriteListAccess
             WHERE Id = @ListId;
         ";
 
-        db.Execute(sql, new { NewName = newName, ListId = listId });
+        _connection.Execute(sql, new { NewName = newName, ListId = listId });
     }
     public static int CreateList(string name, int userId)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             INSERT INTO FavoriteLists (Name, UserId)
@@ -32,12 +30,11 @@ static class FavoriteListAccess
             SELECT last_insert_rowid();
         ";
 
-        var id = db.ExecuteScalar<int>(sql, new { Name = name, UserId = userId });
+        var id = _connection.ExecuteScalar<int>(sql, new { Name = name, UserId = userId });
         return id;
     }
     public static List<FavoriteListProductModel> GetProductsByListId(int listId)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             SELECT *
@@ -45,11 +42,10 @@ static class FavoriteListAccess
             WHERE FavoriteListId = @FavoriteListId;
         ";
 
-        return db.Query<FavoriteListProductModel>(sql, new { FavoriteListId = listId }).ToList();
+        return _connection.Query<FavoriteListProductModel>(sql, new { FavoriteListId = listId }).ToList();
     }
     public static void AddProductToList(int listId, int productId, int quantity)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string selectSql = @"
             SELECT Quantity
@@ -57,7 +53,7 @@ static class FavoriteListAccess
             WHERE FavoriteListId = @FavoriteListId AND ProductId = @ProductId;
         ";
 
-        int? existingQuantity = db.QuerySingleOrDefault<int?>(
+        int? existingQuantity = _connection.QuerySingleOrDefault<int?>(
             selectSql,
             new { FavoriteListId = listId, ProductId = productId });
 
@@ -68,7 +64,7 @@ static class FavoriteListAccess
                 VALUES (@FavoriteListId, @ProductId, @Quantity);
             ";
 
-            db.Execute(insertSql, new
+            _connection.Execute(insertSql, new
             {
                 FavoriteListId = listId,
                 ProductId = productId,
@@ -85,7 +81,7 @@ static class FavoriteListAccess
                 WHERE FavoriteListId = @FavoriteListId AND ProductId = @ProductId;
             ";
 
-            db.Execute(updateSql, new
+            _connection.Execute(updateSql, new
             {
                 FavoriteListId = listId,
                 ProductId = productId,
@@ -95,20 +91,18 @@ static class FavoriteListAccess
     }
     public static void RemoveProductFromList(int listId, int productId)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             DELETE FROM FavoriteListProducts
             WHERE FavoriteListId = @FavoriteListId AND ProductId = @ProductId;
         ";
 
-        db.Execute(sql, new { FavoriteListId = listId, ProductId = productId });
+        _connection.Execute(sql, new { FavoriteListId = listId, ProductId = productId });
     }
     public static void EditProductQuantity(
         List<FavoriteListProductModel> products,
         int listId)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             UPDATE FavoriteListProducts
@@ -118,7 +112,7 @@ static class FavoriteListAccess
 
         foreach (var product in products)
         {
-            db.Execute(sql, new
+            _connection.Execute(sql, new
             {
                 Quantity = product.Quantity,
                 FavoriteListId = listId,
@@ -128,13 +122,12 @@ static class FavoriteListAccess
     }
     public static void RemoveList(int listId)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             DELETE FROM FavoriteLists
             WHERE Id = @Id;
         ";
 
-        db.Execute(sql, new { Id = listId });
+        _connection.Execute(sql, new { Id = listId });
     }
 }   

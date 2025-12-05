@@ -3,27 +3,25 @@ using Microsoft.Data.Sqlite;
 
 public static class ProductAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
 
     public static void AddProduct(ProductModel product)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Products 
+        _connection.Execute(@"INSERT INTO Products 
             (Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible)
             VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
     }
 
     public static void AddProductUnitTest(ProductModel product)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO Products 
+        _connection.Execute(@"INSERT INTO Products 
             (ID, Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible)
             VALUES (@ID, @Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
     }
 
     public static List<ProductModel> SearchProductByName(string name, bool includeHidden = false)
         {
-            using var db = new SqliteConnection(ConnectionString);
             string pattern = $"{name}%";
             string sql = includeHidden
                     ? @"SELECT * FROM Products 
@@ -35,7 +33,7 @@ public static class ProductAccess
                         OR Category LIKE @Category)
                         AND Visible = 1
                         LIMIT 10";
-                return db.Query<ProductModel>(sql,new { Name = pattern, Category = pattern }).ToList();
+                return _connection.Query<ProductModel>(sql,new { Name = pattern, Category = pattern }).ToList();
         }
 
     public static List<ProductModel> GetAllProducts()
@@ -45,19 +43,17 @@ public static class ProductAccess
 
     public static List<ProductModel> GetAllProducts(bool includeHidden = false)
     {
-        using var db = new SqliteConnection(ConnectionString);
         string sql = includeHidden
             ? "SELECT * FROM Products"
             : "SELECT * FROM Products WHERE Visible = 1";
 
-        return db.Query<ProductModel>(sql).ToList();
+        return _connection.Query<ProductModel>(sql).ToList();
     }
 
 
     public static ProductModel? GetProductByID(int id)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.QueryFirstOrDefault<ProductModel>(
+        return _connection.QueryFirstOrDefault<ProductModel>(
             "SELECT * FROM Products WHERE Id = @Id",
             new { Id = id }
         );
@@ -65,8 +61,7 @@ public static class ProductAccess
 
     public static ProductModel? GetProductByName(string name)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.QueryFirstOrDefault<ProductModel>(
+        return _connection.QueryFirstOrDefault<ProductModel>(
             @"SELECT * FROM Products 
             WHERE Name = @Name",
             new { Name = name }
@@ -75,16 +70,14 @@ public static class ProductAccess
 
     public static void UpdateProductStock(int productId, int newQuantity)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(
+        _connection.Execute(
             "UPDATE Products SET Quantity = @Quantity WHERE Id = @Id",
             new { Quantity = newQuantity, Id = productId }
         );
     }
     public static void ChangeProductDetails(ProductModel newProduct)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"UPDATE Products
+        _connection.Execute(@"UPDATE Products
             SET
             Name = @Name,
             Price = @Price,
@@ -100,21 +93,18 @@ public static class ProductAccess
 
     public static void DeleteProductByID(int ID)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"UPDATE Products SET Visible = 0 WHERE ID = @ID", new { ID });
+        _connection.Execute(@"UPDATE Products SET Visible = 0 WHERE ID = @ID", new { ID });
     }
 
         public static void SetProductVisibility(int productId, bool isVisible)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute("UPDATE Products SET Visible = @Visible WHERE Id = @Id;",
+        _connection.Execute("UPDATE Products SET Visible = @Visible WHERE Id = @Id;",
             new { Visible = isVisible ? 1 : 0, Id = productId });
     }
     // get product quantity by id
     public static int GetProductQuantityByID(int id)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.ExecuteScalar<int>(
+        return _connection.ExecuteScalar<int>(
             "SELECT Quantity FROM Products WHERE Id = @Id",
             new { Id = id }
         );
