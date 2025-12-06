@@ -117,6 +117,7 @@ public static class MenuUI
                     SettingsUI.ShowSettingsMenu();
                     break;
                 case "Exit":
+                    ExitLogic.ApplicationExit();
                     return;
             }
         }
