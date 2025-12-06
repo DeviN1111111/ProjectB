@@ -2,34 +2,36 @@ using System.Text;
 
 public static class EmailReminderLogic
 {
+    private static readonly string TemplatePath = 
+        Path.Combine("EmailTemplates", "CartReminderTemplate.html");
+
     public static async Task SendCartReminderAsync(string userEmail, List<CartModel> items)
     {
         string subject = "You left items in your cart!";
-        string body = BuildEmailBody(items);
+
+        string template = File.ReadAllText(TemplatePath);
+        string body = BuildEmailBody(items, template);
 
         await EmailLogic.SendEmailAsync(
             to: userEmail,
             subject: subject,
             body: body,
-            isHtml: false
+            isHtml: true
         );
     }
 
-    private static string BuildEmailBody(List<CartModel> items)
+    private static string BuildEmailBody(List<CartModel> items, string template)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("Hey there!");
-        sb.AppendLine();
-        sb.AppendLine("You left the following items in your supermarket cart:");
-        sb.AppendLine();
+        var itemListBuilder = new StringBuilder();
 
         foreach (var item in items)
         {
-            sb.AppendLine($"• ProductID: {item.ProductId}, Quantity: {item.Quantity}");
+            var product = ProductAccess.GetProductByID(item.ProductId);
+            string name = product?.Name ?? "Unknown Product";
+
+            itemListBuilder.AppendLine($"<li>{name} — Quantity: {item.Quantity}</li>");
         }
 
-        sb.AppendLine();
-        sb.AppendLine("Come back anytime to complete your purchase!");
-        return sb.ToString();
+        return template.Replace("{{ITEM_LIST}}", itemListBuilder.ToString());
     }
 }
