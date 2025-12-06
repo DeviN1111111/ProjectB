@@ -1,6 +1,6 @@
 public static class SessionManager
 {
-    public static UserModel? CurrentUser { get; private set; }
+    public static UserModel? CurrentUser { get; set; }
      
     //tracks if we already sent an exit cart email this session
     public static bool HasSentExitCartEmail { get; private set; }
