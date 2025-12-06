@@ -117,6 +117,7 @@ public static class MenuUI
                     SettingsUI.ShowSettingsMenu();
                     break;
                 case "Exit":
+                    await ExitLogic.ApplicationExitAsync();  //email logic
                     SessionManager.Logout();
                     return;
             }
