@@ -224,8 +224,43 @@ public static class OrderAccess
         );
         return purchaseCost;
     }
+    public static void RemoveAllProductsFromOrder(int orderId)
+    {
+        const string sql = @"DELETE FROM Orders WHERE OrderId = @OrderId;";
+        _connection.Execute(sql, new { OrderId = orderId });
+    }
+    public static int GetProductQuantityInOrder(int orderId, int productId)
+    {
+        const string sql = @"
+            SELECT COUNT(*)
+            FROM Orders
+            WHERE OrderId = @OrderId AND ProductID = @ProductId;
+        ";
 
+        return _connection.ExecuteScalar<int>(sql, new { OrderId = orderId, ProductId = productId });
+    }
 
+    public static void RemoveProductFromOrder(int orderId, int productId)
+    {
+        const string sql = @"
+            DELETE FROM Orders
+            WHERE OrderId = @OrderId AND ProductID = @ProductId;
+        ";
 
+        _connection.Execute(sql, new { OrderId = orderId, ProductId = productId });
+    }
+    public static void RemoveProductQuantityFromOrder(int orderId, int productId, int quantity)
+    {
+        const string sql = @"
+            DELETE FROM Orders
+            WHERE ID IN (
+                SELECT ID
+                FROM Orders
+                WHERE OrderId = @OrderId AND ProductID = @ProductId
+                LIMIT @Quantity
+            );
+        ";
 
+        _connection.Execute(sql, new { OrderId = orderId, ProductId = productId, Quantity = quantity });
+    }
 }

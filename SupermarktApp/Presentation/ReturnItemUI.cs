@@ -13,16 +13,56 @@ class ReturnItemUI
     {
         Console.Clear();
         Utils.PrintTitle("Return Item");
-
+        
+        // ## Get dependencies ##
         var user = SessionManager.CurrentUser!.ID;
         var orders = OrderLogic.GetAllUserOrders(user);
 
-        var returnableOrders = ReturnItemLogic.CheckReturnableOrders(orders, DateTime.Today);
-
-        var selectedOrder = Utils.CreateSelectionPrompt(
-            returnableOrders,
+        var returnableOrderHistories = ReturnItemLogic.CheckReturnableOrders(orders, DateTime.Today);
+        
+        // ## Printing ##
+        var selectedOrderHistory = Utils.CreateSelectionPrompt(
+            returnableOrderHistories,
             "Select an order",
             order => $"Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm}"
         );
+
+        var orderId = selectedOrderHistory.Id;
+
+        var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Return all products", "Return specific products", "[red]Go back[/]"});
+
+        if (selectedChoice == "Return all products")
+        {
+            var orderLines = OrderAccess.GetOrderssByOrderId(orderId);
+
+            foreach (var order in orderLines)
+            {
+                
+            }
+
+            OrderLogic.RemoveAllProductsFromOrder(orderId);
+            OrderLogic.DeleteOrderHistory(orderId);
+        }
+        
+        else if (selectedChoice == "Return specific products")
+        {
+            var itemsForSelection = ReturnItemLogic.GetReturnableProductsWithQuantity(selectedOrderHistory);
+
+            var selectedProducts = Utils.CreateMultiSelectionPrompt(
+                itemsForSelection,
+                "Choose products",
+                item => $"{item.Product.Name} | x{item.Quantity} | [green]{item.UnitPrice}[/]"
+            );
+
+            foreach (var item in selectedProducts)
+            {
+                var qtyToReturn = Utils.AskInt(
+                    $"How many of {item.Product.Name} do you want to return? (max {item.Quantity})",
+                    1,
+                    item.Quantity
+                );
+            }          
+        }
+
     }
 }

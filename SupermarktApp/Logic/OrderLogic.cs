@@ -283,5 +283,12 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
         return outOfStockProducts;
     }
 
-    
+    public static void RemoveAllProductsFromOrder(int orderId)
+    {
+        OrderAccess.RemoveAllProductsFromOrder(orderId);
+    } 
+    public static void DeleteOrderHistory(int orderId)
+    {
+        OrderHistoryAccess.DeleteOrderHistory(orderId);
+    }
 }
