@@ -105,19 +105,19 @@ public static class MenuUI
                     ManageAdminUI.DisplayMenu();
                     break;
                 case "Logout":
-                    SessionManager.CurrentUser = null!;
+                    SessionManager.Logout();
                     break;
                 case "Rewards":
                     RewardUI.DisplayMenu();
                     break;
                 case "Go back":
-                    SessionManager.CurrentUser = null!;
+                    SessionManager.Logout();
                     break;
                 case "Settings":
                     SettingsUI.ShowSettingsMenu();
                     break;
                 case "Exit":
-                    ExitLogic.ApplicationExit();
+                    SessionManager.Logout();
                     return;
             }
         }

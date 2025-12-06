@@ -1,26 +1,25 @@
 public static class ExitLogic
 {
-    public static void ApplicationExit()
+    public static async Task ApplicationExitAsync()
     {
-        if (SessionManager.CurrentUser == null) 
+        var user = SessionManager.CurrentUser;
+
+        if (user == null)
             return;
-
-
-        if (SessionManager.CurrentUser.AccountStatus == "User")
+            
+        if (user.AccountStatus == "User")
         {
-            ProcessCartReminder(SessionManager.CurrentUser.ID);
+            await ProcessCartReminderAsync(user.ID, user.Email);
         }
     }
 
-    private static void ProcessCartReminder(int userId)
+    private static async Task ProcessCartReminderAsync(int userId, string userEmail)
     {
-        // get the items out of cart
         var cartItems = CartAccess.GetAllUserProducts(userId);
 
-        // if there are items send send to next step.
         if (cartItems != null && cartItems.Count > 0)
         {
-            EmailReminderLogic.SendCartReminder(SessionManager.CurrentUser, cartItems);
+            await EmailReminderLogic.SendCartReminderAsync(userEmail, cartItems);
         }
     }
 }
