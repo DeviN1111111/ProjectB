@@ -1,65 +1,65 @@
 public static class ExitLogic
 {
-    // public static async Task ApplicationExitAsync()
-    // {
-    //     var user = SessionManager.CurrentUser;
-
-    //     if (user == null) return;
-    //     if (user.AccountStatus != "User") return;
-
-    //     await ProcessCartReminderAsync(user.ID, user.Email);
-    // }
-   
-    public static async Task ApplicationExitAsync() //DEBUG
+    public static async Task ApplicationExitAsync()
     {
-        Console.WriteLine("ExitLogic: ApplicationExitAsync called");
-
         var user = SessionManager.CurrentUser;
 
-        if (user == null)
-        {
-            Console.WriteLine("ExitLogic: user is null, aborting");
-            return;
-        }
+        if (user == null) return;
+        if (user.AccountStatus != "User") return;
 
-        Console.WriteLine($"ExitLogic: user = {user.Email}, status = {user.AccountStatus}");
-
-        if (user.AccountStatus == "User")
-        {
-            await ProcessCartReminderAsync(user.ID, user.Email);
-        }
+        await ProcessCartReminderAsync(user.ID, user.Email);
     }
-
-
-    // private static async Task ProcessCartReminderAsync(int userId, string userEmail)
+   
+    // public static async Task ApplicationExitAsync() //DEBUG
     // {
-    //     var cartItems = CartAccess.GetAllUserProducts(userId);
+    //     Console.WriteLine("ExitLogic: ApplicationExitAsync called");
 
-    //     if (cartItems != null && cartItems.Count > 0)
+    //     var user = SessionManager.CurrentUser;
+
+    //     if (user == null)
     //     {
-    //         await EmailReminderLogic.SendCartReminderAsync(userEmail, cartItems);
-    //         SessionManager.HasSentExitCartEmail = true;
+    //         Console.WriteLine("ExitLogic: user is null, aborting");
+    //         return;
+    //     }
+
+    //     Console.WriteLine($"ExitLogic: user = {user.Email}, status = {user.AccountStatus}");
+
+    //     if (user.AccountStatus == "User")
+    //     {
+    //         await ProcessCartReminderAsync(user.ID, user.Email);
     //     }
     // }
-         
-    private static async Task ProcessCartReminderAsync(int userId, string userEmail) //DEBUG
+
+
+    private static async Task ProcessCartReminderAsync(int userId, string userEmail)
     {
-        Console.WriteLine($"ExitLogic: fetching cart items for user {userId}");
-
         var cartItems = CartAccess.GetAllUserProducts(userId);
-
-        Console.WriteLine($"ExitLogic: cart item count = {cartItems?.Count ?? 0}");
 
         if (cartItems != null && cartItems.Count > 0)
         {
-            Console.WriteLine("ExitLogic: sending cart reminder email...");
             await EmailReminderLogic.SendCartReminderAsync(userEmail, cartItems);
             SessionManager.HasSentExitCartEmail = true;
         }
-        else
-        {
-            Console.WriteLine("ExitLogic: no items in cart, no email sent");
-        }
     }
+
+    // private static async Task ProcessCartReminderAsync(int userId, string userEmail) //DEBUG
+    // {
+    //     Console.WriteLine($"ExitLogic: fetching cart items for user {userId}");
+
+    //     var cartItems = CartAccess.GetAllUserProducts(userId);
+
+    //     Console.WriteLine($"ExitLogic: cart item count = {cartItems?.Count ?? 0}");
+
+    //     if (cartItems != null && cartItems.Count > 0)
+    //     {
+    //         Console.WriteLine("ExitLogic: sending cart reminder email...");
+    //         await EmailReminderLogic.SendCartReminderAsync(userEmail, cartItems);
+    //         SessionManager.HasSentExitCartEmail = true;
+    //     }
+    //     else
+    //     {
+    //         Console.WriteLine("ExitLogic: no items in cart, no email sent");
+    //     }
+    // }
 
 }

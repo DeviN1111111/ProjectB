@@ -105,19 +105,21 @@ public static class MenuUI
                     ManageAdminUI.DisplayMenu();
                     break;
                 case "Logout":
+                    await ExitLogic.ApplicationExitAsync();  //send email
                     SessionManager.Logout();
                     break;
                 case "Rewards":
                     RewardUI.DisplayMenu();
                     break;
-                case "Go back":
-                    SessionManager.Logout();
-                    break;
+                // case "Go back":
+                //     SessionManager.Logout();
+                //     break;
                 case "Settings":
                     SettingsUI.ShowSettingsMenu();
                     break;
                 case "Exit":
-                    await ExitLogic.ApplicationExitAsync();  //email logic
+                    // Console.WriteLine("MenuUI Exit: CurrentUser = " + (SessionManager.CurrentUser?.Email ?? "null"));// debug
+                    await ExitLogic.ApplicationExitAsync();  //email 
                     SessionManager.Logout();
                     return;
             }
