@@ -111,14 +111,10 @@ public static class MenuUI
                 case "Rewards":
                     RewardUI.DisplayMenu();
                     break;
-                // case "Go back":
-                //     SessionManager.Logout();
-                //     break;
                 case "Settings":
                     SettingsUI.ShowSettingsMenu();
                     break;
                 case "Exit":
-                    // Console.WriteLine("MenuUI Exit: CurrentUser = " + (SessionManager.CurrentUser?.Email ?? "null"));// debug
                     await ExitLogic.ApplicationExitAsync();  //email 
                     SessionManager.Logout();
                     return;

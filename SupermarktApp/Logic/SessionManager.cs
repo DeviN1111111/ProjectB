@@ -4,16 +4,10 @@ public static class SessionManager
      
     //tracks if we already sent an exit cart email this session
     public static bool HasSentExitCartEmail { get; set; }
-
-    public static void Login(UserModel user)
-    {
-        CurrentUser = user;
-        HasSentExitCartEmail = false; // new session, reset to false
-    }
     public static void Logout()
-    {
+    {   // clear the user session
         CurrentUser = null;
-        HasSentExitCartEmail = false;  // clean reset here
+        HasSentExitCartEmail = false; 
     }
     public static void UpdateCurrentUser(int CurrentUserID)
     {
