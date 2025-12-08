@@ -309,6 +309,8 @@ public class DatabaseFiller
             reportProductProgress?.Invoke(1);
         }
 
+        DiscountsLogic.AddExpiryDateDiscounts(1, 50); // Add default expiry date discounts
+
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(451, 50));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(452, 60));
         RewardItemsAccess.AddRewardItem(new RewardItemsModel(453, 30));

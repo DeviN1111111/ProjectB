@@ -124,6 +124,108 @@ public static class ManagementUI
         new SelectionPrompt<string>()
             .Title("[green]Discount Options[/]")
             .AddChoices(
+                "Edit Weekly Discounts",
+                "Edit Expiry Date Discounts",
+                "Back"));
+
+        switch (choice)
+        {
+            case "Edit Weekly Discounts":
+                ShowWeeklyDiscountMenu();
+                break;
+
+            case "Edit Expiry Date Discounts":
+                ShowExpiryDateDiscountMenu();
+                break;
+
+            case "Back":
+                return;
+        }
+    }
+
+    static void ShowExpiryDateDiscountMenu()
+    {
+        Console.Clear();
+
+        Utils.PrintTitle("Expiry Date Discounts");
+
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Expiry Date Discount Options[/]")
+            .AddChoices(
+                "Set up expiry date discount",
+                "Back"));
+
+        switch (choice)
+        {
+            case "Set up expiry date discount":
+                SetUpExpiryDateDiscount();
+                break;
+            case "Back":
+                return;
+        }
+    }
+
+    static void SetUpExpiryDateDiscount()
+    {
+        Console.Clear();
+
+        int days;
+        double discount;
+
+        Utils.PrintTitle("Set up Expiry Date Discounts");
+
+        AnsiConsole.MarkupLine("[yellow]Set up the Expiry Discount values: [/]");
+
+        while (true)
+        {
+            days = AnsiConsole.Prompt(new TextPrompt<int>("Enter the number of days before expiry to apply the discount:")
+                .DefaultValue(3));
+
+            if(days < 0)
+            {
+                AnsiConsole.MarkupLine("[red]Number of days must be 0 or higher.[/]");
+                continue;
+            }
+            else if (days > 365)
+            {
+                AnsiConsole.MarkupLine("[red]Number of days must be less than or equal to 365.[/]");
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        while (true)
+        {
+            discount = AnsiConsole.Prompt(new TextPrompt<double>("Enter discount percentage to apply (e.g. 15 for 15%):")
+                .DefaultValue(50.0));
+
+            if(discount <= 0 || discount > 100)
+            {
+                AnsiConsole.MarkupLine("[red]Discount percentage must be greater than 0 and at most 100.[/]");
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        DiscountsLogic.AddExpiryDateDiscounts(days, discount);
+
+        AnsiConsole.MarkupLine($"[yellow]Successfully updated expiry discounts to start {days} days before expiry with {Math.Round(discount, 2)}% discount.[/]");
+        AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
+        Console.ReadKey();
+    }
+    static void ShowWeeklyDiscountMenu()
+    {
+        var choice = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[green]Discount Options[/]")
+            .AddChoices(
                 "Add discount on a specific date",
                 "Delete discount on a specific date",
                 "Back"));
