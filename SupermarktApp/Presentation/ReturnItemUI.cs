@@ -12,7 +12,7 @@ class ReturnItemUI
     public static void DisplayMenu()
     {
         Console.Clear();
-        Utils.PrintTitle("Return Item");
+        Utils.PrintTitle("Return Products");
         
         // ## Get dependencies ##
         var user = SessionManager.CurrentUser!.ID;
@@ -28,16 +28,16 @@ class ReturnItemUI
         );
 
         var orderId = selectedOrderHistory.Id;
+        var orderLines = OrderAccess.GetOrderssByOrderId(orderId);
+        double totalRefund = 0;
 
         var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Return all products", "Return specific products", "[red]Go back[/]"});
 
         if (selectedChoice == "Return all products")
         {
-            var orderLines = OrderAccess.GetOrderssByOrderId(orderId);
-
-            foreach (var order in orderLines)
+            foreach (var orderedProduct in orderLines)
             {
-                
+                totalRefund += orderedProduct.Price;
             }
 
             OrderLogic.RemoveAllProductsFromOrder(orderId);
@@ -46,7 +46,7 @@ class ReturnItemUI
         
         else if (selectedChoice == "Return specific products")
         {
-            var itemsForSelection = ReturnItemLogic.GetReturnableProductsWithQuantity(selectedOrderHistory);
+            var itemsForSelection = ReturnItemLogic.GetReturnableProductsWithQuantity(orderLines);
 
             var selectedProducts = Utils.CreateMultiSelectionPrompt(
                 itemsForSelection,
@@ -61,8 +61,20 @@ class ReturnItemUI
                     1,
                     item.Quantity
                 );
-            }          
+                
+                if (qtyToReturn <= 0) continue;
+
+                ReturnItemLogic.RemoveProductQuantityFromOrder(orderId, item.Product.ID, qtyToReturn);
+
+                totalRefund += qtyToReturn * item.UnitPrice;
+            } 
+
+            if (!OrderLogic.GetOrderssByOrderId(orderId).Any())
+            {
+                OrderLogic.DeleteOrderHistory(orderId);
+            }                     
         }
 
+        else return;
     }
 }

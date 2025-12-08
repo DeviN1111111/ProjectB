@@ -15,10 +15,8 @@ public static class ReturnItemLogic
             .Select(o => ProductLogic.GetProductById(o.ProductID))
             .ToList();        
     }
-    public static List<(ProductModel Product, int Quantity, double UnitPrice)> GetReturnableProductsWithQuantity(OrderHistoryModel orderHistory)
+    public static List<(ProductModel Product, int Quantity, double UnitPrice)> GetReturnableProductsWithQuantity(List<OrdersModel> orderLines)
     {
-        var orderLines = OrderAccess.GetOrderssByOrderId(orderHistory.Id);
-
         return orderLines
             .GroupBy(o => o.ProductID)
             .Select(g =>
@@ -32,5 +30,9 @@ public static class ReturnItemLogic
                 );
             })
             .ToList();
+    }
+    public static void RemoveProductQuantityFromOrder(int orderId, int productId, int quantity)
+    {
+        OrderAccess.RemoveProductQuantityFromOrder(orderId, productId, quantity);
     }
 }
