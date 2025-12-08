@@ -22,11 +22,21 @@ public static class ReturnItemLogic
             .Select(g =>
             {
                 var product = ProductLogic.GetProductById(g.Key); // g.Key is the product id
+                double basePrice = product.Price;
+                var productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+                double unitPrice = basePrice;
+
+                if (productDiscount != null &&
+                    productDiscount.Discount.DiscountPercentage > 0)
+                {
+                    var discount = productDiscount.Discount.DiscountPercentage;
+                    unitPrice = Math.Round(basePrice * (1 - discount / 100.0), 2);
+                }
 
                 return (
                     Product:   product,
                     Quantity:  g.Count(),
-                    UnitPrice: g.First().Price
+                    UnitPrice: unitPrice
                 );
             })
             .ToList();

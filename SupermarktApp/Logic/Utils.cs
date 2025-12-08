@@ -178,6 +178,13 @@ static class Utils
 
         return $"[strike red]{oldPrice}[/] [green]{newPrice}[/]";
     }
+    /// <summary>
+    /// Prompts the user to enter an integer within an optional range.
+    /// </summary>
+    /// <param name="text">The text prompt</param>
+    /// <param name="min">The minimum acceptable value (inclusive)</param>
+    /// <param name="max">The maximum acceptable value (inclusive)</param>
+    /// <returns>User input as an integer.</returns>
     public static int AskInt(string text, int? min = null, int? max = null)
     {
         var prompt = new TextPrompt<int>(text ?? "Enter a number")
