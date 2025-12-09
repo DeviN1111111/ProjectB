@@ -322,41 +322,8 @@ public class Order
                         Console.ReadKey();
                         break;
                     case "Pay Later":
-                        List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
-
-                        foreach (var item in cartProducts)
-                        {
-                            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
-                            if (product != null)
-                            {
-                                for (int i = 0; i < item.Quantity; i++)
-                                {
-                                    var newOrder = new OrdersModel
-                                    {
-                                        UserID = SessionManager.CurrentUser!.ID,
-                                        ProductID = product.ID,
-                                        Price = product.Price,
-                                    };
-                                    OrderedItems.Add(newOrder);
-                                }
-                            }
-                        }
-                        OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
-                        if (SelectedCouponId.HasValue)
-                        {
-                            CouponLogic.UseCoupon(SelectedCouponId.Value);
-                            CouponLogic.ResetCouponSelection();
-                        }
-                        AnsiConsole.WriteLine("Thank you purchase succesful!");
-                        AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
-                        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-
-                        OrderHistoryModel order = OrderLogic.GetOrderByUserId(SessionManager.CurrentUser!.ID);
-                        Console.ReadKey();
-                        await PayLaterLogic.Activate(order.Id);
-                        OrderLogic.UpdateStock();
-                        OrderLogic.ClearCart();
-                        break;
+                        PayLater(cartProducts, allProducts);
+                        break;    
                 }
                 break;
 
@@ -378,7 +345,6 @@ public class Order
 
             case "Go back":
                 break;
-
         }
         return;
     }
@@ -402,14 +368,15 @@ public class Order
             return;
         }
 
-        var itemsToRemove = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("[bold white]Select items to remove from your cart:[/]")
-                .NotRequired()
-                .PageSize(10)
-                .MoreChoicesText("[grey](Use ↑/↓ to navigate, [blue]<space>[/] to select, [green]<enter>[/] to confirm)[/]")
-                .AddChoices(cartChoices)
-        );
+        // var itemsToRemove = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select items to remove from your cart:[/]")
+        //         .NotRequired()
+        //         .PageSize(10)
+        //         .MoreChoicesText("[grey](Use ↑/↓ to navigate, [blue]<space>[/] to select, [green]<enter>[/] to confirm)[/]")
+        //         .AddChoices(cartChoices)
+        // );
+        var itemsToRemove = Utils.CreateMultiSelectionPrompt<string>(cartChoices, "[bold white]Select items to remove from your cart:[/]");
 
         if (itemsToRemove.Count == 0)
         {
@@ -442,24 +409,16 @@ public class Order
         while (true)
         {
             Console.Clear();
+            GiveNewUserCoupon();
 
-            var currentUser = SessionManager.CurrentUser!;
-            var firstOrders = OrderLogic.GetAllUserOrders(currentUser.ID);
-            if (firstOrders != null && firstOrders.Count == 1)
-            {
-                var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
-                if (userCoupons == null || userCoupons.Count == 0)
-                {
-                    CouponLogic.CreateCoupon(currentUser.ID, 5);
-                }
-            }
+            // Title
             Utils.PrintTitle("Order History");
 
+            // Fetch user orders
             var userOrders = OrderLogic.GetAllUserOrders(SessionManager.CurrentUser!.ID);
 
             AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]\n");
-            if (Console.ReadKey(true).Key == ConsoleKey.Escape)
-                return;
+            if (Console.ReadKey(true).Key == ConsoleKey.Escape) return;
 
             if (userOrders == null || userOrders.Count == 0)
             {
@@ -474,16 +433,13 @@ public class Order
                     ? $"Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm}"
                     : $"[red]Order #{order.Id} - {order.Date:dd-MM-yyyy HH:mm} (Unpaid)[/]")
                 .ToList();
-            
-            string selectedOrderLabel = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[yellow]Select an order to view details[/]")
-                    .AddChoices(orderChoices)
-            );
+
+            var selectedOrderLabel = Utils.CreateSelectionPrompt(orderChoices, "[yellow]Select an order to view details[/]");
+
             var selectedOrderId = int.Parse(
-                selectedOrderLabel
-                    .Split(' ')[1]
-                    .Replace("#", "")
+            selectedOrderLabel
+                .Split(' ')[1]
+                .Replace("#", "")
             );
 
             var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId);
@@ -735,7 +691,7 @@ public class Order
 
         int actualOrderId = selectedOrder.Id;
         var reorderResult = OrderLogic.ReorderPastOrder(actualOrderId);
-        AnsiConsole.MarkupLine("[green]Items added to cart (where possible)![/]");
+        AnsiConsole.MarkupLine("[green]Items added to cart (where available)![/]");
 
         if (reorderResult.Unavailable.Any())
         {
@@ -751,5 +707,56 @@ public class Order
                 AnsiConsole.MarkupLine($"- {name}");
         }
         Console.ReadKey();
+    }
+    public static void GiveNewUserCoupon()
+    {
+        var currentUser = SessionManager.CurrentUser!;
+        var firstOrders = OrderLogic.GetAllUserOrders(currentUser.ID);
+        if (firstOrders != null && firstOrders.Count == 1)
+        {
+            var userCoupons = CouponLogic.GetAllCoupons(currentUser.ID);
+            if (userCoupons == null || userCoupons.Count == 0)
+            {
+                CouponLogic.CreateCoupon(currentUser.ID, 5);
+            }
+        }
+    }
+
+    public async static void PayLater( List<CartModel> cartProducts, List<ProductModel> allProducts)
+    {
+        List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
+
+        foreach (var item in cartProducts)
+        {
+            var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
+            if (product != null)
+            {
+                for (int i = 0; i < item.Quantity; i++)
+                {
+                    var newOrder = new OrdersModel
+                    {
+                        UserID = SessionManager.CurrentUser!.ID,
+                        ProductID = product.ID,
+                        Price = product.Price,
+                    };
+                    OrderedItems.Add(newOrder);
+                }
+            }
+        }
+        OrderLogic.AddOrderWithItems(OrderedItems, allProducts);  // Create order with items
+        if (SelectedCouponId.HasValue)
+        {
+            CouponLogic.UseCoupon(SelectedCouponId.Value);
+            CouponLogic.ResetCouponSelection();
+        }
+        AnsiConsole.WriteLine("Thank you purchase succesful!");
+        AnsiConsole.WriteLine($"You have till {DateTime.Today.AddDays(30)} to complete your payment. Unpaid orders will be fined. You will receive an email with payment instructions.");
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+
+        OrderHistoryModel order = OrderLogic.GetOrderByUserId(SessionManager.CurrentUser!.ID);
+        Console.ReadKey();
+        await PayLaterLogic.Activate(order.Id);
+        OrderLogic.UpdateStock();
+        OrderLogic.ClearCart();
     }
 }
