@@ -69,6 +69,13 @@ public class DiscountsLogic
 
     public static void AddExpiryDateDiscounts(int daysBeforeExpiry = 3, double discountPercentage = 30.0)
     {
+        var allExpiryDiscounts = DiscountsAccess.GetAllExpiryDiscounts();
+        
+        foreach(var discount in allExpiryDiscounts)
+        {
+            RemoveDiscountByID(discount.ID);
+        }
+
         var allProducts = ProductAccess.GetAllProducts();
 
         foreach(var product in allProducts)
