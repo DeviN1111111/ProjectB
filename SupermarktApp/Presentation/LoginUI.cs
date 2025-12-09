@@ -5,8 +5,6 @@ using Spectre.Console;
 
 public static class LoginUI
 {
-    public static readonly Color Hover = Color.FromHex("#006494");
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     private static int attempts = 0;
     public static void Login()
     {
@@ -262,7 +260,7 @@ public static class LoginUI
             bool is2FAEnabled = false;
             var wantToEnable2FA = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Yes", "No" }));
 
             if (wantToEnable2FA == "Yes")

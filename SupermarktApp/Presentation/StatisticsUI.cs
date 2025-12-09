@@ -3,12 +3,6 @@ using Spectre.Console;
 using System;
 public static class StatisticsUI
 {
-    public static readonly Color Text = Color.FromHex("#E8F1F2");
-    public static readonly Color Hover = Color.FromHex("#006494");
-    public static readonly Color Confirm = Color.FromHex("#13293D");
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-    public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
-
     public static void DisplayMenu()
     {
         Console.Clear();
@@ -16,8 +10,8 @@ public static class StatisticsUI
 
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title($"Select the [#{Text.ToHex()}]time period[/]")
-                .HighlightStyle(new Style(Hover))
+                .Title($"Select the [#{ColorUI.Text.ToHex()}]time period[/]")
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Today", "This Week", "This Month", "This Year", "All Time", "Custom Range", "Search Statistics per product", "Go back" }));
 
         switch (period)

@@ -2,8 +2,6 @@ using Spectre.Console;
 
 public class NotificationUI
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#0F4C75");
-    public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
         while (true)

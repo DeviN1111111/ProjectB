@@ -2,7 +2,6 @@ using Spectre.Console;
 
 public static class SearchUI
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static ProductModel SearchProductByNameOrCategory()
     {
         Console.Clear();

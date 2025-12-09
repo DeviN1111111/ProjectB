@@ -16,7 +16,7 @@ static class Utils
             AnsiConsole.Write(
                 new FigletText(title)
                     .Centered()
-                    .Color(MenuUI.AsciiPrimary));        
+                    .Color(ColorUI.AsciiPrimary));        
     }
     /// <summary>
     /// Creates and prints selection prompt with the choices passed.
@@ -92,7 +92,7 @@ static class Utils
     public static Table CreateTable(IEnumerable<string> columns)
     {
         var table = new Table()
-            .BorderColor(MenuUI.AsciiPrimary);
+            .BorderColor(ColorUI.AsciiPrimary);
 
         foreach(string column in columns)
         {

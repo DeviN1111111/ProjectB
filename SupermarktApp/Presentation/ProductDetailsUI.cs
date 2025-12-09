@@ -3,7 +3,6 @@ using Spectre.Console;
 
 public static class ProductDetailsUI
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static void ShowProductDetails(ProductModel product)
     {
         Console.Clear();
