@@ -20,7 +20,7 @@ public static class SuggestionsUI
         {   
             //user can chooose from suggestions 
             var s = suggestions[i];
-            lines.Add($"[yellow]{i +1}.[/]{Markup.Escape(s.Name)}");
+            lines.Add($"[yellow]{i +1}.[/]{s.Name}");
         }
 
         string listText = string.Join("\n", lines);

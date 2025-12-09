@@ -297,7 +297,7 @@ public static class ManagementUI
             var choices = allUsers
                 .Select(user =>
                 {
-                    var label = $"User [yellow]{Markup.Escape(user.Name)}[/] - [blue]{Markup.Escape(user.Email)}[/]";
+                    var label = $"User [yellow]{user.Name}[/] - [blue]{user.Email}[/]";
                     return (User: user, Label: label);
                 })
                 .ToList();
@@ -350,10 +350,10 @@ public static class ManagementUI
                     .Title("Select a user to edit their coupons")
                     .HighlightStyle(new Style(ColorUI.Hover))
                     .PageSize(10)
-                    .AddChoices(allUsers.Select(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]").Concat(new[] { "Go back" })));
+                    .AddChoices(allUsers.Select(u => $"[yellow]{u.Name}[/] - [blue]{u.Email}[/]").Concat(new[] { "Go back" })));
             if (userSelection == "Go back") break;
 
-            var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]" == userSelection);
+            var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{u.Name}[/] - [blue]{u.Email}[/]" == userSelection);
             if (selectedUser == null)
             {
                 AnsiConsole.MarkupLine("[red]User not found.[/]");
