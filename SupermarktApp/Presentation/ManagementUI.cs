@@ -49,6 +49,9 @@ public static class ManagementUI
                 case "Shop Settings":
                     ShowShopSettingsMenu();
                     break;
+                case "Manage Users":
+                    ManageAdminUI.DisplayMenu();
+                    break;
                 case "Discounts":
                     ShowDiscountMenu();
                     break;

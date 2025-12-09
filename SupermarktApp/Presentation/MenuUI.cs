@@ -101,9 +101,6 @@ public static class MenuUI
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
                     break;
-                case "Manage Users":
-                    ManageAdminUI.DisplayMenu();
-                    break;
                 case "Logout":
                     await ExitLogic.ApplicationExitAsync();  //send email
                     SessionManager.Logout();
