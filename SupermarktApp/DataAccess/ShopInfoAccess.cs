@@ -4,18 +4,17 @@ using Microsoft.VisualBasic;
 using Spectre.Console;
 public class ShopInfoAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
     public static string Table = "ShopInfo";
     public static ShopInfoModel? GetShopInfo()
     {
-        using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} LIMIT 1";
-        return db.QueryFirstOrDefault<ShopInfoModel>(sql);
+        return _connection.QueryFirstOrDefault<ShopInfoModel>(sql);
     }
 
     public static void UpdateShopInfo(ShopInfoModel shopInfo)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         const string sql = @"
             UPDATE ShopInfo SET
@@ -36,11 +35,11 @@ public class ShopInfoAccess
                 ClosingHourSunday = @ClosingHourSunday
             WHERE Id = @Id;";
 
-        var affected = db.Execute(sql, shopInfo);
+        var affected = _connection.Execute(sql, shopInfo);
 
         if (affected == 0)
         {
-            db.Execute(@"
+            _connection.Execute(@"
                 INSERT INTO ShopInfo (
                     Description,
                     OpeningHourMonday,  ClosingHourMonday,

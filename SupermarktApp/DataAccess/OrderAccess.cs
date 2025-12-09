@@ -6,25 +6,23 @@ using System.Collections.Generic;
 
 public static class OrderAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
 
     public static IEnumerable<OrdersModel> GetAllOrders()
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.Query<OrdersModel>("SELECT * FROM Orders");
+        return _connection.Query<OrdersModel>("SELECT * FROM Orders");
     }
     public static DateTime GetDateOfFirstOrder()
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.ExecuteScalar<DateTime>(
+        return _connection.ExecuteScalar<DateTime>(
             @"SELECT MIN(Date) FROM Orders;"
         );
     }
 
     public static OrdersModel? GetMostSoldProductAfterDate(DateTime startDate, DateTime endDate)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.QueryFirstOrDefault<OrdersModel>(
+        return _connection.QueryFirstOrDefault<OrdersModel>(
             @"SELECT ProductID, COUNT(*) AS SoldCount
               FROM Orders
               WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
@@ -36,8 +34,7 @@ public static class OrderAccess
     }
     public static int GetMostSoldCountUpToDate(DateTime startDate, DateTime endDate)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        int count = db.ExecuteScalar<int>(
+        int count = _connection.ExecuteScalar<int>(
             @"SELECT COUNT(*) AS SoldCount
               FROM Orders
               WHERE ProductID = (
@@ -55,8 +52,7 @@ public static class OrderAccess
 
     public static List<(int ProductID, int SoldCount)> GetTop5MostSoldProductsUpToDate(DateTime startDate, DateTime endDate)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        var results = db.Query<(int ProductID, int SoldCount)>(
+        var results = _connection.Query<(int ProductID, int SoldCount)>(
             @"SELECT ProductID, COUNT(*) AS SoldCount
             FROM Orders
             WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
@@ -70,9 +66,8 @@ public static class OrderAccess
     }
     public static List<ProductSalesDto> SeedProductSalesDto(DateTime startDate, DateTime endDate)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
-        var sales = db.Query<(int ProductID, DateTime Date, int UserID, int SoldCount)>(
+        var sales = _connection.Query<(int ProductID, DateTime Date, int UserID, int SoldCount)>(
             @"SELECT ProductID, DATE(Date) AS Date, UserID, COUNT(*) AS SoldCount
             FROM Orders
             WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
@@ -103,10 +98,9 @@ public static class OrderAccess
 
     public static ProductSalesDto? GetSalesOfSingleProductByID(int productId)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
         // get productid userid and date
-        var orderData = db.QueryFirstOrDefault<OrdersModel>(
+        var orderData = _connection.QueryFirstOrDefault<OrdersModel>(
             @"SELECT ProductID, UserID, Date
             FROM Orders
             WHERE ProductID = @ProductID
@@ -118,13 +112,13 @@ public static class OrderAccess
             return null; // return null if there is not atleast 1 order
 
         // count the amount of the same productid is sold
-        int soldCount = db.ExecuteScalar<int>(
+        int soldCount = _connection.ExecuteScalar<int>(
             @"SELECT COUNT(*) FROM Orders WHERE ProductID = @ProductID;",
             new { ProductID = productId }
         );
 
         // get the whole product for the dto
-        var product = db.QueryFirstOrDefault<ProductModel>(
+        var product = _connection.QueryFirstOrDefault<ProductModel>(
             @"SELECT * FROM Products WHERE ID = @ProductID;",
             new { ProductID = productId }
         );
@@ -144,9 +138,8 @@ public static class OrderAccess
 
  public static void AddToOrders(int userId, int orderId, int productId, double price)
     {
-    using var db = new SqliteConnection(ConnectionString);
 
-    db.Execute(@"
+    _connection.Execute(@"
         INSERT INTO Orders (UserID, OrderId, ProductId, Price)
         VALUES (@UserID, @OrderId, @ProductId, @Price);",
         new { UserID = userId, OrderId = orderId, ProductId = productId, Price = price }
@@ -155,12 +148,11 @@ public static class OrderAccess
 
     public static List<OrdersModel> GetOrderssByOrderId(int orderId)
     {
-        using var connection = new SqliteConnection(ConnectionString);
         var query = @"
             SELECT * FROM Orders
             WHERE OrderId = @OrderId;
         ";
-        return connection.Query<OrdersModel>(query, new { OrderId = orderId }).AsList();
+        return _connection.Query<OrdersModel>(query, new { OrderId = orderId }).AsList();
     }
     public static List<ProductModel> GetTop5MostBoughtProducts(int userId)
     {
@@ -169,9 +161,8 @@ public static class OrderAccess
 
     public static List<ProductModel> GetMostBoughtProducts(int userId, int limit)
     {
-        using var db = new SqliteConnection(ConnectionString);
 
-        var productCounts = db.Query<(int ProductId, int Count)>(@"
+        var productCounts = _connection.Query<(int ProductId, int Count)>(@"
             SELECT ProductID, COUNT(ProductID) AS Count
             FROM Orders
             WHERE UserID = @UserId
@@ -183,7 +174,7 @@ public static class OrderAccess
 
         foreach (var item in productCounts)
         {
-            var discount = db.QueryFirstOrDefault<string>(
+            var discount = _connection.QueryFirstOrDefault<string>(
                 "SELECT * FROM Discounts WHERE ProductId = @ProductId",
                 new { ProductId = item.ProductId }
             );
@@ -194,7 +185,7 @@ public static class OrderAccess
             if (discount != null || reward != null)
                 continue;
 
-            var product = db.QueryFirstOrDefault<ProductModel>(
+            var product = _connection.QueryFirstOrDefault<ProductModel>(
                 "SELECT * FROM Products WHERE Id = @Id",
                 new { Id = item.ProductId });
 
@@ -210,8 +201,7 @@ public static class OrderAccess
 
         public static double GetTotalRevenue(DateTime startDate, DateTime endDate)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        double revenue = db.ExecuteScalar<double>(
+        double revenue = _connection.ExecuteScalar<double>(
             @"SELECT SUM(Products.Price)
             FROM Orders
             JOIN Products ON Orders.ProductID = Products.ID
@@ -224,8 +214,7 @@ public static class OrderAccess
     }
     public static double GetTotalPurchaseCost(DateTime start, DateTime end)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        double purchaseCost = db.ExecuteScalar<double>(
+        double purchaseCost = _connection.ExecuteScalar<double>(
             @"SELECT SUM(CostPerUnit * QuantityAdded)
             FROM RestockHistory
             WHERE DATE(RestockDate) >= DATE(@Start)

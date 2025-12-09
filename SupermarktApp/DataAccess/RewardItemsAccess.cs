@@ -3,26 +3,24 @@ using Microsoft.Data.Sqlite;
 
 public static class RewardItemsAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
 
     public static void AddRewardItem(RewardItemsModel RewardItem)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO RewardItems 
+        _connection.Execute(@"INSERT INTO RewardItems 
             (ProductId, PriceInPoints)
             VALUES (@ProductId, @PriceInPoints)", RewardItem);
     }
 
     public static List<RewardItemsModel> GetAllRewardItems()
     {
-        using var db = new SqliteConnection(ConnectionString);
-        return db.Query<RewardItemsModel>("SELECT * FROM RewardItems").ToList();
+        return _connection.Query<RewardItemsModel>("SELECT * FROM RewardItems").ToList();
     }
 
     public static RewardProductDTO? GetRewardItemByProductId(int productId)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        var rewardItem = db.QuerySingleOrDefault<RewardItemsModel>(
+        var rewardItem = _connection.QuerySingleOrDefault<RewardItemsModel>(
             "SELECT * FROM RewardItems WHERE ProductId = @ProductId",
             new { ProductId = productId });
 

@@ -6,10 +6,7 @@ public static class SearchUI
     public static ProductModel SearchProductByNameOrCategory()
     {
         Console.Clear();
-        AnsiConsole.Write(
-        new FigletText("Product Search")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Product Search");
         AnsiConsole.MarkupLine("[blue]Search:[/]");
         AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
         string input = "";
@@ -25,10 +22,7 @@ public static class SearchUI
 
             Console.Clear();
 
-            AnsiConsole.Write(
-            new FigletText("Product Search")
-                .Centered()
-                .Color(AsciiPrimary));
+            Utils.PrintTitle("Product Search");
 
             if (input.Length == 0)
             {
@@ -60,10 +54,7 @@ public static class SearchUI
                     ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
                     if(productDiscount != null)
                     {
-                        string text = product.Price.ToString();
-                        var struckPrice = $"[strike][red]€{text}[/][/]";
-
-                        string newPrice = $"{struckPrice} [green]€{Math.Round(product.Price * (1 - (productDiscount.Discount.DiscountPercentage / 100)), 2)}[/]";
+                        string newPrice = Utils.CalculateDiscountedPriceString(product.Price, productDiscount.Discount.DiscountPercentage);
                         table.AddRow(product.Name, newPrice);            
                     }
                     else

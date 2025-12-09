@@ -3,12 +3,12 @@ using Microsoft.Data.Sqlite;
 using System;
 public static class RestockHistoryAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
 
     public static void AddRestockEntry(RestockHistoryModel restockEntry)
     {
-        using var db = new SqliteConnection(ConnectionString);
-        db.Execute(@"INSERT INTO RestockHistory 
+        _connection.Execute(@"INSERT INTO RestockHistory 
             (ProductID, QuantityAdded, RestockDate, CostPerUnit)
             VALUES (@ProductID, @QuantityAdded, @RestockDate, @CostPerUnit)", restockEntry);
     }

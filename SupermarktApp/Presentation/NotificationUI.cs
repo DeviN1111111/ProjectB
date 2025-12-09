@@ -9,10 +9,7 @@ public class NotificationUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Notifications")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Notifications");
 
             var prompt1 = new SelectionPrompt<string>()
                 .AddChoices(new[] { "Fill specific low stock product", "Go back" });
@@ -28,64 +25,11 @@ public class NotificationUI
             }
         }
     }
-    // public static void FillAllLowStockProducts()
-    // {
-    //     Console.Clear();
-    //     AnsiConsole.Write(
-    //         new FigletText("Fill Products")
-    //             .Centered()
-    //             .Color(AsciiPrimary));
 
-    //     int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(100));
-    //     List<ProductModel> AllLowQuantityProducts = NotificationLogic.GetAllLowQuantityProducts(QuantityThreshold);
-
-    //     int count = 0;
-    //     foreach (var product in AllLowQuantityProducts)
-    //     {
-    //         AnsiConsole.MarkupLine($"ProductID: {product.ID} Name: [yellow]{product.Name}[/] Quantity: [red]{product.Quantity}[/]");
-    //         count++;
-    //         if (count == 20)
-    //         {
-    //             Console.ReadKey();
-    //             count = 0;
-    //             Console.Clear();
-    //             AnsiConsole.Write(
-    //                 new FigletText("Fill Products")
-    //                     .Centered()
-    //                     .Color(AsciiPrimary));
-    //         }
-    //     }
-
-    //     if (AllLowQuantityProducts.Count == 0)
-    //     {
-    //         AnsiConsole.MarkupLine("[green]No products found with low stock.[/]");
-    //         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-    //         Console.ReadKey();
-    //         return;
-    //     }
-
-    //     double price = 0;
-    //     int QuantityFill;
-    //     do
-    //     {
-    //         QuantityFill = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity you want to add to all stock products:").DefaultValue(100));
-    //     } while (ValidaterLogic.ValidateQuantityProduct(QuantityFill) == false);
-
-    //     foreach (var product in AllLowQuantityProducts)
-    //     {
-    //         price += NotificationLogic.FillProductQuantity(product.ID, QuantityFill);
-    //     }
-    //     AnsiConsole.MarkupLine($"[green]Successfully filled all low stock products. Total cost: [yellow]€{Math.Round(price, 2)}[/].[/]");
-    //     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
-    //     Console.ReadKey();
-    // }
     public static double FillSpecificLowStockProduct()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Fill Products")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Fill Products");
 
         int QuantityThreshold = AnsiConsole.Prompt(new TextPrompt<int>("Enter the quantity threshold for low stock notifications:").DefaultValue(50));
         List<ProductModel> AllLowQuantityProducts = NotificationLogic.GetAllLowQuantityProducts(QuantityThreshold);
@@ -122,10 +66,7 @@ public class NotificationUI
             return 0;
         }
         Console.Clear();
-        AnsiConsole.Write(
-        new FigletText("Fill Products")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Fill Products");
 
         double price = 0;
         int QuantityFill;

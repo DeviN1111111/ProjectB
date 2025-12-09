@@ -12,10 +12,7 @@ public class DiscountsUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Discounts")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Discounts");
 
             var Choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -47,10 +44,7 @@ public class DiscountsUI
     public static void DisplayWeeklyDiscounts()
     {
         Console.Clear();
-        AnsiConsole.Write(
-        new FigletText("Weekly Discounted Products")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Weekly Discounted Products");
 
         var discounts = DiscountsLogic.GetWeeklyDiscounts();
         if (discounts.Count == 0)
@@ -80,10 +74,7 @@ public class DiscountsUI
     public static void DisplayPersonalDiscounts()
     {
         Console.Clear();
-        AnsiConsole.Write(
-        new FigletText("Personal Discounted Products")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Personal Discounts");
 
         DiscountsLogic.SeedPersonalDiscounts(SessionManager.CurrentUser!.ID); // clear previous discounts and seed again based on order history
         var discounts = DiscountsLogic.GetValidPersonalDiscounts(SessionManager.CurrentUser!.ID); // retrieve the (new) personal discounts
@@ -116,10 +107,7 @@ public class DiscountsUI
     public static void DisplayExpiryDateDiscounts()
     {
         Console.Clear();
-        AnsiConsole.Write(
-        new FigletText("Expiry Date Discounts")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Expiry Date Discounts");
 
         var discounts = DiscountsLogic.GetAllExpiryDiscounts();
         if (discounts.Count == 0)

@@ -8,14 +8,7 @@ public static class ShopDetailsUI
     {
         Console.Clear();
         ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Welcome to our Supermarket!")
-                .Centered()
-                .Color(AsciiPrimary));
-
-
-
+        Utils.PrintTitle("Welcome to our Supermarket!");
         var table = new Table();
 
         var description = shopInfo.Description;
@@ -100,33 +93,34 @@ public static class ShopDetailsUI
         {
             AnsiConsole.MarkupLine("[grey]No reviews yet! Be the first to leave one![/]");
         }
-        // var currentUser = SessionManager.CurrentUser;
-        // if (currentUser != null)
-        
-        var choice = AnsiConsole.Prompt(
+
+        var currentUser = SessionManager.CurrentUser;
+        if (currentUser!= null && currentUser.AccountStatus == "User")
+        {
+            var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[green]Would you like to add a review?[/]")
                 .AddChoices("Yes", "No")
-        );
-        switch(choice)
-        {
-            case "Yes":
-                ShopReviewUI.AddReview(new ShopReviewLogic());
-                break;
-            case "No":
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
-                Console.ReadKey();
-                break;
-        }
+            );
+            switch(choice)
+            {
+                case "Yes":
+                    ShopReviewUI.AddReview(reviewLogic);
+                    Show();
+                    return;
+                case "No":
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+                    Console.ReadKey();
+                    break;
+            }
+        }   
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+        Console.ReadKey();
     }
     public static void PromptDescription()
     {
         Console.Clear();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Update Description")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Update Description");
         string description = AnsiConsole.Ask<string>("Enter the new [green]shop description[/]:");
         ShopInfoLogic.UpdateDescription(description);
         AnsiConsole.MarkupLine("[green]Shop description updated successfully![/]");
@@ -138,11 +132,7 @@ public static class ShopDetailsUI
         ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
 
         Console.Clear();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Update Opening Hours")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Update Opening Hours");
         var options = new List<string>();
         options.AddRange(new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
         var choice = AnsiConsole.Prompt(
