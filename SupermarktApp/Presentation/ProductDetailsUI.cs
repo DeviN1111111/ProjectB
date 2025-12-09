@@ -8,10 +8,7 @@ public static class ProductDetailsUI
     {
         Console.Clear();
         double ProductPrice = product.Price;
-        AnsiConsole.Write(
-            new FigletText("Product Details")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Product Details");
         var body = string.Empty;
 
         ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);

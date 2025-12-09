@@ -19,11 +19,7 @@ public class Order
         List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
 
         // Title
-        AnsiConsole.Write(
-            new FigletText("Cart")
-                .Centered()
-                .Color(AsciiPrimary));
-
+        Utils.PrintTitle("Cart");
 
         // Cart table
         var cartTable = new Table()
@@ -147,11 +143,8 @@ public class Order
 
             var allUserProducts = ChecklistLogic.AllUserProducts();
             var allProducts = ProductLogic.GetAllProducts();
-
-            AnsiConsole.Write(
-                new FigletText("Checklist")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            
+            Utils.PrintTitle("Checklist");
 
             if (allUserProducts.Count == 0)
             {
@@ -301,10 +294,8 @@ public class Order
                 int rewardPoints = RewardLogic.CalculateRewardPoints(rewardableAmount);
                 // pay now or pay on pickup
                 Console.Clear();
-                AnsiConsole.Write(
-                    new FigletText("Checkout")
-                        .Centered()
-                        .Color(Color.White));
+                Utils.PrintTitle("Checkout");
+
                 AnsiConsole.WriteLine("Choose payment method:");
                 var option1 = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -462,11 +453,7 @@ public class Order
                     CouponLogic.CreateCoupon(currentUser.ID, 5);
                 }
             }
-            
-            AnsiConsole.Write(
-                new FigletText("Order History")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Order History");
 
             var userOrders = OrderLogic.GetAllUserOrders(SessionManager.CurrentUser!.ID); // geen access aanroepen in de presentation layer
 
@@ -510,10 +497,7 @@ public class Order
             }
 
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText($"Order #{selectedOrderId}")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle($"Order #{selectedOrderId}");
 
             var orderTable = new Table()
                 .BorderColor(AsciiPrimary)

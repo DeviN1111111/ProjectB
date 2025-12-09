@@ -6,10 +6,7 @@ public static class SearchUI
     public static ProductModel SearchProductByNameOrCategory()
     {
         Console.Clear();
-        AnsiConsole.Write(
-        new FigletText("Product Search")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Product Search");
         AnsiConsole.MarkupLine("[blue]Search:[/]");
         AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
         string input = "";
@@ -25,10 +22,7 @@ public static class SearchUI
 
             Console.Clear();
 
-            AnsiConsole.Write(
-            new FigletText("Product Search")
-                .Centered()
-                .Color(AsciiPrimary));
+            Utils.PrintTitle("Product Search");
 
             if (input.Length == 0)
             {

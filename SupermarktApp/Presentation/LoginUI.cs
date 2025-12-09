@@ -75,10 +75,7 @@ public static class LoginUI
                 // Ask twice then option to forget password
 
                 Console.Clear();
-                AnsiConsole.Write(
-                new FigletText("Error")
-                    .Centered()
-                    .Color(AsciiPrimary));
+                Utils.PrintTitle("Error");
                 AnsiConsole.MarkupLine("[red]Login failed! Please check your email and password.[/]");
                 Console.ReadKey();
                 attempts++;
@@ -87,10 +84,8 @@ public static class LoginUI
                 {
                     // option to go back or reset password
                     Console.Clear();
-                    AnsiConsole.Write(
-                        new FigletText("Supermarket App")
-                            .Centered()
-                            .Color(AsciiPrimary));
+                    Utils.PrintTitle("Supermarket App");
+
                     var choice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .AddChoices(new[] { "Reset Password", "Back to Main Menu" }));
@@ -179,10 +174,7 @@ public static class LoginUI
                 break;
             }
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Supermarket App")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
+            Utils.PrintTitle("Supermarket App");
 
             string name = AnsiConsole.Prompt(new TextPrompt<string>("What's your first name?"));
             string lastName = AnsiConsole.Prompt(new TextPrompt<string>("What's your last name?"));
