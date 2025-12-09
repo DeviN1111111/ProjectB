@@ -671,4 +671,85 @@ public class Order
                 }
     }
     }
+    public static void HandleUnpaidOrder(OrderHistoryModel selectedOrder, int selectedOrderId, double finalTotal)
+    {
+        // Show fine date if exists
+        if (selectedOrder.FineDate != null)
+        {
+            AnsiConsole.MarkupLine(
+                $"[yellow]You have till [red]{selectedOrder.FineDate:dd-MM-yyyy HH:mm}[/] to pay.[/]\n"
+            );
+        }
+
+        var payChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]This order is unpaid. What would you like to do?[/]")
+                .AddChoices("Pay Now", "Go Back")
+        );
+
+        if (payChoice != "Pay Now")
+            return;
+
+        var paymentCode = AnsiConsole.Ask<string>("[yellow]Enter your 6-digit payment code:[/]");
+        if (!paymentCode.All(char.IsDigit) || paymentCode.Length != 6)
+        {
+            AnsiConsole.MarkupLine("[red]Invalid code. It must be 6 digits and numeric.[/]");
+            Console.ReadKey();
+            return;
+        }
+
+        bool isPaid = PayLaterLogic.Pay(selectedOrderId, int.Parse(paymentCode));
+        if (!isPaid)
+        {
+            AnsiConsole.MarkupLine("[red]Payment failed or declined.[/]");
+            Console.ReadKey();
+            return;
+        }
+
+        AnsiConsole.MarkupLine("[green]Payment successful.[/]");
+        double rewardableAmount = Math.Max(0, finalTotal);
+        int rewardPoints = RewardLogic.CalculateRewardPoints(rewardableAmount);
+        RewardLogic.AddRewardPointsToUser(rewardPoints);
+        AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
+        Console.ReadKey();
+    }
+    public static void HandlePaidOrder(OrderHistoryModel selectedOrder)
+    {
+        var reorderChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]This order is already paid. What would you like to do?[/]")
+                .AddChoices("Reorder", "Go Back")
+        );
+
+        if (reorderChoice != "Reorder")
+            return;
+
+        var confirmReorder = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[red]Are you sure you want to reorder this past order?[/]")
+                .AddChoices("Yes", "No")
+        );
+
+        if (confirmReorder != "Yes")
+            return;
+
+        int actualOrderId = selectedOrder.Id;
+        var reorderResult = OrderLogic.ReorderPastOrder(actualOrderId);
+        AnsiConsole.MarkupLine("[green]Items added to cart (where possible)![/]");
+
+        if (reorderResult.Unavailable.Any())
+        {
+            AnsiConsole.MarkupLine("\n[red]The following products are no longer available:[/]");
+            foreach (var name in reorderResult.Unavailable)
+                AnsiConsole.MarkupLine($"- {name}");
+        }
+
+        if (reorderResult.OutOfStock.Any())
+        {
+            AnsiConsole.MarkupLine("\n[yellow]The following products had stock issues:[/]");
+            foreach (var name in reorderResult.OutOfStock)
+                AnsiConsole.MarkupLine($"- {name}");
+        }
+        Console.ReadKey();
+    }
 }
