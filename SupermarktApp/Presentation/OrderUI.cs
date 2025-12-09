@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 public class Order
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     private static string Safe(string text) => Markup.Escape(text);
     public static double CouponCredit = 0;
     public static int? SelectedCouponId = null;
@@ -23,7 +22,7 @@ public class Order
 
         // Cart table
         var cartTable = new Table()
-            .BorderColor(AsciiPrimary)
+            .BorderColor(ColorUI.AsciiPrimary)
             .AddColumn("[white]Product[/]")
             .AddColumn("[white]Quantity[/]")
             .AddColumn("[white]Price[/]")
@@ -114,7 +113,7 @@ public class Order
             )
             .Header(headerText, Justify.Left)
             .Border(BoxBorder.Double)
-            .BorderColor(AsciiPrimary)
+            .BorderColor(ColorUI.AsciiPrimary)
         );
 
         var rightSide =SuggestionsUI.GetSuggestionsPanel(SessionManager.CurrentUser!.ID);
@@ -455,7 +454,7 @@ public class Order
             Utils.PrintTitle($"Order #{selectedOrderId}");
 
             var orderTable = new Table()
-                .BorderColor(AsciiPrimary)
+                .BorderColor(ColorUI.AsciiPrimary)
                 .AddColumn("[white]Product[/]")
                 .AddColumn("[white]Quantity[/]")
                 .AddColumn("[white]Price per Unit[/]")

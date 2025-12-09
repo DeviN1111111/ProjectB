@@ -2,8 +2,6 @@ using Spectre.Console;
 
 public class ProductUI
 {
-    // add to basket and add to checklist had dubbel code 
-    // heb er dit van gemaakt :) -a
     private static int AskForQuantity(ProductModel product)
     {
         while(true)

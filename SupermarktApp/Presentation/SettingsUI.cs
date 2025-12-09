@@ -1,7 +1,6 @@
 using Spectre.Console;
 public static class SettingsUI
 {
-    public static readonly Color Hover = Color.FromHex("#006494");
     public static void ShowSettingsMenu()
     {
         while (true)
@@ -102,7 +101,7 @@ public static class SettingsUI
         AnsiConsole.MarkupLine("Are you sure you want to enable 2FA?");
         var wantToEnable2FA = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Yes", "No" }));
 
         if (wantToEnable2FA == "Yes")
@@ -147,7 +146,7 @@ public static class SettingsUI
         AnsiConsole.MarkupLine("Are you sure you want to disable 2FA?");
         var wantToEnable2FA = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Yes", "No" }));
 
         if (wantToEnable2FA == "Yes")
@@ -310,7 +309,7 @@ public static class SettingsUI
             AnsiConsole.MarkupLine("Are you sure you want to apply these changes?");
             var confirmChange = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .AddChoices(new[] { "Yes", "No" }));
 
             if (confirmChange == "No")

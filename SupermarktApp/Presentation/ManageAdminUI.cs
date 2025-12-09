@@ -3,11 +3,6 @@ using Spectre.Console;
 
 public class ManageAdminUI
 {
-    public static readonly Color Text = Color.FromHex("#E8F1F2");
-    public static readonly Color Hover = Color.FromHex("#006494");
-    public static readonly Color Confirm = Color.FromHex("#13293D");
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-    public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
         while (true)
@@ -17,7 +12,7 @@ public class ManageAdminUI
 
             var period = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .AddChoices(new[] { "Add User", "Delete User", "Change Role", "Go back" }));
 
             switch (period)
@@ -130,7 +125,7 @@ public class ManageAdminUI
 
         var Confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Confirm", "Cancel" }));
         
         switch (Confirm)

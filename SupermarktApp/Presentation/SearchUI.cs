@@ -2,7 +2,6 @@ using Spectre.Console;
 
 public static class SearchUI
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static ProductModel SearchProductByNameOrCategory()
     {
         Console.Clear();
@@ -56,6 +55,10 @@ public static class SearchUI
                     {
                         string newPrice = Utils.CalculateDiscountedPriceString(product.Price, productDiscount.Discount.DiscountPercentage);
                         table.AddRow(product.Name, newPrice);            
+                    }
+                    else if (RewardLogic.GetRewardItemByProductId(product.ID) != null)
+                    {
+                        continue;
                     }
                     else
                     {

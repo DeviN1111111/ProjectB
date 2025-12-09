@@ -327,9 +327,9 @@ public class DatabaseFiller
         ProductAccess.ChangeProductDetails(RewardItem2);
         ProductAccess.ChangeProductDetails(RewardItem3);
 
-        ProductAccess.SetProductVisibility(451, false);
-        ProductAccess.SetProductVisibility(452, false);
-        ProductAccess.SetProductVisibility(453, false);
+        ProductAccess.SetProductVisibility(451, true);
+        ProductAccess.SetProductVisibility(452, true);
+        ProductAccess.SetProductVisibility(453, true);
 
         var birthdayPresent = new ProductModel(
             name: "Birthday Present",
