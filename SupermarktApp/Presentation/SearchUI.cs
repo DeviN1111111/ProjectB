@@ -57,6 +57,10 @@ public static class SearchUI
                         string newPrice = Utils.CalculateDiscountedPriceString(product.Price, productDiscount.Discount.DiscountPercentage);
                         table.AddRow(product.Name, newPrice);            
                     }
+                    else if (RewardLogic.GetRewardItemByProductId(product.ID) != null)
+                    {
+                        continue;
+                    }
                     else
                     {
                         string yellowPrice = $"[yellow]€{product.Price.ToString()}[/]";
