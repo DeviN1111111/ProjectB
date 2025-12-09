@@ -75,13 +75,12 @@ public class NotificationUI
 
         foreach (var product in itemsToFill)
         {
-            // var productID = product.Split(" ");
-            // price += NotificationLogic.FillProductQuantity(Convert.ToInt32(productID[1]), QuantityFill);
             var productID = int.Parse(product.Split(" ")[1]);
             var cost = NotificationLogic.FillProductQuantity(productID, QuantityFill);
 
             price += cost;
-            RestockHistoryAccess.AddRestockEntry(new RestockHistoryModel(productID, QuantityFill, DateTime.Now, cost / QuantityFill));
+            NotificationLogic.AddRestockEntry(new RestockHistoryModel(productID, QuantityFill, DateTime.Now, cost / QuantityFill));
+
         }
         AnsiConsole.MarkupLine($"[green]Successfully filled the selected products. Total cost: [yellow]€{Math.Round(price, 2)}[/].[/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");

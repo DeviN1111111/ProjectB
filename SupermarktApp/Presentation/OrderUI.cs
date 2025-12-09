@@ -318,6 +318,7 @@ public class Order
                         OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        CouponLogic.ResetCouponSelection();
                         Console.ReadKey();
                         break;
                     case "Pay Later":
@@ -349,6 +350,7 @@ public class Order
                         Console.ReadKey();
                         await PayLaterLogic.Activate(order.Id);
                         OrderLogic.UpdateStock();
+                        CouponLogic.ResetCouponSelection();
                         OrderLogic.ClearCart();
                         break;
                 }

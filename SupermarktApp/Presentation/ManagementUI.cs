@@ -724,7 +724,7 @@ public static class ManagementUI
 
             foreach (var review in allReviews)
             {
-                UserModel user = UserAccess.GetUserByID(review.UserId)!;
+                UserModel user = UserSettingsLogic.GetUserByID(review.UserId)!;
                 ReviewList.Add($"ReviewID: {review.Id} User: [yellow]{user.Name}[/] Stars: [green]{review.Stars}[/] Text: [blue]{review.Text}[/]");
             }
 
