@@ -2,39 +2,35 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 public class ChecklistAccess
 {
-    private const string ConnectionString = "Data Source=database.db";
+    private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
+    private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
     public static string Table = "Checklist";
 
     public static void AddToChecklist(int userId, int productId, int quantity)
     {
-        using var db = new SqliteConnection(ConnectionString);
         var sql = $"INSERT INTO {Table} (UserId, ProductId, Quantity) VALUES (@UserId, @ProductId, @Quantity)";
-        db.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity });
+        _connection.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity });
     }
 
     public static List<ChecklistModel> GetAllUserProducts(int userID)
     {
-        using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE UserId = @UserID";
-        return db.Query<ChecklistModel>(sql, new { UserID = userID }).ToList();
+        return _connection.Query<ChecklistModel>(sql, new { UserID = userID }).ToList();
     }
     
     public static ChecklistModel? GetUserProductByProductId(int userId, int productId)
     {
-        using var db = new SqliteConnection(ConnectionString);
         var sql = $"SELECT * FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
-        return db.QueryFirstOrDefault<ChecklistModel>(sql, new { UserId = userId, ProductId = productId });
+        return _connection.QueryFirstOrDefault<ChecklistModel>(sql, new { UserId = userId, ProductId = productId });
     }
     public static void ClearChecklist()
     {
-        using var db = new SqliteConnection(ConnectionString);
         var sql = $"DELETE FROM Cart WHERE UserId = @UserId";
-        db.Execute(sql, new { UserId = SessionManager.CurrentUser.ID });
+        _connection.Execute(sql, new { UserId = SessionManager.CurrentUser!.ID });
     }
     public static void RemoveFromChecklist(int userId, int productId)
     {
-        using var db = new SqliteConnection(ConnectionString);
         var sql = $"DELETE FROM {Table} WHERE UserId = @UserId AND ProductId = @ProductId";
-        db.Execute(sql, new { UserId = userId, ProductId = productId });
+        _connection.Execute(sql, new { UserId = userId, ProductId = productId });
     }
 }

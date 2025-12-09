@@ -53,9 +53,4 @@ public class ProductLogic
     
         return ProductAccess.GetAllProducts(includeHidden);
     }
-
-    public static ProductModel GetProductByID(int productID)
-    {
-        return ProductAccess.GetProductByID(productID)!;
-    }
 }

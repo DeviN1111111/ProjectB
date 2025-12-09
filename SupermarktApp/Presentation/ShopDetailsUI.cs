@@ -100,24 +100,29 @@ public static class ShopDetailsUI
         {
             AnsiConsole.MarkupLine("[grey]No reviews yet! Be the first to leave one![/]");
         }
-        // var currentUser = SessionManager.CurrentUser;
-        // if (currentUser != null)
-        
-        var choice = AnsiConsole.Prompt(
+
+        var currentUser = SessionManager.CurrentUser;
+        if (currentUser!= null && currentUser.AccountStatus == "User")
+        {
+            var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[green]Would you like to add a review?[/]")
                 .AddChoices("Yes", "No")
-        );
-        switch(choice)
-        {
-            case "Yes":
-                ShopReviewUI.AddReview(new ShopReviewLogic());
-                break;
-            case "No":
-                AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
-                Console.ReadKey();
-                break;
-        }
+            );
+            switch(choice)
+            {
+                case "Yes":
+                    ShopReviewUI.AddReview(reviewLogic);
+                    Show();
+                    return;
+                case "No":
+                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+                    Console.ReadKey();
+                    break;
+            }
+        }   
+        AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
+        Console.ReadKey();
     }
     public static void PromptDescription()
     {

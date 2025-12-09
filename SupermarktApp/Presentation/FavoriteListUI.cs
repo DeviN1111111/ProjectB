@@ -303,7 +303,15 @@ static class FavoriteListUI
         {
             foreach (var item in allProductsInList)
             {
-                OrderLogic.AddToCart(item.Product, item.Quantity);
+                var product = ProductLogic.GetProductById(item.ProductId);
+                if (product.Quantity >= item.Quantity)
+                {
+                    OrderLogic.AddToCart(item.Product, item.Quantity);
+                }
+                else
+                {
+                    OrderLogic.AddToCart(item.Product, product.Quantity);
+                }
             }
         }
         else if (selectedChoice == "Add specific products")
@@ -324,7 +332,15 @@ static class FavoriteListUI
 
             foreach(var item in listToAddToCart)
             {
-                OrderLogic.AddToCart(item.Product, item.Quantity);
+                var product = ProductLogic.GetProductById(item.ProductId);
+                if (product.Quantity >= item.Quantity)
+                {
+                    OrderLogic.AddToCart(item.Product, item.Quantity);
+                }
+                else
+                {
+                    OrderLogic.AddToCart(item.Product, product.Quantity);
+                }
             }
         }
         else return;
