@@ -8,10 +8,7 @@ public static class MapUI
     public static void DisplayMap(int box)
     {
         Console.Clear();
-            AnsiConsole.Write(
-            new FigletText("Map")
-            .Centered()
-            .Color(AsciiPrimary));
+        Utils.PrintTitle("Store Map");
         Console.WriteLine(MapLogic.MapBuilder(box));
         Console.ReadKey();
     }

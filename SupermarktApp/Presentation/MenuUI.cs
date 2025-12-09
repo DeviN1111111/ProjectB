@@ -8,10 +8,7 @@ public static class MenuUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Supermarket App")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Supermarket App");
             var options = new List<string>();
 
             List<ProductModel> products = NotificationLogic.GetAllLowQuantityProducts(50);
@@ -35,7 +32,21 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Favorite Lists", "Rewards", "Discounts", "Shop Reviews", "Shop Details", "Settings", "Logout", "Exit"});
+                options.AddRange(new[] { 
+                    "Order", 
+                    "Cart", 
+                    "Checklist", 
+                    "Order History", 
+                    "Favorite Lists", 
+                    "Return Item",
+                    "Rewards", 
+                    "Discounts", 
+                    "Shop Reviews", 
+                    "Shop Details", 
+                    "Settings", 
+                    "Logout", 
+                    "Exit"
+                    });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -82,6 +93,9 @@ public static class MenuUI
                     Console.Clear();
                     Order.ShowCart();
                     break;
+                case "Return Item":
+                    ReturnItemUI.DisplayMenu();
+                    break;
                 case "Checklist":
                     Console.Clear();
                     Order.ShowChecklist();
@@ -101,22 +115,19 @@ public static class MenuUI
                 case "Statistics":
                     StatisticsUI.DisplayMenu();
                     break;
-                case "Manage Users":
-                    ManageAdminUI.DisplayMenu();
-                    break;
                 case "Logout":
-                    SessionManager.CurrentUser = null!;
+                    await ExitLogic.ApplicationExitAsync();  //send email
+                    SessionManager.Logout();
                     break;
                 case "Rewards":
                     RewardUI.DisplayMenu();
-                    break;
-                case "Go back":
-                    SessionManager.CurrentUser = null!;
                     break;
                 case "Settings":
                     SettingsUI.ShowSettingsMenu();
                     break;
                 case "Exit":
+                    await ExitLogic.ApplicationExitAsync();  //email 
+                    SessionManager.Logout();
                     return;
             }
         }

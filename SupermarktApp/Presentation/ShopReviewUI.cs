@@ -10,10 +10,7 @@ public static class ShopReviewUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Shop Reviews")
-                    .Centered()
-                    .Color(Color.Gold1));
+            Utils.PrintTitle("Shop Reviews");
 
             var options = new List<string>
             {
@@ -51,11 +48,7 @@ public static class ShopReviewUI
     private static void ViewMyReviews(ShopReviewLogic logic)
     {
         Console.Clear();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Your Reviews")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Your Reviews");
 
         var user = SessionManager.CurrentUser;
         if (user == null)
@@ -87,10 +80,7 @@ public static class ShopReviewUI
     public static void AddReview(ShopReviewLogic logic)
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Add Your Review")
-                .Centered()
-                .Color(Color.Yellow));
+        Utils.PrintTitle("Add Your Review");
 
         var currentUser = SessionManager.CurrentUser;
         if (currentUser == null)

@@ -13,10 +13,7 @@ public class ManageAdminUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Manage Users")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("Manage Users");
 
             var period = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -50,10 +47,7 @@ public class ManageAdminUI
     public static void ChangeRole()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Change Role")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Change Role");
 
         List<UserModel> AllUsers = AdminLogic.GetAllUsers();
         List<string> UsersToDeleteList = [];
@@ -96,10 +90,7 @@ public class ManageAdminUI
         else
         {
             Console.Clear();
-            AnsiConsole.Write(
-            new FigletText("ERROR")
-                .Centered()
-                .Color(AsciiPrimary));
+            Utils.PrintTitle("ERROR");
             AnsiConsole.MarkupLine("[yellow]You can't change your own role![/]");
             Console.ReadKey();
         }
@@ -108,10 +99,7 @@ public class ManageAdminUI
     public static void DeleteUser()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Delete User")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Delete User");
 
         List<UserModel> AllUsers = AdminLogic.GetAllUsers();
         List<string> UsersToDeleteList = [];
@@ -162,10 +150,7 @@ public class ManageAdminUI
         else
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("ERROR")
-                    .Centered()
-                    .Color(AsciiPrimary));
+            Utils.PrintTitle("ERROR");
             AnsiConsole.MarkupLine("[yellow]You can't delete yourself![/]");
             Console.ReadKey();
         }
@@ -174,10 +159,7 @@ public class ManageAdminUI
     public static void AddUser()
     {
         Console.Clear();
-        AnsiConsole.Write(
-            new FigletText("Add User")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Add User");
 
         while (true)
         {
@@ -187,10 +169,7 @@ public class ManageAdminUI
                 break;
             }
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Supermarket App")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
+            Utils.PrintTitle("Supermarket App");
 
             string name = AnsiConsole.Prompt(new TextPrompt<string>("What's your first name?"));
             string lastName = AnsiConsole.Prompt(new TextPrompt<string>("What's your last name?"));

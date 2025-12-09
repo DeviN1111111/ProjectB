@@ -50,4 +50,9 @@ public static class OrderHistoryAccess
         const string query = "SELECT * FROM OrderHistory WHERE IsPaid = 0 ORDER BY Date DESC;";
         return _connection.Query<OrderHistoryModel>(query).AsList();
     }
+    public static void DeleteOrderHistory(int orderId)
+    {
+        const string sql = @"DELETE FROM OrderHistory WHERE Id = @OrderId;";
+        _connection.Execute(sql, new { OrderId = orderId });
+    }
 }

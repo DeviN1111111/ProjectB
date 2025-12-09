@@ -7,11 +7,7 @@ public static class SettingsUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Settings Menu")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
-
+            Utils.PrintTitle("Settings Menu");
 
             AnsiConsole.MarkupLine($"[italic yellow]Changing settings for:[/] [bold green]{SessionManager.CurrentUser.Name}[/]");
             Console.WriteLine();
@@ -41,11 +37,7 @@ public static class SettingsUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Security Settings Menu")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
-
+            Utils.PrintTitle("Security Settings Menu");
 
             AnsiConsole.MarkupLine($"[italic yellow]Changing Security settings for:[/] [bold green]{SessionManager.CurrentUser.Name}[/]");
             Console.WriteLine();
@@ -72,11 +64,7 @@ public static class SettingsUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("2FA Settings Menu")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
-
+            Utils.PrintTitle("2FA Settings Menu");
 
             AnsiConsole.MarkupLine($"[italic yellow]Changing 2FA settings for: [/][bold green]{SessionManager.CurrentUser.Name}[/]");
             Console.WriteLine();
@@ -180,10 +168,7 @@ public static class SettingsUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Profile Settings Menu")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
+            Utils.PrintTitle("Profile Settings Menu");
 
             var grid = new Grid();
             grid.AddColumn();
@@ -230,10 +215,7 @@ public static class SettingsUI
         while (true)
         {
             Console.Clear();
-            AnsiConsole.Write(
-                new FigletText("Profile Settings Menu")
-                    .Centered()
-                    .Color(MenuUI.AsciiPrimary));
+            Utils.PrintTitle("Profile Settings Menu");
 
             string NewName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Name[/]:").DefaultValue(SessionManager.CurrentUser!.Name).DefaultValue(SessionManager.CurrentUser.Name));
             string NewLastName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Last Name[/]:").DefaultValue(SessionManager.CurrentUser.LastName).DefaultValue(SessionManager.CurrentUser.LastName));

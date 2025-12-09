@@ -8,14 +8,7 @@ public static class ShopDetailsUI
     {
         Console.Clear();
         ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Welcome to our Supermarket!")
-                .Centered()
-                .Color(AsciiPrimary));
-
-
-
+        Utils.PrintTitle("Welcome to our Supermarket!");
         var table = new Table();
 
         var description = shopInfo.Description;
@@ -127,11 +120,7 @@ public static class ShopDetailsUI
     public static void PromptDescription()
     {
         Console.Clear();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Update Description")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Update Description");
         string description = AnsiConsole.Ask<string>("Enter the new [green]shop description[/]:");
         ShopInfoLogic.UpdateDescription(description);
         AnsiConsole.MarkupLine("[green]Shop description updated successfully![/]");
@@ -143,11 +132,7 @@ public static class ShopDetailsUI
         ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
 
         Console.Clear();
-        Color AsciiPrimary = Color.FromHex("#247BA0");
-        AnsiConsole.Write(
-            new FigletText("Update Opening Hours")
-                .Centered()
-                .Color(AsciiPrimary));
+        Utils.PrintTitle("Update Opening Hours");
         var options = new List<string>();
         options.AddRange(new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
         var choice = AnsiConsole.Prompt(
