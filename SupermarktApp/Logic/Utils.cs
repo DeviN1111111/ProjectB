@@ -178,4 +178,27 @@ static class Utils
 
         return $"[strike red]{oldPrice}[/] [green]{newPrice}[/]";
     }
+    /// <summary>
+    /// Prompts the user to enter an integer within an optional range.
+    /// </summary>
+    /// <param name="text">The text prompt</param>
+    /// <param name="min">The minimum acceptable value (inclusive)</param>
+    /// <param name="max">The maximum acceptable value (inclusive)</param>
+    /// <returns>User input as an integer.</returns>
+    public static int AskInt(string text, int? min = null, int? max = null)
+    {
+        var prompt = new TextPrompt<int>(text ?? "Enter a number")
+            .PromptStyle("green")
+            .ValidationErrorMessage("[red]Invalid number.[/]")
+            .Validate(num =>
+            {
+                if (min.HasValue && num < min.Value)
+                    return ValidationResult.Error($"[red]Minimum is {min.Value}[/]");
+                if (max.HasValue && num > max.Value)
+                    return ValidationResult.Error($"[red]Maximum is {max.Value}[/]");
+                return ValidationResult.Success();
+            });
+
+        return AnsiConsole.Prompt(prompt);
+    }
 }

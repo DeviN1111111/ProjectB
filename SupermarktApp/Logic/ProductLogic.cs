@@ -53,4 +53,14 @@ public class ProductLogic
     
         return ProductAccess.GetAllProducts(includeHidden);
     }
+    public static void UpdateStock(int productId, int incomingQuantity)
+    {
+        var currentQuantity = ProductAccess.GetProductQuantityByID(productId);
+        var newQuantity = currentQuantity + incomingQuantity;
+
+        if (newQuantity < 0)
+            newQuantity = 0;
+
+        ProductAccess.UpdateProductStock(productId, newQuantity);
+    }
 }

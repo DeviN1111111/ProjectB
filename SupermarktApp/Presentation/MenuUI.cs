@@ -32,7 +32,21 @@ public static class MenuUI
             else if (SessionManager.CurrentUser.AccountStatus == "User")
             {
                 // Options when you're logged in as a regular user
-                options.AddRange(new[] { "Order", "Cart", "Checklist", "Order History", "Favorite Lists", "Rewards", "Discounts", "Shop Reviews", "Shop Details", "Settings", "Logout", "Exit"});
+                options.AddRange(new[] { 
+                    "Order", 
+                    "Cart", 
+                    "Checklist", 
+                    "Order History", 
+                    "Favorite Lists", 
+                    "Return Item",
+                    "Rewards", 
+                    "Discounts", 
+                    "Shop Reviews", 
+                    "Shop Details", 
+                    "Settings", 
+                    "Logout", 
+                    "Exit"
+                    });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
@@ -78,6 +92,9 @@ public static class MenuUI
                 case "Cart":
                     Console.Clear();
                     Order.ShowCart();
+                    break;
+                case "Return Item":
+                    ReturnItemUI.DisplayMenu();
                     break;
                 case "Checklist":
                     Console.Clear();
