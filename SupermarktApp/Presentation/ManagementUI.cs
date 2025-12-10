@@ -101,11 +101,11 @@ public static class ManagementUI
         switch (choice)
         {
             case "Edit Shop Description":
-                ShopDetailsUI.PromptDescription();
+                ShopDetailsUI.ChangeDescription();
                 break;
 
             case "Edit Opening Hours":
-                ShopDetailsUI.PromptOpeningHours();
+                ShopDetailsUI.ChangeOpeningHours();
                 break;
 
             case "Back":
