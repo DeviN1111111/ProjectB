@@ -155,10 +155,15 @@ static class Utils
     /// Formats price to 0,00
     /// </summary>
     /// <param name="price">The price</param>
+    /// <param name="color">Optional color for the price</param>
     /// <typeparam name="T"></typeparam>
     /// <returns>Formatted price string</returns>
-    public static string ChangePriceFormat<T>(T price)
+    public static string ChangePriceFormat<T>(T price, string? color = null)
     {
+        if (color != null)
+        {
+            return $"[{color}]€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",") + "[/]";
+        }
         return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",");
     }
     /// <summary>
