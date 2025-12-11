@@ -320,7 +320,7 @@ public static class StatisticsUI
         // ** DEPENDENCIES **
         var allProducts = ProductLogic.GetAllProducts();
         var overPricedProducts = ProductLogic.GetOverpricedProducts(allProducts);
-        Func<double, string> priceFormatter = price => Utils.ChangePriceFormat(price);
+        Func<double, string, string> priceFormatter = (price, color) => Utils.ChangePriceFormat(price, color);
 
         // ** DISPLAY **
         var competitorPricesTable = Utils.CreateTable(
@@ -331,8 +331,8 @@ public static class StatisticsUI
         {
             competitorPricesTable.AddRow(
                 product.Name,
-                priceFormatter(product.Price),
-                priceFormatter(product.CompetitorPrice)
+                priceFormatter(product.Price, "red"),
+                priceFormatter(product.CompetitorPrice, "green")
             );
         }
 
@@ -353,7 +353,7 @@ public static class StatisticsUI
         }
     }
      
-    public static void EditOverpricedProducts(List<ProductModel> overPricedProducts, Func<double, string> priceFormatter)
+    public static void EditOverpricedProducts(List<ProductModel> overPricedProducts, Func<double, string, string> priceFormatter)
     {
         Console.Clear();
         Utils.PrintTitle("Edit Competitor Prices");
@@ -361,14 +361,14 @@ public static class StatisticsUI
         var selectedProducts = Utils.CreateMultiSelectionPrompt(
             overPricedProducts,
             "Select products to change price:",
-            p => $"{p.Name} - Current Price: {priceFormatter(p.Price)} | Competitor Price: {priceFormatter(p.CompetitorPrice)}"
+            p => $"{p.Name} - Current Price: {priceFormatter(p.Price, "red")} | Competitor Price: {priceFormatter(p.CompetitorPrice, "green")}"
         );
 
         foreach (var product in selectedProducts)
         {
             double newPrice = Utils.AskDouble(
                 $"Enter new price for [yellow]{product.Name}[/] " +
-                $"Current Price: {priceFormatter(product.Price)} | Competitor Price: {priceFormatter(product.CompetitorPrice)}: "
+                $"Current Price: {priceFormatter(product.Price, "red")} | Competitor Price: {priceFormatter(product.CompetitorPrice, "green")}): "
             );
 
             ProductLogic.LowerPriceForOverpricedProduct(product, newPrice);
