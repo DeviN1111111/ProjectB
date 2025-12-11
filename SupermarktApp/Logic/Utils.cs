@@ -162,9 +162,9 @@ static class Utils
     {
         if (color != null)
         {
-            return $"[{color}]€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",") + "[/]";
+            return $"[{color}]€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(",",".") + "[/]";
         }
-        return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",");
+        return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(",",".");
     }
     /// <summary>
     /// Calculates discounted price and returns a formatted string with old and new price.
