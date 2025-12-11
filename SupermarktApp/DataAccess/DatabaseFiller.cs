@@ -193,21 +193,9 @@ public class DatabaseFiller
         _sharedConnection!.Execute(@"
             CREATE TABLE IF NOT EXISTS ShopInfo (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Description TEXT,
-                OpeningHourMonday TEXT,
-                ClosingHourMonday TEXT,
-                OpeningHourTuesday TEXT,
-                ClosingHourTuesday TEXT,
-                OpeningHourWednesday TEXT,
-                ClosingHourWednesday TEXT,
-                OpeningHourThursday TEXT,
-                ClosingHourThursday TEXT,
-                OpeningHourFriday TEXT,
-                ClosingHourFriday TEXT,
-                OpeningHourSaturday TEXT,
-                ClosingHourSaturday TEXT,
-                OpeningHourSunday TEXT,
-                ClosingHourSunday TEXT
+                Day TEXT,
+                OpeningHour TEXT,
+                ClosingHour TEXT
             );");
 
         _sharedConnection!.Execute(@"
@@ -343,6 +331,26 @@ public class DatabaseFiller
         );
         ProductAccess.AddProduct(birthdayPresent);
 
+        List<ShopInfoModel> listWeek = new List<ShopInfoModel>
+        {
+            new ShopInfoModel(@"
+            Welcome to our supermarket — where freshness comes first.
+            Our bakery opens early with warm, freshly baked bread, and all our vegetables are kept perfectly cooled throughout the day.
+            Most restocking takes place in the evening, so the shelves are full and ready for you every morning.", null!, null!),
+            new ShopInfoModel("Monday", "12:00", "22:00"),
+            new ShopInfoModel("Tuesday", "12:00", "22:00"),
+            new ShopInfoModel("Wednesday", "12:00", "22:00"),
+            new ShopInfoModel("Thursday", "12:00", "22:00"),
+            new ShopInfoModel("Friday", "12:00", "22:00"),
+            new ShopInfoModel("Saturday", "12:00", "22:00"),
+            new ShopInfoModel("Sunday", "12:00", "22:00")
+        };
+
+        foreach (var week in listWeek)
+        {
+            ShopInfoAccess.AddDay(week);
+        }
+
         var weeklyDiscounts = new List<DiscountsModel>();
         var chosen = new HashSet<int>();
         int productCount = products.Count;
@@ -396,37 +404,6 @@ public class DatabaseFiller
 
             reportOrderProgress?.Invoke(1);
         }
-
-        var defaultShopInfo = new ShopInfoModel
-        {
-            Description = @"
-            Welcome to our supermarket — where freshness comes first.
-            Our bakery opens early with warm, freshly baked bread, and all our vegetables are kept perfectly cooled throughout the day.
-            Most restocking takes place in the evening, so the shelves are full and ready for you every morning.",
-
-            OpeningHourMonday = "07:00",
-            ClosingHourMonday = "22:00",
-
-            OpeningHourTuesday = "07:00",
-            ClosingHourTuesday = "22:00",
-
-            OpeningHourWednesday = "07:00",
-            ClosingHourWednesday = "22:00",
-
-            OpeningHourThursday = "07:00",
-            ClosingHourThursday = "22:00",
-
-            OpeningHourFriday = "07:00",
-            ClosingHourFriday = "22:00",
-
-            OpeningHourSaturday = "08:00",
-            ClosingHourSaturday = "20:00",
-
-            OpeningHourSunday = "08:00",
-            ClosingHourSunday = "20:00"
-        };
-
-        ShopInfoAccess.UpdateShopInfo(defaultShopInfo);
 
         var sampleReviews = new List<ShopReviewModel>
         {

@@ -201,4 +201,18 @@ static class Utils
 
         return AnsiConsole.Prompt(prompt);
     }
+    
+    /// <summary>
+    /// Calculates discounted price the formatted value
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="PriceBeforeDiscount"></param>
+    /// <param name="discountPercentage"></param>
+    /// <returns>formattedPrice as single string without old price</returns>
+    public static string CalculateDiscountedPrice<T>(T PriceBeforeDiscount, T discountPercentage)
+    {
+        decimal PriceAfterDiscount = Convert.ToDecimal(PriceBeforeDiscount) * (1 - (Convert.ToDecimal(discountPercentage) / 100m));
+
+        return ChangePriceFormat(PriceAfterDiscount);
+    }
 }

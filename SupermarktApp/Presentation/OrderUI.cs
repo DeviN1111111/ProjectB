@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 public class Order
 {
-    private static string Safe(string text) => Markup.Escape(text);
+    private static string Safe(string text) => text;
     public static double CouponCredit = 0;
     public static int? SelectedCouponId = null;
     public static double TotalPrice = 0;
@@ -168,7 +168,7 @@ public class Order
                 string checkbox = isChecked ? "[green][[X]][/]" : "[grey][[ ]][/]";
                 string selector = isSelected ? "[cyan]>[/]" : " ";
 
-                string safeName = Markup.Escape(product.Name);
+                string safeName = product.Name;
 
                 AnsiConsole.MarkupLine($"{selector} {checkbox} [white]{safeName}[/] (x{checklistItem.Quantity})");
             }
@@ -215,7 +215,7 @@ public class Order
                         var product = allProducts.FirstOrDefault(p => p.ID == checklistItem.ProductId);
                         if (product == null) continue;
 
-                        string safeName = Markup.Escape(product.Name);
+                        string safeName = product.Name;
 
                         switch (action)
                         {
@@ -318,6 +318,7 @@ public class Order
                         OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
+                        CouponLogic.ResetCouponSelection();
                         Console.ReadKey();
                         break;
                     case "Pay Later":
@@ -578,7 +579,7 @@ public class Order
             var product = suggestions[indexPressed];
             // fill 0 in for the discount and reward
             OrderLogic.AddToCart(product, 1, 0, 0);
-            AnsiConsole.MarkupLine($"\n[green]Added [yellow]{Markup.Escape(product.Name)}[/] to cart![/]");
+            AnsiConsole.MarkupLine($"\n[green]Added [yellow]{product.Name}[/] to cart![/]");
             Thread.Sleep(800);
         }
         return;

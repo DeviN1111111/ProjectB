@@ -190,13 +190,6 @@ public class OrderLogic
             OrderLogic.AddOrderWithItems(allOrderItems, allProducts);
         }
 
-        // Apply coupon if selected
-        if (selectedCouponId.HasValue)
-        {
-            CouponLogic.UseCoupon(selectedCouponId.Value);
-            CouponLogic.ResetCouponSelection();
-        }
-
         //  clean up
         OrderLogic.UpdateStock();
         OrderLogic.ClearCart();

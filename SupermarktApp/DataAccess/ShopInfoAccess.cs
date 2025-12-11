@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic;
@@ -6,60 +7,43 @@ public class ShopInfoAccess
 {
     private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
     private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
-    public static string Table = "ShopInfo";
-    public static ShopInfoModel? GetShopInfo()
+
+    public static void AddDay(ShopInfoModel model)
     {
-        var sql = $"SELECT * FROM {Table} LIMIT 1";
-        return _connection.QueryFirstOrDefault<ShopInfoModel>(sql);
+        _connection.Execute(@"INSERT INTO ShopInfo 
+            (Day, OpeningHour, ClosingHour)
+            VALUES (@Day, @OpeningHour, @ClosingHour)", model);
     }
 
-    public static void UpdateShopInfo(ShopInfoModel shopInfo)
+    public static List<ShopInfoModel> GetDescriptionAndAllDays()
     {
+        var sql = $"SELECT * FROM ShopInfo";
+        return _connection.Query<ShopInfoModel>(sql).ToList();
+    }
 
+    public static void UpdateShopInfoDescription(string description)
+    {
         const string sql = @"
-            UPDATE ShopInfo SET
-                Description = @Description,
-                OpeningHourMonday = @OpeningHourMonday,
-                ClosingHourMonday = @ClosingHourMonday,
-                OpeningHourTuesday = @OpeningHourTuesday,
-                ClosingHourTuesday = @ClosingHourTuesday,
-                OpeningHourWednesday = @OpeningHourWednesday,
-                ClosingHourWednesday = @ClosingHourWednesday,
-                OpeningHourThursday = @OpeningHourThursday,
-                ClosingHourThursday = @ClosingHourThursday,
-                OpeningHourFriday = @OpeningHourFriday,
-                ClosingHourFriday = @ClosingHourFriday,
-                OpeningHourSaturday = @OpeningHourSaturday,
-                ClosingHourSaturday = @ClosingHourSaturday,
-                OpeningHourSunday = @OpeningHourSunday,
-                ClosingHourSunday = @ClosingHourSunday
-            WHERE Id = @Id;";
+            UPDATE ShopInfo
+            SET Day = @day
+            WHERE OpeningHour IS NULL
+            AND ClosingHour IS NULL;
+        ";
 
-        var affected = _connection.Execute(sql, shopInfo);
-
-        if (affected == 0)
-        {
-            _connection.Execute(@"
-                INSERT INTO ShopInfo (
-                    Description,
-                    OpeningHourMonday,  ClosingHourMonday,
-                    OpeningHourTuesday, ClosingHourTuesday,
-                    OpeningHourWednesday, ClosingHourWednesday,
-                    OpeningHourThursday, ClosingHourThursday,
-                    OpeningHourFriday,  ClosingHourFriday,
-                    OpeningHourSaturday, ClosingHourSaturday,
-                    OpeningHourSunday,  ClosingHourSunday
-                )
-                VALUES (
-                    @Description,
-                    @OpeningHourMonday,  @ClosingHourMonday,
-                    @OpeningHourTuesday, @ClosingHourTuesday,
-                    @OpeningHourWednesday, @ClosingHourWednesday,
-                    @OpeningHourThursday, @ClosingHourThursday,
-                    @OpeningHourFriday,  @ClosingHourFriday,
-                    @OpeningHourSaturday, @ClosingHourSaturday,
-                    @OpeningHourSunday,  @ClosingHourSunday
-                );", shopInfo);
-        }
+        _connection.Execute(sql, new { day = description });
     }
+
+    public static void UpdateOpeningHours(string newOpeningHour, string newClosingHour, string day)
+    {
+        const string sql = @"
+            UPDATE ShopInfo
+            SET
+            OpeningHour = @openingHour,
+            ClosingHour = @closingHour
+            WHERE Day = @Day;
+        ";
+
+        _connection.Execute(sql, new { Day = day, openingHour = newOpeningHour, closingHour = newClosingHour });
+    }
+
 }
