@@ -321,6 +321,7 @@ public static class StatisticsUI
         var allProducts = ProductLogic.GetAllProducts();
         var overPricedProducts = ProductLogic.GetOverpricedProducts(allProducts);
         Func<double, string, string> priceFormatter = (price, color) => Utils.ChangePriceFormat(price, color);
+        Func<double, string> ownPriceFormatter = price => Utils.ChangePriceFormat(price, "red");
 
         // ** DISPLAY **
         var competitorPricesTable = Utils.CreateTable(

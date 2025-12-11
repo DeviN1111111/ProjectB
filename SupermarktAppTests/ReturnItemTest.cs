@@ -16,9 +16,9 @@ namespace SupermarktAppTests
             var orders = new List<OrderHistoryModel>
             {
                 new() { Date = today, IsPaid = true },
-                new() { Date = today.AddDays(-2), IsPaid = true },
                 new() { Date = today.AddDays(-4), IsPaid = true },
-                new() { Date = today.AddDays(-1), IsPaid = false }                
+                new() { Date = today.AddDays(-11), IsPaid = true },
+                new() { Date = today.AddDays(-2), IsPaid = false }                
             };
 
             var result = ReturnItemLogic.CheckReturnableOrders(orders, today);
@@ -26,8 +26,9 @@ namespace SupermarktAppTests
             Assert.HasCount(2, result);
         }
         [TestMethod]
-        public void CheckReturnableProducts_ReturnsProductsForGivenOrder()
+        public void CheckReturnableProducts_GetProductsForGivenOrder()
         {
+        // Arrange
             var userId = 1;
 
             // Create an orderHistory row
@@ -50,9 +51,11 @@ namespace SupermarktAppTests
 
             var orderHistory = OrderHistoryAccess.GetOrderById(orderHistoryId);
 
+        // Act
             var result = ReturnItemLogic.CheckReturnableProducts(orderHistory);
             var resultIds = result.Select(p => p.ID).ToList();
 
+        // Assert
             Assert.HasCount(2, result);
             CollectionAssert.AreEquivalent(new List<int> { dbP1.ID, dbP2.ID }, resultIds);
         }
