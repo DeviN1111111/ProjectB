@@ -10,7 +10,7 @@ public static class ProductDetailsUI
         Utils.PrintTitle("Product Details");
         var body = string.Empty;
 
-        ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+        ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product)!;
         string expiryText = product.ExpiryDate.Date.ToString("dd-MM-yyyy");
 
         if(productDiscount != null) // if u got a discount print the discounted price
@@ -28,7 +28,7 @@ public static class ProductDetailsUI
                 $"[bold #00014d]Category:[/] [#5dabcf]{product.Category}[/]\n" +
                 $"[bold #00014d]Stock Quantity:[/] [#5dabcf]{product.Quantity}[/]";
         }
-        else if (SessionManager.CurrentUser.AccountStatus == "User" || SessionManager.CurrentUser.AccountStatus == "Guest")
+        else if (SessionManager.CurrentUser!.AccountStatus == "User" || SessionManager.CurrentUser.AccountStatus == "Guest")
         {
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
@@ -62,11 +62,7 @@ public static class ProductDetailsUI
     
     public static void CompareTwoProducts(ProductModel product1, ProductModel product2)
     {
-        var beforeEditTable = new Table()
-            .Title("[yellow]Before EDIT:[/]")
-            .AddColumn("Field")
-            .AddColumn("Value");
-
+        Table beforeEditTable = Utils.CreateTable(new [] { "Field", "Value" }, "[red]Before EDIT:[/]");
 
         beforeEditTable.AddRow("Name", product1.Name);
         beforeEditTable.AddRow("Price", product1.Price.ToString("C"));
@@ -77,10 +73,7 @@ public static class ProductDetailsUI
         beforeEditTable.AddRow("Quantity", product1.Quantity.ToString());
         beforeEditTable.AddRow("Visible", product1.Visible.ToString());
 
-        var afterTable = new Table()
-            .Title("[green]After EDIT:[/]")
-            .AddColumn("Field")
-            .AddColumn("Value");
+        Table afterTable = Utils.CreateTable(new [] { "Field", "Value" }, "[green]After EDIT:[/]");
 
         afterTable.AddRow("Name", product2.Name);
         afterTable.AddRow("Price", product2.Price.ToString("C"));
@@ -100,5 +93,5 @@ public static class ProductDetailsUI
             .Header("[bold cyan]Product Edit Comparison[/]")
             .Border(BoxBorder.Double);
         AnsiConsole.Write(panel);
-        }
+    }
 }

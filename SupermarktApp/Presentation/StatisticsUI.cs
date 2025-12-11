@@ -18,41 +18,29 @@ public static class StatisticsUI
         {
             case "Go back":
                 return;
-
             case "Today":
                 DisplayStatistics(DateTime.Today, DateTime.Now);
                 break;
-
             case "This Week":
                 DisplayStatistics(DateTime.Today.AddDays(-7), DateTime.Now);
                 break;
-
             case "This Month":
                 DisplayStatistics(DateTime.Today.AddMonths(-1), DateTime.Now);
                 break;
-
             case "This Year":
                 DisplayStatistics(DateTime.Today.AddYears(-1), DateTime.Now);
                 break;
-
             case "Custom Range":
                 DateTime FirstOrderDate = StatisticLogic.GetDateOfFirstOrder();
                 var (startDate, endDate) = PromptForDate(FirstOrderDate);
                 DisplayStatistics(startDate, endDate);
                 break;
-
             case "All Time":
                 DisplayStatistics(DateTime.MinValue, DateTime.Now);
                 break;
             case "Search Statistics per product":
-                ProductModel product = SearchUI.SearchProductByNameOrCategory();
-                if(product == null)
-                {
-                    break;
-                }
-                DisplayStatisticsPerProduct(product);
+                DisplayStatisticsPerProduct();
                 break;
-
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
@@ -172,10 +160,16 @@ public static class StatisticsUI
         }
     }
 
-    public static void DisplayStatisticsPerProduct(ProductModel product)
+    public static void DisplayStatisticsPerProduct()
     {
         Console.Clear();
         Utils.PrintTitle("Supermarket Analytics");
+
+        ProductModel product = SearchUI.SearchProductByNameOrCategory();
+        if(product == null)
+        {
+            return;
+        }
 
         var table = StatisticLogic.CreateBreakdownChartForSingleProduct(product);
         if (table == null)

@@ -33,9 +33,7 @@ public static class SearchUI
                 AnsiConsole.MarkupLine($"[blue]Search: {input}[/]");
             }
             // Tot hier gelezen
-            var table = new Table();
-            table.AddColumn("Name");
-            table.AddColumn("Price");
+            Table table = Utils.CreateTable(new [] { "Name", "Price" });
 
             if (input.Length != 0)
             {
@@ -50,10 +48,10 @@ public static class SearchUI
                 //Vul de table met Namen en prijzen.
                 foreach (ProductModel product in productList)
                 {
-                    ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+                    ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product)!;
                     if(productDiscount != null)
                     {
-                        string newPrice = Utils.CalculateDiscountedPriceString(product.Price, productDiscount.Discount.DiscountPercentage);
+                        string newPrice = Utils.CalculateDiscountedPriceString(product.Price, productDiscount.Discount!.DiscountPercentage);
                         table.AddRow(product.Name, newPrice);            
                     }
                     else if (RewardLogic.GetRewardItemByProductId(product.ID) != null)

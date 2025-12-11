@@ -89,10 +89,14 @@ static class Utils
     /// </summary>
     /// <param name="columns">IEnumerable of strings for the columns.</param>
     /// <returns>The table.</returns>
-    public static Table CreateTable(IEnumerable<string> columns)
+    public static Table CreateTable(IEnumerable<string> columns, string title = "")
     {
+
         var table = new Table()
             .BorderColor(ColorUI.AsciiPrimary);
+
+        if (title != "")
+            table.Title(title);
 
         foreach(string column in columns)
         {

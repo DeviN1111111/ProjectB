@@ -9,11 +9,11 @@ public class NotificationUI
             Console.Clear();
             Utils.PrintTitle("Notifications");
 
-            var prompt1 = new SelectionPrompt<string>()
-                .AddChoices(new[] { "Fill specific low stock product", "Go back" });
-            string selectedItem = AnsiConsole.Prompt(prompt1);
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .AddChoices(new[] { "Fill specific low stock product", "Go back" }));
 
-            switch (selectedItem)
+            switch (choice)
             {
                 case "Go back":
                     return;
@@ -52,7 +52,6 @@ public class NotificationUI
                 .Title("[bold white]Select items to fill the quantity:[/]")
                 .NotRequired()
                 .PageSize(20)
-                // .AddChoices(LowQuantityProductNames)
                 .AddChoiceGroup("Select all", LowQuantityProductNames)
         );
 

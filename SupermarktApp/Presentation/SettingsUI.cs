@@ -248,6 +248,7 @@ public static class SettingsUI
             string NewZipcode;
             do
             {
+                AnsiConsole.MarkupLine("[blue]Zipcode must be in the format 0000AB (Example: 2353TL).[/]");
                 NewZipcode = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Zipcode[/]:").DefaultValue(SessionManager.CurrentUser.Zipcode).DefaultValue(SessionManager.CurrentUser.Zipcode));
             } while (ValidaterLogic.ValidateZipcode(NewZipcode) == false);
             
@@ -255,6 +256,7 @@ public static class SettingsUI
             string NewPhoneNumber;
             do
             {
+                AnsiConsole.MarkupLine("[blue]Phonenumber must have 10 digits (Example: 1234567890).[/]");
                 NewPhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Phone Number[/]:").DefaultValue(SessionManager.CurrentUser.PhoneNumber).DefaultValue(SessionManager.CurrentUser.PhoneNumber));
             } while (ValidaterLogic.ValidatePhoneNumber(NewPhoneNumber) == false);
 
@@ -262,16 +264,14 @@ public static class SettingsUI
             DateTime Birthdate;
             do
             {
-                newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate (DD-MM-YYYY)[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
+                AnsiConsole.MarkupLine("[blue]Birthday must be in this format (DD-MM-YYYY).[/]");
+                newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
             } while (DateTime.TryParse(newBirthdate, out Birthdate) == false);
 
 
-            
+
             AnsiConsole.WriteLine();
-            var beforeEditTable = new Table()
-                .Title("[red]Before EDIT:[/]")
-                .AddColumn("Field")
-                .AddColumn("Value");
+            Table beforeEditTable = Utils.CreateTable(new [] { "Field", "Value" }, "[red]Before EDIT:[/]");
 
             beforeEditTable.AddRow("Name", $"[red]{SessionManager.CurrentUser.Name}[/]");
             beforeEditTable.AddRow("Lastname", $"[red]{SessionManager.CurrentUser.LastName}[/]");
@@ -282,10 +282,7 @@ public static class SettingsUI
             beforeEditTable.AddRow("Phonenumber", $"[red]{SessionManager.CurrentUser.PhoneNumber}[/]");
             beforeEditTable.AddRow("Birthdate", $"[red]{SessionManager.CurrentUser.Birthdate:dd-MM-yyyy}[/]");
 
-            var afterTable = new Table()
-                .Title("[green]After EDIT:[/]")
-                .AddColumn("Field")
-                .AddColumn("Value");
+            Table afterTable = Utils.CreateTable(new [] { "Field", "Value" }, "[green]After EDIT:[/]");
 
             afterTable.AddRow("Name", $"[green]{NewName}[/]");
             afterTable.AddRow("Lastname", $"[green]{NewLastName}[/]");

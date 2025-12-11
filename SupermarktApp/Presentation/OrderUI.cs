@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 public class Order
 {
-    private static string Safe(string text) => text;
     public static double CouponCredit = 0;
     public static int? SelectedCouponId = null;
     public static double TotalPrice = 0;
@@ -21,13 +20,7 @@ public class Order
         Utils.PrintTitle("Cart");
 
         // Cart table
-        var cartTable = new Table()
-            .BorderColor(ColorUI.AsciiPrimary)
-            .AddColumn("[white]Product[/]")
-            .AddColumn("[white]Quantity[/]")
-            .AddColumn("[white]Price[/]")
-            .AddColumn("[white]Total[/]");
-
+        Table cartTable = Utils.CreateTable(new [] {"[white]Product[/]", "[white]Quantity[/]", "[white]Price[/]", "[white]Total[/]"});
 
         // Products in cart
         foreach (var cartProduct in allUserProducts)
@@ -35,7 +28,7 @@ public class Order
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
-                ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(Product);
+                ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(Product)!;
         
                 if (cartProduct.ProductId == Product.ID)
                 {
@@ -45,7 +38,7 @@ public class Order
                     }
                     else if(productDiscount != null)
                     {
-                        double priceAfterDiscount = Math.Round((Product.Price * (1 - productDiscount.Discount.DiscountPercentage / 100)), 2);
+                        double priceAfterDiscount = Math.Round(Product.Price * (1 - productDiscount.Discount!.DiscountPercentage / 100), 2);
                         double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
 
                         totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
@@ -454,12 +447,7 @@ public class Order
             Console.Clear();
             Utils.PrintTitle($"Order #{selectedOrderId}");
 
-            var orderTable = new Table()
-                .BorderColor(ColorUI.AsciiPrimary)
-                .AddColumn("[white]Product[/]")
-                .AddColumn("[white]Quantity[/]")
-                .AddColumn("[white]Price per Unit[/]")
-                .AddColumn("[white]Total Price[/]");
+            Table orderTable = Utils.CreateTable(new [] {"[white]Product[/]", "[white]Quantity[/]", "[white]Price per Unit[/]", "[white]Total Price[/]"});
 
             double totalOrderPrice = 0;
 
@@ -486,13 +474,13 @@ public class Order
                 {
                     double price = product.Price;
 
-                    ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product);
+                    ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(product)!;
                     
                     double DiscountPercentage = 0;
 
                     if(productDiscount != null)
                     {
-                        DiscountPercentage = productDiscount.Discount.DiscountPercentage;
+                        DiscountPercentage = productDiscount.Discount!.DiscountPercentage;
                     }
                     // Apply discounts if needed
                     if (DiscountPercentage > 0)

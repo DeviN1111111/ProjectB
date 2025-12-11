@@ -99,6 +99,7 @@ public class ManageAdminUI
         List<UserModel> AllUsers = AdminLogic.GetAllUsers();
         List<string> UsersToDeleteList = [];
         UsersToDeleteList.Add("Go back");
+        
         foreach (UserModel user in AllUsers)
         {
             UsersToDeleteList.Add($"{user.ID} / {user.Name} / {user.AccountStatus}");

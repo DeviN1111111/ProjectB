@@ -18,11 +18,9 @@ public class DiscountsUI
             {
                 case "Go back":
                     return;
-
                 case "Weekly Discounts":
                     DisplayWeeklyDiscounts();
                     break;
-
                 case "Personal Discounts":
                     DisplayPersonalDiscounts();
                     break;
@@ -50,11 +48,12 @@ public class DiscountsUI
         }
         else
         {
-            var table = new Table();
-            table.AddColumn("[blue]Name[/]");
-            table.AddColumn("[italic yellow]Discount Percentage[/]");
-            table.AddColumn("[red]Original Price[/]");
-            table.AddColumn("[green]Discounted Price[/]");
+            Table table = Utils.CreateTable(new [] {
+                "[blue]Name[/]", 
+                "[italic yellow]Discount Percentage[/]", 
+                "[red]Original Price[/]", 
+                "[green]Discounted Price[/]"});
+                
             foreach (DiscountsModel discount in discounts)
             {
                 var product = ProductLogic.GetProductById(discount.ProductID);
@@ -82,11 +81,12 @@ public class DiscountsUI
         }
         else
         {
-            var table = new Table();
-            table.AddColumn("[blue]Name[/]");
-            table.AddColumn("[italic yellow]Discount Percentage[/]");
-            table.AddColumn("[red]Original Price[/]");
-            table.AddColumn("[green]Discounted Price[/]");
+            Table table = Utils.CreateTable(new [] {
+                "[blue]Name[/]", 
+                "[italic yellow]Discount Percentage[/]", 
+                "[red]Original Price[/]", 
+                "[green]Discounted Price[/]"});
+
             foreach (var discount in discounts)
             {
                 var product = ProductLogic.GetProductById(discount.ProductID);
@@ -113,16 +113,17 @@ public class DiscountsUI
         }
         else
         {
-            var table = new Table();
-            table.AddColumn("[blue]Name[/]");
-            table.AddColumn("[italic yellow]Discount Percentage[/]");
-            table.AddColumn("[red]Original Price[/]");
-            table.AddColumn("[green]Discounted Price[/]");
+            Table table = Utils.CreateTable([
+                "[blue]Name[/]", 
+                "[italic yellow]Discount Percentage[/]", 
+                "[red]Original Price[/]", 
+                "[green]Discounted Price[/]"]);
+
             foreach (DiscountsModel discount in discounts)
             {
                 var product = ProductLogic.GetProductById(discount.ProductID);
-                ProductDiscountDTO discountedProduct = DiscountsLogic.CheckDiscountByProduct(product);
-                if(discountedProduct != null && discountedProduct.Discount.DiscountType == "Expiry") // Maybe make it page system so page doesnt flood with too many discounts
+                ProductDiscountDTO discountedProduct = DiscountsLogic.CheckDiscountByProduct(product)!;
+                if(discountedProduct != null && discountedProduct.Discount!.DiscountType == "Expiry") // Maybe make it page system so page doesnt flood with too many discounts
                 {
                     table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]{Utils.CalculateDiscountedPrice(product.Price, discount.DiscountPercentage)}[/]");
                 }      

@@ -8,6 +8,7 @@ public static class ShopDetailsUI
     {
         Console.Clear();
         Utils.PrintTitle("Welcome to our Supermarket!");
+        // Table table = Utils.CreateTable(new [] { "[bold #00014d]Day[/]").Centered(), "[bold #00014d]Opening Hours[/]").Centered()});
         var table = new Table();
 
         List<ShopInfoModel> DescriptionAndWeeks = ShopInfoLogic.GetDescriptionAndAllDays();
@@ -88,8 +89,6 @@ public static class ShopDetailsUI
                     Show();
                     return;
                 case "No":
-                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
-                    Console.ReadKey();
                     break;
             }
         }   
