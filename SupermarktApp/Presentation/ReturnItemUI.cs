@@ -30,7 +30,7 @@ class ReturnItemUI
         );
 
         var orderId = selectedOrderHistory.Id;
-        var orderLines = OrderLogic.GetOrdersByOrderId(orderId);
+        var orderLines = OrderLogic.GetOrderItemsByOrderId(orderId);
         double totalRefund = 0;
 
         var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Return all products", "Return specific products", "[red]Go back[/]"});
@@ -77,7 +77,7 @@ class ReturnItemUI
                 totalRefund += qtyToReturn * item.UnitPrice;
             } 
 
-            if (!OrderLogic.GetOrdersByOrderId(orderId).Any())
+            if (!OrderLogic.GetOrderItemsByOrderId(orderId).Any())
             {
                 OrderLogic.DeleteOrderHistory(orderId);
             }

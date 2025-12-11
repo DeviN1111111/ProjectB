@@ -136,7 +136,7 @@ public class OrderLogic
         return Math.Round(totalDiscount, 2);
     }
     //create a new order for the current user.
-    public static void AddOrderWithItems(List<OrdersModel> cartProducts, List<ProductModel> allProducts)
+    public static void AddOrderWithItems(List<OrderItemsModel> cartProducts, List<ProductModel> allProducts)
     {
         // Create a new order and get its ID
         int orderId = OrderHistoryAccess.AddToOrderHistory(SessionManager.CurrentUser!.ID);
@@ -150,21 +150,21 @@ public class OrderLogic
                 // Add each item to OrderItems with the new orderId
                 if (RewardItem != null)
                 {
-                    OrderAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, 0.0);
+                    OrderItemAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, 0.0);
                 }
                 else
-                    OrderAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, matchingProduct.Price);
+                    OrderItemAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, matchingProduct.Price);
             }
         }
     }
-    public static List<OrdersModel> GetOrdersByOrderId(int orderId)
+    public static List<OrderItemsModel> GetOrderItemsByOrderId(int orderId)
     {
-        return OrderAccess.GetOrdersByOrderId(orderId);
+        return OrderItemAccess.GetOrderItemsByOrderId(orderId);
     }
     public static OrderHistoryModel GetOrderByUserId(int userId) => OrderHistoryAccess.GetOrderByUserId(userId);
     public static void ProcessPay(List<CartModel> cartProducts, List<ProductModel> allProducts, int? selectedCouponId)
     {
-        List<OrdersModel> allOrderItems = new List<OrdersModel>();
+        List<OrderItemsModel> allOrderItems = new List<OrderItemsModel>();
 
         foreach (var item in cartProducts)
         {
@@ -172,10 +172,10 @@ public class OrderLogic
             if (product == null)
                 continue;
 
-            // Create OrdersModel per quantity
+            // Create OrderItemsModel per quantity
             for (int i = 0; i < item.Quantity; i++)
             {
-                allOrderItems.Add(new OrdersModel
+                allOrderItems.Add(new OrderItemsModel
                 {
                     UserID = SessionManager.CurrentUser!.ID,
                     ProductID = product.ID,
@@ -196,7 +196,7 @@ public class OrderLogic
     }
 public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrder(int orderHistoryId)
 {
-    var pastOrderItems = OrderAccess.GetOrdersByOrderId(orderHistoryId);
+    var pastOrderItems = OrderItemAccess.GetOrderItemsByOrderId(orderHistoryId);
 
     var outOfStockProducts = new List<string>();
     var unavailableProducts = new List<string>();
@@ -278,7 +278,7 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
 
     public static void RemoveAllProductsFromOrder(int orderId)
     {
-        OrderAccess.RemoveAllProductsFromOrder(orderId);
+        OrderItemAccess.RemoveAllProductsFromOrder(orderId);
     } 
     public static void DeleteOrderHistory(int orderId)
     {

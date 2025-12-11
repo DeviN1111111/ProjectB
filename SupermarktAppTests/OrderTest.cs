@@ -138,7 +138,7 @@ namespace SupermarktAppTests
             var orderHistory = OrderHistoryAccess.GetOrderByUserId(result.ID);
             Assert.IsNotNull(orderHistory);
 
-            var orderItems = OrderAccess.GetOrdersByOrderId(orderHistory.Id);
+            var orderItems = OrderItemAccess.GetOrderItemsByOrderId(orderHistory.Id);
 
             Assert.HasCount(5, orderItems); // 5 items purchased (2 of product1 and 3 of product2)
             Assert.IsTrue(orderItems.Exists(item => item.ProductID == product1.ID));  // Check that product1 is in the order items

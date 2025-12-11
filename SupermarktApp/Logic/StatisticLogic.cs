@@ -5,7 +5,7 @@ public static class StatisticLogic
 {
     public static ProductModel MostSoldItem(DateTime startDate, DateTime endDate)
     {
-        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate)!;
+        OrderItemsModel MostSold = OrderItemAccess.GetMostSoldProductAfterDate(startDate, endDate)!;
 
         if (MostSold == null)
         {
@@ -24,20 +24,20 @@ public static class StatisticLogic
 
     public static int MostSoldItemCount(DateTime startDate, DateTime endDate)
     {
-        OrdersModel MostSold = OrderAccess.GetMostSoldProductAfterDate(startDate, endDate)!;
+        OrderItemsModel MostSold = OrderItemAccess.GetMostSoldProductAfterDate(startDate, endDate)!;
 
         if (MostSold == null)
         {
             return 0;
         }
 
-        int count = OrderAccess.GetMostSoldCountUpToDate(startDate, endDate);
+        int count = OrderItemAccess.GetMostSoldCountUpToDate(startDate, endDate);
         return count;
     }
 
     public static List<ProductSalesDto> GetProductSalesData(DateTime startDate, DateTime endDate)
     {
-        List<ProductSalesDto> sales = OrderAccess.SeedProductSalesDto(startDate, endDate);
+        List<ProductSalesDto> sales = OrderItemAccess.SeedProductSalesDto(startDate, endDate);
         if (sales == null)
         {
             return null!;
@@ -93,7 +93,7 @@ public static class StatisticLogic
     }
     public static Table CreateBreakdownChartForSingleProduct(ProductModel Product)
     {
-        ProductSalesDto saleDTO = OrderAccess.GetSalesOfSingleProductByID(Product.ID)!;
+        ProductSalesDto saleDTO = OrderItemAccess.GetSalesOfSingleProductByID(Product.ID)!;
         if (saleDTO == null)
         {
             return null!;
@@ -142,7 +142,7 @@ public static class StatisticLogic
         table.AddColumn("Price per Unit");
         table.AddColumn("Total Revenue from this product");
 
-        var topSales = OrderAccess.GetTop5MostSoldProductsUpToDate(startDate, endDate);
+        var topSales = OrderItemAccess.GetTop5MostSoldProductsUpToDate(startDate, endDate);
         if (topSales == null || topSales.Count == 0)
         {
             table.AddRow("No sales data available", "-", "-", "-", "-");
@@ -165,17 +165,17 @@ public static class StatisticLogic
 
     public static DateTime GetDateOfFirstOrder()
     {
-        DateTime firstOrderDate = OrderAccess.GetDateOfFirstOrder();
+        DateTime firstOrderDate = OrderItemAccess.GetDateOfFirstOrder();
         return firstOrderDate;
     }
     public static double TotalRevenue(DateTime start, DateTime end)
     {
-        double result = OrderAccess.GetTotalRevenue(start, end);
+        double result = OrderItemAccess.GetTotalRevenue(start, end);
         return Math.Round(result, 2);
     }
     public static double TotalPurchaseCost(DateTime start, DateTime end)
     {
-        var cost = OrderAccess.GetTotalPurchaseCost(start, end);
+        var cost = OrderItemAccess.GetTotalPurchaseCost(start, end);
         return Math.Round(cost, 2);
     }
 }

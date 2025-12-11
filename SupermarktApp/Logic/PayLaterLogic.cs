@@ -20,7 +20,7 @@ public static class PayLaterLogic
     }
     public static double ApplyFine(OrderHistoryModel order)
     {
-        var orderItems = OrderLogic.GetOrdersByOrderId(order.Id);
+        var orderItems = OrderLogic.GetOrderItemsByOrderId(order.Id);
         double totalOrderPrice = 0;
         double totalFine = 50;
         var productCounts = new Dictionary<int, int>();

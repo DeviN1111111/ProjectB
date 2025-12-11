@@ -442,7 +442,7 @@ public class Order
                 .Replace("#", "")
             );
 
-            var orderItems = OrderLogic.GetOrdersByOrderId(selectedOrderId);
+            var orderItems = OrderLogic.GetOrderItemsByOrderId(selectedOrderId);
 
             if (orderItems.Count == 0)
             {
@@ -724,7 +724,7 @@ public class Order
 
     public async static void PayLater( List<CartModel> cartProducts, List<ProductModel> allProducts)
     {
-        List<OrdersModel> OrderedItems = new List<OrdersModel>();  // List to hold order items
+        List<OrderItemsModel> OrderedItems = new List<OrderItemsModel>();  // List to hold order items
 
         foreach (var item in cartProducts)
         {
@@ -733,7 +733,7 @@ public class Order
             {
                 for (int i = 0; i < item.Quantity; i++)
                 {
-                    var newOrder = new OrdersModel
+                    var newOrder = new OrderItemsModel
                     {
                         UserID = SessionManager.CurrentUser!.ID,
                         ProductID = product.ID,

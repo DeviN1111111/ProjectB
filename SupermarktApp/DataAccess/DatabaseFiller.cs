@@ -13,7 +13,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "RewardItems",
+        "Cart", "Users", "Products", "OrderItems", "RewardItems",
         "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
         "FavoriteLists", "FavoriteListProducts", "RestockHistory"
     };
@@ -150,7 +150,7 @@ public class DatabaseFiller
             );");
 
         _sharedConnection!.Execute(@"
-            CREATE TABLE IF NOT EXISTS Orders (
+            CREATE TABLE IF NOT EXISTS OrderItems (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
                 OrderId INTEGER NOT NULL,
@@ -456,7 +456,7 @@ public class DatabaseFiller
     public static void InsertOrderItem(int UserID, int orderId, int productId, double price, DateTime date)
     {
         _sharedConnection!.Execute(@"
-            INSERT INTO Orders (UserID, OrderId, ProductId, Price, Date)
+            INSERT INTO OrderItems (UserID, OrderId, ProductId, Price, Date)
             VALUES (@UserID, @OrderId, @ProductId, @Price, @Date);",
             new { UserID = UserID, OrderId = orderId, ProductId = productId, Price = price, Date = date }
         );

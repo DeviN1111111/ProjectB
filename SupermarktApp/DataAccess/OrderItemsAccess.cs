@@ -4,27 +4,27 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-public static class OrderAccess
+public static class OrderItemAccess
 {
     private static readonly IDatabaseFactory _sqlLiteConnection = new SqliteDatabaseFactory("Data Source=database.db");
     private static readonly SqliteConnection _connection = _sqlLiteConnection.GetConnection();
 
-    public static IEnumerable<OrdersModel> GetAllOrders()
+    public static IEnumerable<OrderItemsModel> GetAllOrderItems()
     {
-        return _connection.Query<OrdersModel>("SELECT * FROM Orders");
+        return _connection.Query<OrderItemsModel>("SELECT * FROM OrderItems");
     }
     public static DateTime GetDateOfFirstOrder()
     {
         return _connection.ExecuteScalar<DateTime>(
-            @"SELECT MIN(Date) FROM Orders;"
+            @"SELECT MIN(Date) FROM OrderItems;"
         );
     }
 
-    public static OrdersModel? GetMostSoldProductAfterDate(DateTime startDate, DateTime endDate)
+    public static OrderItemsModel? GetMostSoldProductAfterDate(DateTime startDate, DateTime endDate)
     {
-        return _connection.QueryFirstOrDefault<OrdersModel>(
+        return _connection.QueryFirstOrDefault<OrderItemsModel>(
             @"SELECT ProductID, COUNT(*) AS SoldCount
-              FROM Orders
+              FROM OrderItems
               WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
               GROUP BY ProductID
               ORDER BY SoldCount DESC
@@ -36,10 +36,10 @@ public static class OrderAccess
     {
         int count = _connection.ExecuteScalar<int>(
             @"SELECT COUNT(*) AS SoldCount
-              FROM Orders
+              FROM OrderItems
               WHERE ProductID = (
                   SELECT ProductID
-                  FROM Orders
+                  FROM OrderItems
                   WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
                   GROUP BY ProductID
                   ORDER BY COUNT(*) DESC
@@ -54,7 +54,7 @@ public static class OrderAccess
     {
         var results = _connection.Query<(int ProductID, int SoldCount)>(
             @"SELECT ProductID, COUNT(*) AS SoldCount
-            FROM Orders
+            FROM OrderItems
             WHERE DATE(Date) >= DATE(@StartDate) AND DATE(Date) <= DATE(@EndDate)
             GROUP BY ProductID
             ORDER BY SoldCount DESC
@@ -100,9 +100,9 @@ public static class OrderAccess
     {
 
         // get productid userid and date
-        var orderData = _connection.QueryFirstOrDefault<OrdersModel>(
+        var orderData = _connection.QueryFirstOrDefault<OrderItemsModel>(
             @"SELECT ProductID, UserID, Date
-            FROM Orders
+            FROM OrderItems
             WHERE ProductID = @ProductID
             LIMIT 1;",
             new { ProductID = productId }
@@ -113,7 +113,7 @@ public static class OrderAccess
 
         // count the amount of the same productid is sold
         int soldCount = _connection.ExecuteScalar<int>(
-            @"SELECT COUNT(*) FROM Orders WHERE ProductID = @ProductID;",
+            @"SELECT COUNT(*) FROM OrderItems WHERE ProductID = @ProductID;",
             new { ProductID = productId }
         );
 
@@ -140,19 +140,19 @@ public static class OrderAccess
     {
 
     _connection.Execute(@"
-        INSERT INTO Orders (UserID, OrderId, ProductId, Price)
+        INSERT INTO OrderItems (UserID, OrderId, ProductId, Price)
         VALUES (@UserID, @OrderId, @ProductId, @Price);",
         new { UserID = userId, OrderId = orderId, ProductId = productId, Price = price }
     );
     }
 
-    public static List<OrdersModel> GetOrdersByOrderId(int orderId)
+    public static List<OrderItemsModel> GetOrderItemsByOrderId(int orderId)
     {
         var query = @"
-            SELECT * FROM Orders
+            SELECT * FROM OrderItems
             WHERE OrderId = @OrderId;
         ";
-        return _connection.Query<OrdersModel>(query, new { OrderId = orderId }).AsList();
+        return _connection.Query<OrderItemsModel>(query, new { OrderId = orderId }).AsList();
     }
     public static List<ProductModel> GetTop5MostBoughtProducts(int userId)
     {
@@ -164,7 +164,7 @@ public static class OrderAccess
 
         var productCounts = _connection.Query<(int ProductId, int Count)>(@"
             SELECT ProductID, COUNT(ProductID) AS Count
-            FROM Orders
+            FROM OrderItems
             WHERE UserID = @UserId
             GROUP BY ProductID
             ORDER BY Count DESC;",
@@ -203,10 +203,10 @@ public static class OrderAccess
     {
         double revenue = _connection.ExecuteScalar<double>(
             @"SELECT SUM(Products.Price)
-            FROM Orders
-            JOIN Products ON Orders.ProductID = Products.ID
-            WHERE DATE(Orders.Date) >= DATE(@StartDate)
-            AND DATE(Orders.Date) <= DATE(@EndDate);
+            FROM OrderItems
+            JOIN Products ON OrderItems.ProductID = Products.ID
+            WHERE DATE(OrderItems.Date) >= DATE(@StartDate)
+            AND DATE(OrderItems.Date) <= DATE(@EndDate);
             ",
             new { StartDate = startDate, EndDate = endDate }
         );
@@ -226,14 +226,14 @@ public static class OrderAccess
     }
     public static void RemoveAllProductsFromOrder(int orderId)
     {
-        const string sql = @"DELETE FROM Orders WHERE OrderId = @OrderId;";
+        const string sql = @"DELETE FROM OrderItems WHERE OrderId = @OrderId;";
         _connection.Execute(sql, new { OrderId = orderId });
     }
     public static int GetProductQuantityInOrder(int orderId, int productId)
     {
         const string sql = @"
             SELECT COUNT(*)
-            FROM Orders
+            FROM OrderItems
             WHERE OrderId = @OrderId AND ProductID = @ProductId;
         ";
 
@@ -243,7 +243,7 @@ public static class OrderAccess
     public static void RemoveProductFromOrder(int orderId, int productId)
     {
         const string sql = @"
-            DELETE FROM Orders
+            DELETE FROM OrderItems
             WHERE OrderId = @OrderId AND ProductID = @ProductId;
         ";
 
@@ -252,10 +252,10 @@ public static class OrderAccess
     public static void RemoveProductQuantityFromOrder(int orderId, int productId, int quantity)
     {
         const string sql = @"
-            DELETE FROM Orders
+            DELETE FROM OrderItems
             WHERE ID IN (
                 SELECT ID
-                FROM Orders
+                FROM OrderItems
                 WHERE OrderId = @OrderId AND ProductID = @ProductId
                 LIMIT @Quantity
             );

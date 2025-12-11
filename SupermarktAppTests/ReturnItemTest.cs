@@ -45,8 +45,8 @@ namespace SupermarktAppTests
             var dbP2 = ProductAccess.GetProductByName("Apple")!;
 
             // Add order lines for this order
-            OrderAccess.AddToOrders(userId, orderHistoryId, dbP1.ID, dbP1.Price);
-            OrderAccess.AddToOrders(userId, orderHistoryId, dbP2.ID, dbP2.Price);
+            OrderItemAccess.AddToOrders(userId, orderHistoryId, dbP1.ID, dbP1.Price);
+            OrderItemAccess.AddToOrders(userId, orderHistoryId, dbP2.ID, dbP2.Price);
 
             var orderHistory = OrderHistoryAccess.GetOrderById(orderHistoryId);
 
