@@ -361,14 +361,6 @@ public class Order
             return;
         }
 
-        // var itemsToRemove = AnsiConsole.Prompt(
-        //     new MultiSelectionPrompt<string>()
-        //         .Title("[bold white]Select items to remove from your cart:[/]")
-        //         .NotRequired()
-        //         .PageSize(10)
-        //         .MoreChoicesText("[grey](Use ↑/↓ to navigate, [blue]<space>[/] to select, [green]<enter>[/] to confirm)[/]")
-        //         .AddChoices(cartChoices)
-        // );
         var itemsToRemove = Utils.CreateMultiSelectionPrompt<string>(cartChoices, "[bold white]Select items to remove from your cart:[/]");
 
         if (itemsToRemove.Count == 0)

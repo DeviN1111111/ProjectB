@@ -230,11 +230,9 @@ public static class ManagementUI
             case "Add discount on a specific date":
                 DiscountSpecificDate();
                 break;
-
             case "Delete discount on a specific date":
                 DeleteDiscountSpecificDate();
                 break;
-
             case "Back":
                 return;
         }
@@ -255,11 +253,9 @@ public static class ManagementUI
             case "Create Coupon":
                 CreateCouponForUser();
                 break;
-
             case "Edit Coupons":
                 EditCoupons();
                 break;
-
             case "Back":
                 return;
         }
@@ -279,7 +275,6 @@ public static class ManagementUI
             case "Delete Reviews":
                 DeleteReviews();
                 break;
-
             case "Go Back":
                 return;
         }
@@ -675,13 +670,14 @@ public static class ManagementUI
             DiscountedProductsList.Add($"{discount.ID} / {discount.StartDate:dd-MM-yyyy} to {discount.EndDate:dd-MM-yyyy} / {product.Name} / {discount.DiscountPercentage}%");
         }
 
-        var weeksToDelete = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("[bold white]Select the weeks you want to delete:[/]")
-                .NotRequired()
-                .PageSize(20)
-                .AddChoiceGroup("Select all", DiscountedProductsList)
-        );
+        var weeksToDelete = Utils.CreateMultiSelectionPromptWithSelectAll<string>(DiscountedProductsList, "Select All","[bold white]Select the weeks you want to delete:[/]");
+        // var weeksToDelete = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select the weeks you want to delete:[/]")
+        //         .NotRequired()
+        //         .PageSize(20)
+        //         .AddChoiceGroup("Select all", DiscountedProductsList)
+        // );
 
         if (weeksToDelete.Count == 0)
         {
@@ -728,11 +724,12 @@ public static class ManagementUI
                 ReviewList.Add($"ReviewID: {review.Id} User: [yellow]{user.Name}[/] Stars: [green]{review.Stars}[/] Text: [blue]{review.Text}[/]");
             }
 
-            var prompt = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
-                .PageSize(10)
-                .Title("[bold white]Select reviews to delete:[/]")
-                .NotRequired()
-                .AddChoices(ReviewList));
+            var prompt = Utils.CreateMultiSelectionPrompt<string>(ReviewList, "[bold white]Select reviews to delete:[/]");
+            // var prompt = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
+            //     .PageSize(10)
+            //     .Title("[bold white]Select reviews to delete:[/]")
+            //     .NotRequired()
+            //     .AddChoices(ReviewList));
             
             if (prompt.Count == 0)
             {

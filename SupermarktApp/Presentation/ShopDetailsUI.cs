@@ -114,16 +114,15 @@ public static class ShopDetailsUI
         var options = new List<string>();
 
         options.AddRange(new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
-        // var day = AnsiConsole.Prompt(new SelectionPrompt<string>()
-        //         .AddChoices(options));
 
-        var days = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("[bold white]Select the days you want to change for the opening/closing hours.[/]")
-                .NotRequired()
-                .PageSize(20)
-                .AddChoiceGroup("Select all days", options)
-        );
+        var days = Utils.CreateMultiSelectionPromptWithSelectAll<string>(options, "Select All days", "[bold white]Select the days you want to change for the opening/closing hours:[/]");
+        // var days = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select the days you want to change for the opening/closing hours.[/]")
+        //         .NotRequired()
+        //         .PageSize(20)
+        //         .AddChoiceGroup("Select all days", options)
+        // );
 
         if (days.Count == 0)
         {

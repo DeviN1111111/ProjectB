@@ -10,5 +10,6 @@ public static class MapUI
         Utils.PrintTitle("Store Map");
         Console.WriteLine(MapLogic.MapBuilder(box));
         Console.ReadKey();
+        AnsiConsole.MarkupLine("[green]Press ENTER to return to the main menu.[/]");
     }
 }

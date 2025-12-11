@@ -89,14 +89,12 @@ public static class MenuUI
                     ProductUI.SearchProduct();
                     break;
                 case "Cart":
-                    Console.Clear();
                     Order.ShowCart();
                     break;
                 case "Return Item":
                     ReturnItemUI.DisplayMenu();
                     break;
                 case "Checklist":
-                    Console.Clear();
                     Order.ShowChecklist();
                     break;
                 case "Order History":

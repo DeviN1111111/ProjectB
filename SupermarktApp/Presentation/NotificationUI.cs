@@ -47,13 +47,14 @@ public class NotificationUI
             LowQuantityProductNames.Add($"ProductID: {product.ID } Name: [yellow]{product.Name}[/] Quantity: [red]{product.Quantity}[/]");
         }
 
-        var itemsToFill = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("[bold white]Select items to fill the quantity:[/]")
-                .NotRequired()
-                .PageSize(20)
-                .AddChoiceGroup("Select all", LowQuantityProductNames)
-        );
+        var itemsToFill = Utils.CreateMultiSelectionPromptWithSelectAll<string>(LowQuantityProductNames, "Select All", "[bold white]Select items to fill the quantity:[/]");
+        // var itemsToFill = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select items to fill the quantity:[/]")
+        //         .NotRequired()
+        //         .PageSize(20)
+        //         .AddChoiceGroup("Select all", LowQuantityProductNames)
+        // );
 
         if (itemsToFill.Count == 0)
         {
