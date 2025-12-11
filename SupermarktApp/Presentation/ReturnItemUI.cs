@@ -10,7 +10,6 @@ class ReturnItemUI
         // ## Get dependencies ##
         var user = SessionManager.CurrentUser!.ID;
         var orders = OrderLogic.GetAllUserOrders(user);
-
         var returnableOrderHistories = ReturnItemLogic.CheckReturnableOrders(orders, DateTime.Today);
 
         // ## No returnable orders ##
