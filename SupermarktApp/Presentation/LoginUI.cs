@@ -188,7 +188,147 @@ public static class LoginUI
     }
 
 
-// why after i click reset password and do it wrong twice and then go to main menu and do it wrong twice i dont go into forget password
+    // why after i click reset password and do it wrong twice and then go to main menu and do it wrong twice i dont go into forget password
+    //Register method
+    // public static void Register()
+    // {
+    //     while (true)
+    //     {
+    //         AnsiConsole.MarkupLine("[yellow]Press escape to return.[/]");
+    //         AnsiConsole.MarkupLine("[green]Press any key to continue[/]");
+    //         if (Console.ReadKey().Key == ConsoleKey.Escape)
+    //         {
+    //             break;
+    //         }
+    //         Console.Clear();
+    //         Utils.PrintTitle("Supermarket App");
+
+    //         string name = AnsiConsole.Prompt(new TextPrompt<string>("What's your first name?"));
+    //         string lastName = AnsiConsole.Prompt(new TextPrompt<string>("What's your last name?"));
+    //         string email;
+    //         do
+    //         {
+    //             AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
+    //             email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
+
+    //             if (!ValidaterLogic.ValidateEmail(email))
+    //             {
+    //                 AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
+    //                 continue;
+    //             }
+
+    //             if (UserSettingsLogic.EmailExists(email))
+    //             {
+    //                 AnsiConsole.MarkupLine($"[red]The email [yellow]{email}[/] is already registered. Please use a different one![/]");
+    //                 continue;
+    //             }
+    //             break;
+
+    //         } while (true);
+    //         string password;
+    //         do
+    //         {
+    //             AnsiConsole.MarkupLine("[blue]Password must contain at least 1 digit and has to be 6 characters long (Example: Cheese1).[/]");
+    //             password = AnsiConsole.Prompt(new TextPrompt<string>("Create a password:").Secret());
+    //         } while (ValidaterLogic.ValidatePassword(password) == false);
+    //         string Address = AnsiConsole.Prompt(new TextPrompt<string>("What's your street name?"));
+    //         string Zipcode;
+    //         do
+    //         {
+    //             AnsiConsole.MarkupLine("[blue]Zipcode must be in the format 0000AB (Example: 2353TL).[/]");
+    //             Zipcode = AnsiConsole.Prompt(new TextPrompt<string>("What's your zipcode?"));
+    //         } while (ValidaterLogic.ValidateZipcode(Zipcode) == false);
+    //         string PhoneNumber;
+    //         do
+    //         {
+    //             AnsiConsole.MarkupLine("[blue]Phonenumber must have 10 digits (Example: 1234567890).[/]");
+    //             PhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("What's your phone number?"));
+    //         } while (ValidaterLogic.ValidatePhoneNumber(PhoneNumber) == false);
+    //         string City = AnsiConsole.Prompt(new TextPrompt<string>("What's your city?"));
+
+    //         DateTime Birthdate;
+
+    //         while (true)
+    //         {
+    //             string birthdateInput = AnsiConsole.Prompt(
+    //                 new TextPrompt<string>("What's your birthdate? (DD-MM-YYYY)")
+    //             );
+
+    //             // First check format
+    //             if (!System.Text.RegularExpressions.Regex.IsMatch(birthdateInput, @"^\d{2}-\d{2}-\d{4}$"))
+    //             {
+    //                 AnsiConsole.MarkupLine("[red]Invalid format. Please use DD-MM-YYYY (e.g., 25-12-2005).[/]");
+    //                 continue;
+    //             }
+
+    //             // Then check if it's a real date
+    //             if (!DateTime.TryParseExact(
+    //                     birthdateInput,
+    //                     "dd-MM-yyyy",
+    //                     null,
+    //                     System.Globalization.DateTimeStyles.None,
+    //                     out Birthdate))
+    //             {
+    //                 AnsiConsole.MarkupLine("[red]Date is out of range — please enter a valid calendar date.[/]");
+    //                 continue;
+    //             }
+
+    //             // Check logical range (0–100 years)
+    //             if (!ValidaterLogic.ValidateDateOfBirth(Birthdate))
+    //             {
+    //                 AnsiConsole.MarkupLine("[red]Birthdate must be between 0 and 100 years old.[/]");
+    //                 continue;
+    //             }
+
+    //             break;
+    //         }
+
+
+    //         AnsiConsole.MarkupLine($"Do you want to [green]ENABLE[/] [yellow]2FA[/] for your account?");
+
+    //         bool is2FAEnabled = false;
+    //         var wantToEnable2FA = AnsiConsole.Prompt(
+    //         new SelectionPrompt<string>()
+    //             .HighlightStyle(new Style(ColorUI.Hover))
+    //             .AddChoices(new[] { "Yes", "No" }));
+
+    //         if (wantToEnable2FA == "Yes")
+    //         {
+    //             AnsiConsole.MarkupLine($"[italic yellow]A 2FA code has been sent to your email([italic green]{email}[/])![/]");
+    //             string Register2FACode;
+    //             string correct2FACode = TwoFALogic.Register2FAEmail(email).Result;
+    //             do
+    //             {
+    //                 Register2FACode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+    //                 if (Register2FACode.ToLower() == "exit")
+    //                 {
+    //                     return;
+    //                 }
+    //                 else if (Register2FACode != correct2FACode)
+    //                 {
+    //                     AnsiConsole.MarkupLine("[red]Error: Entered wrong code[/]");
+    //                 }
+    //             } while (Register2FACode != correct2FACode);
+                
+    //             is2FAEnabled = true;
+    //             AnsiConsole.MarkupLine("[green]2FA has been enabled for your account![/]");
+    //         }
+
+    //         List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, Birthdate, City, is2FAEnabled);
+            
+    //         if (Errors.Count == 0)
+    //         {
+    //             AnsiConsole.MarkupLine("[green]Registration successful! You can now log in.[/]");
+    //             AnsiConsole.MarkupLine("[yellow]Press any key to continue to the main menu...[/]");
+
+    //             var createdUser = LoginLogic.GetUserByEmail(email);
+    //             CouponLogic.CreateCoupon(createdUser!.ID, 5);
+    //             Console.ReadKey();
+    //             break;
+    //         }
+    //     }
+    // }
+    
     public static void Register()
     {
         while (true)
@@ -204,47 +344,12 @@ public static class LoginUI
 
             string name = AnsiConsole.Prompt(new TextPrompt<string>("What's your first name?"));
             string lastName = AnsiConsole.Prompt(new TextPrompt<string>("What's your last name?"));
-            string email;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
-                email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
-
-                if (!ValidaterLogic.ValidateEmail(email))
-                {
-                    AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
-                    continue;
-                }
-
-                if (UserSettingsLogic.EmailExists(email))
-                {
-                    AnsiConsole.MarkupLine($"[red]The email [yellow]{email}[/] is already registered. Please use a different one![/]");
-                    continue;
-                }
-                break;
-
-            } while (true);
-            string password;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Password must contain at least 1 digit and has to be 6 characters long (Example: Cheese1).[/]");
-                password = AnsiConsole.Prompt(new TextPrompt<string>("Create a password:").Secret());
-            } while (ValidaterLogic.ValidatePassword(password) == false);
+            string email = AskEmail();
+            string password = AskPassword();
             string Address = AnsiConsole.Prompt(new TextPrompt<string>("What's your street name?"));
-            string Zipcode;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Zipcode must be in the format 0000AB (Example: 2353TL).[/]");
-                Zipcode = AnsiConsole.Prompt(new TextPrompt<string>("What's your zipcode?"));
-            } while (ValidaterLogic.ValidateZipcode(Zipcode) == false);
-            string PhoneNumber;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Phonenumber must have 10 digits (Example: 1234567890).[/]");
-                PhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("What's your phone number?"));
-            } while (ValidaterLogic.ValidatePhoneNumber(PhoneNumber) == false);
+            string Zipcode = AskZipcode();
+            string PhoneNumber = AskPhoneNumber();
             string City = AnsiConsole.Prompt(new TextPrompt<string>("What's your city?"));
-
             DateTime Birthdate;
 
             while (true)
@@ -326,8 +431,7 @@ public static class LoginUI
                 break;
             }
         }
-    }
-
+    
     public static void ProcessTwoFactor(UserModel account)
     {
         TwoFALogic.CreateInsertAndEmailSend2FACode(account.ID);
@@ -399,7 +503,6 @@ public static class LoginUI
 
         attempts = 0;
     }
-    
     private static void ProcessPasswordReset(ref string email)
     {
         for (int resetAttempts = 0; resetAttempts < 2; resetAttempts++)
@@ -447,7 +550,6 @@ public static class LoginUI
             }
         }
     }
-
     private static void ResetPassword(UserModel user)
     {
         string newPassword;
@@ -469,7 +571,59 @@ public static class LoginUI
         Console.ReadKey();
         attempts = 0;
     }
+    public static string AskEmail()
+    {
+        do
+        {
+            AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
+            string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your email?"));
 
+            if (!ValidaterLogic.ValidateEmail(email))
+            {
+                AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
+                continue;
+            }
 
-    
+            if (UserSettingsLogic.EmailExists(email))
+            {
+                AnsiConsole.MarkupLine($"[red]The email [yellow]{email}[/] is already registered. Please use a different one![/]");
+                continue;
+            }
+            return email;
+
+        } while (true);
+    }
+
+    public static string AskPassword()
+    {
+        string password;
+        do
+        {
+            AnsiConsole.MarkupLine("[blue]Password must contain at least 1 digit and be 6+ characters (Example: Cheese1).[/]");
+            password = AnsiConsole.Prompt(new TextPrompt<string>("Create a password:").Secret());
+        } while (!ValidaterLogic.ValidatePassword(password));
+        return password;
+    }
+
+    public static string AskZipcode()
+    {
+        string Zipcode;
+        do
+        {
+            AnsiConsole.MarkupLine("[blue]Zipcode must be in the format 0000AB (Example: 2353TL).[/]");
+            Zipcode = AnsiConsole.Prompt(new TextPrompt<string>("What's your zipcode?"));
+        } while (!ValidaterLogic.ValidateZipcode(Zipcode));
+        return Zipcode;
+    }
+
+    public static string AskPhoneNumber()
+    {
+        string PhoneNumber;
+        do
+        {
+            AnsiConsole.MarkupLine("[blue]Phonenumber must have 10 digits (Example: 1234567890).[/]");
+            PhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("What's your phone number?"));
+        } while (!ValidaterLogic.ValidatePhoneNumber(PhoneNumber));
+        return PhoneNumber;
+    }
 }
