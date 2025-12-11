@@ -7,7 +7,7 @@ public static class ProductDetailsUI
     public static void ShowProductDetails(ProductModel product)
     {
         Console.Clear();
-        double ProductPrice = product.Price;
+        string ProductPrice = product.Price.ToString();
         Utils.PrintTitle("Product Details");
         var body = string.Empty;
 
@@ -19,10 +19,10 @@ public static class ProductDetailsUI
             string discountType = productDiscount.Discount!.DiscountType;
             double DiscountPercentage = productDiscount.Discount.DiscountPercentage;
 
-            ProductPrice = Math.Round(product.Price * (1 - DiscountPercentage / 100), 2);
+            ProductPrice = Utils.ChangePriceFormat(product.Price * (1 - DiscountPercentage / 100), "green");
             body =
                 $"[bold #00014d]Name:[/] [#5dabcf]{product.Name}[/]\n" +
-                $"[bold #00014d]Price:[/] [#5dabcf][red strike]€{product.Price}[/] €{ProductPrice} [italic yellow]({discountType} Discount)[/][/]\n" +
+                $"[bold #00014d]Price:[/] [#5dabcf][red strike]€{product.Price}[/] {ProductPrice} [italic yellow]({discountType} Discount)[/][/]\n" +
                 $"[bold #00014d]Expiry Date:[/] [#5dabcf]{expiryText}[/]\n" +
                 $"[bold #00014d]Nutrition Info:[/] [#5dabcf]{product.NutritionDetails}[/]\n" +
                 $"[bold #00014d]Description:[/] [#5dabcf]{product.Description}[/]\n" +

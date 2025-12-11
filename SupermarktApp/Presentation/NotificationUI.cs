@@ -85,7 +85,7 @@ public class NotificationUI
             price += cost;
             RestockHistoryAccess.AddRestockEntry(new RestockHistoryModel(productID, QuantityFill, DateTime.Now, cost / QuantityFill));
         }
-        AnsiConsole.MarkupLine($"[green]Successfully filled the selected products. Total cost: [yellow]€{Math.Round(price, 2)}[/].[/]");
+        AnsiConsole.MarkupLine($"[green]Successfully filled the selected products. Total cost: {Utils.ChangePriceFormat(price, "yellow")}[/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
         return price;
