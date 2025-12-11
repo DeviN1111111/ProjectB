@@ -218,57 +218,17 @@ public static class SettingsUI
 
             string NewName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Name[/]:").DefaultValue(SessionManager.CurrentUser!.Name).DefaultValue(SessionManager.CurrentUser.Name));
             string NewLastName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Last Name[/]:").DefaultValue(SessionManager.CurrentUser.LastName).DefaultValue(SessionManager.CurrentUser.LastName));
-            string NewEmail;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
-                NewEmail = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Email[/]:").DefaultValue(SessionManager.CurrentUser.Email));
-
-                if (NewEmail == SessionManager.CurrentUser.Email)
-                {
-                    break;
-                }
-
-                if (!ValidaterLogic.ValidateEmail(NewEmail))
-                {
-                    AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
-                    continue;
-                }
-
-                if (UserSettingsLogic.EmailExists(NewEmail))
-                {
-                    AnsiConsole.MarkupLine($"[red]The email [yellow]{NewEmail}[/] is already registered. Please use a different one![/]");
-                    continue;
-                }
-                break;
-
-            } while (true);
+            string NewEmail = LoginUI.AskEmail();
 
             string NewAddress = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Address[/]:").DefaultValue(SessionManager.CurrentUser.Address).DefaultValue(SessionManager.CurrentUser.Address));
-            string NewZipcode;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Zipcode must be in the format 0000AB (Example: 2353TL).[/]");
-                NewZipcode = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Zipcode[/]:").DefaultValue(SessionManager.CurrentUser.Zipcode).DefaultValue(SessionManager.CurrentUser.Zipcode));
-            } while (ValidaterLogic.ValidateZipcode(NewZipcode) == false);
+            string NewZipcode = LoginUI.AskZipcode();
             
             string NewCity = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]City[/]:").DefaultValue(SessionManager.CurrentUser.City).DefaultValue(SessionManager.CurrentUser.City));
-            string NewPhoneNumber;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Phonenumber must have 10 digits (Example: 1234567890).[/]");
-                NewPhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Phone Number[/]:").DefaultValue(SessionManager.CurrentUser.PhoneNumber).DefaultValue(SessionManager.CurrentUser.PhoneNumber));
-            } while (ValidaterLogic.ValidatePhoneNumber(NewPhoneNumber) == false);
+            string NewPhoneNumber = LoginUI.AskPhoneNumber();
 
             string newBirthdate;
-            DateTime Birthdate;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Birthday must be in this format (DD-MM-YYYY).[/]");
-                newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
-            } while (DateTime.TryParse(newBirthdate, out Birthdate) == false);
-
-
+            DateTime Birthdate = LoginUI.AskBirthdate();
+            //(DateTime.TryParse(newBirthdate, out Birthdate) == false)
 
             AnsiConsole.WriteLine();
             Table beforeEditTable = Utils.CreateTable(new [] { "Field", "Value" }, "[red]Before EDIT:[/]");
