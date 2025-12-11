@@ -6,6 +6,7 @@ using Spectre.Console;
 public static class LoginUI
 {
     private static int attempts = 0;
+    private static string email = "";
     // public static void Login()
     // {
     //         string email = AnsiConsole.Prompt(new TextPrompt<string>("What's your [green]email[/]?:"));
@@ -344,79 +345,14 @@ public static class LoginUI
 
             string name = AnsiConsole.Prompt(new TextPrompt<string>("What's your first name?"));
             string lastName = AnsiConsole.Prompt(new TextPrompt<string>("What's your last name?"));
-            string email = AskEmail();
+            email = AskEmail();
             string password = AskPassword();
             string Address = AnsiConsole.Prompt(new TextPrompt<string>("What's your street name?"));
             string Zipcode = AskZipcode();
             string PhoneNumber = AskPhoneNumber();
             string City = AnsiConsole.Prompt(new TextPrompt<string>("What's your city?"));
-            DateTime Birthdate;
-
-            while (true)
-            {
-                string birthdateInput = AnsiConsole.Prompt(
-                    new TextPrompt<string>("What's your birthdate? (DD-MM-YYYY)")
-                );
-
-                // First check format
-                if (!System.Text.RegularExpressions.Regex.IsMatch(birthdateInput, @"^\d{2}-\d{2}-\d{4}$"))
-                {
-                    AnsiConsole.MarkupLine("[red]Invalid format. Please use DD-MM-YYYY (e.g., 25-12-2005).[/]");
-                    continue;
-                }
-
-                // Then check if it's a real date
-                if (!DateTime.TryParseExact(
-                        birthdateInput,
-                        "dd-MM-yyyy",
-                        null,
-                        System.Globalization.DateTimeStyles.None,
-                        out Birthdate))
-                {
-                    AnsiConsole.MarkupLine("[red]Date is out of range — please enter a valid calendar date.[/]");
-                    continue;
-                }
-
-                // Check logical range (0–100 years)
-                if (!ValidaterLogic.ValidateDateOfBirth(Birthdate))
-                {
-                    AnsiConsole.MarkupLine("[red]Birthdate must be between 0 and 100 years old.[/]");
-                    continue;
-                }
-
-                break;
-            }
-
-
-            AnsiConsole.MarkupLine($"Do you want to [green]ENABLE[/] [yellow]2FA[/] for your account?");
-
-            bool is2FAEnabled = false;
-            var wantToEnable2FA = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .HighlightStyle(new Style(ColorUI.Hover))
-                .AddChoices(new[] { "Yes", "No" }));
-
-            if (wantToEnable2FA == "Yes")
-            {
-                AnsiConsole.MarkupLine($"[italic yellow]A 2FA code has been sent to your email([italic green]{email}[/])![/]");
-                string Register2FACode;
-                string correct2FACode = TwoFALogic.Register2FAEmail(email).Result;
-                do
-                {
-                    Register2FACode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
-                    if (Register2FACode.ToLower() == "exit")
-                    {
-                        return;
-                    }
-                    else if (Register2FACode != correct2FACode)
-                    {
-                        AnsiConsole.MarkupLine("[red]Error: Entered wrong code[/]");
-                    }
-                } while (Register2FACode != correct2FACode);
-                
-                is2FAEnabled = true;
-                AnsiConsole.MarkupLine("[green]2FA has been enabled for your account![/]");
-            }
+            DateTime Birthdate = AskBirthdate();
+            bool is2FAEnabled = Ask2FA();
 
             List<string> Errors = LoginLogic.Register(name, lastName, email, password, Address, Zipcode, PhoneNumber, Birthdate, City, is2FAEnabled);
             
@@ -431,7 +367,7 @@ public static class LoginUI
                 break;
             }
         }
-    
+    }
     public static void ProcessTwoFactor(UserModel account)
     {
         TwoFALogic.CreateInsertAndEmailSend2FACode(account.ID);
@@ -593,7 +529,6 @@ public static class LoginUI
 
         } while (true);
     }
-
     public static string AskPassword()
     {
         string password;
@@ -604,7 +539,6 @@ public static class LoginUI
         } while (!ValidaterLogic.ValidatePassword(password));
         return password;
     }
-
     public static string AskZipcode()
     {
         string Zipcode;
@@ -615,7 +549,6 @@ public static class LoginUI
         } while (!ValidaterLogic.ValidateZipcode(Zipcode));
         return Zipcode;
     }
-
     public static string AskPhoneNumber()
     {
         string PhoneNumber;
@@ -625,5 +558,77 @@ public static class LoginUI
             PhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("What's your phone number?"));
         } while (!ValidaterLogic.ValidatePhoneNumber(PhoneNumber));
         return PhoneNumber;
+    }
+    public static DateTime AskBirthdate()
+    {
+        DateTime Birthdate;
+
+        while (true)
+        {
+            string birthdateInput = AnsiConsole.Prompt(
+                new TextPrompt<string>("What's your birthdate? (DD-MM-YYYY)")
+            );
+
+            // First check format
+            if (!System.Text.RegularExpressions.Regex.IsMatch(birthdateInput, @"^\d{2}-\d{2}-\d{4}$"))
+            {
+                AnsiConsole.MarkupLine("[red]Invalid format. Please use DD-MM-YYYY (e.g., 25-12-2005).[/]");
+                continue;
+            }
+
+            // Then check if it's a real date
+            if (!DateTime.TryParseExact(
+                    birthdateInput,
+                    "dd-MM-yyyy",
+                    null,
+                    System.Globalization.DateTimeStyles.None,
+                    out Birthdate))
+            {
+                AnsiConsole.MarkupLine("[red]Date is out of range — please enter a valid calendar date.[/]");
+                continue;
+            }
+
+            // Check logical range (0–100 years)
+            if (!ValidaterLogic.ValidateDateOfBirth(Birthdate))
+            {
+                AnsiConsole.MarkupLine("[red]Birthdate must be between 0 and 100 years old.[/]");
+                continue;
+            }
+
+            break;
+        }
+        return Birthdate;
+    }
+    public static bool Ask2FA()
+    {
+        AnsiConsole.MarkupLine($"Do you want to [green]ENABLE[/] [yellow]2FA[/] for your account?");
+
+        var wantToEnable2FA = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .HighlightStyle(new Style(ColorUI.Hover))
+            .AddChoices(new[] { "Yes", "No" }));
+
+        if (wantToEnable2FA == "Yes")
+        {
+            AnsiConsole.MarkupLine($"[italic yellow]A 2FA code has been sent to your email([italic green]{email}[/])![/]");
+            string Register2FACode;
+            string correct2FACode = TwoFALogic.Register2FAEmail(email).Result;
+            do
+            {
+                Register2FACode = AnsiConsole.Prompt(new TextPrompt<string>("Enter the [bold yellow]2FA[/] code sent to your email(or '[bold red]EXIT[/]' to [red]exit[/]):"));
+                if (Register2FACode.ToLower() == "exit")
+                {
+                    return false;
+                }
+                else if (Register2FACode != correct2FACode)
+                {
+                    AnsiConsole.MarkupLine("[red]Error: Entered wrong code[/]");
+                }
+            } while (Register2FACode != correct2FACode);
+            
+            AnsiConsole.MarkupLine("[green]2FA has been enabled for your account![/]");
+            return true;
+        }
+        return false;
     }
 }
