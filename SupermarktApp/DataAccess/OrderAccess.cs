@@ -146,7 +146,7 @@ public static class OrderAccess
     );
     }
 
-    public static List<OrdersModel> GetOrderssByOrderId(int orderId)
+    public static List<OrdersModel> GetOrdersByOrderId(int orderId)
     {
         var query = @"
             SELECT * FROM Orders

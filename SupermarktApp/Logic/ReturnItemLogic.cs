@@ -11,7 +11,7 @@ public static class ReturnItemLogic
     public static List<ProductModel> CheckReturnableProducts(OrderHistoryModel orderHistory)
     {
         return OrderLogic
-            .GetOrderssByOrderId(orderHistory.Id)
+            .GetOrdersByOrderId(orderHistory.Id)
             .Select(o => ProductLogic.GetProductById(o.ProductID))
             .ToList();        
     }

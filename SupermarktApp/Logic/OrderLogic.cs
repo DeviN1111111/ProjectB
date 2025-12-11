@@ -157,9 +157,9 @@ public class OrderLogic
             }
         }
     }
-    public static List<OrdersModel> GetOrderssByOrderId(int orderId)
+    public static List<OrdersModel> GetOrdersByOrderId(int orderId)
     {
-        return OrderAccess.GetOrderssByOrderId(orderId);
+        return OrderAccess.GetOrdersByOrderId(orderId);
     }
     public static OrderHistoryModel GetOrderByUserId(int userId) => OrderHistoryAccess.GetOrderByUserId(userId);
     public static void ProcessPay(List<CartModel> cartProducts, List<ProductModel> allProducts, int? selectedCouponId)
@@ -196,7 +196,7 @@ public class OrderLogic
     }
 public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrder(int orderHistoryId)
 {
-    var pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
+    var pastOrderItems = OrderAccess.GetOrdersByOrderId(orderHistoryId);
 
     var outOfStockProducts = new List<string>();
     var unavailableProducts = new List<string>();

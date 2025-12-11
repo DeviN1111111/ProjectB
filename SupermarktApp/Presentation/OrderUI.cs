@@ -442,7 +442,7 @@ public class Order
                 .Replace("#", "")
             );
 
-            var orderItems = OrderLogic.GetOrderssByOrderId(selectedOrderId);
+            var orderItems = OrderLogic.GetOrdersByOrderId(selectedOrderId);
 
             if (orderItems.Count == 0)
             {
