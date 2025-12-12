@@ -7,4 +7,14 @@ public class ChristmasBoxModel : ProductModel
     public decimal TotalProductsValue =>
         // calculate total price content box
         Products.Sum(p => (decimal)p.Price);  
+
+    public bool HasMinimumProducts()
+    {   // minimun of 3 products 
+        return Products.Count >= MinimumProductsRequired;
+    }
+    
+    public bool IsValid()
+    {   
+        return HasMinimumProducts();
+    }
 }
