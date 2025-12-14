@@ -113,7 +113,8 @@ static class Utils
     public static List<T> CreateMultiSelectionPrompt<T>(IEnumerable<T> choices, string title= "", Func<T, string>? format= null) where T : notnull
     {
         var prompt = new MultiSelectionPrompt<T>()
-            .PageSize(10);
+            .PageSize(10)
+            .NotRequired();
 
         if (title != "")
             prompt.Title(title);

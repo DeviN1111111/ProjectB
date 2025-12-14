@@ -314,43 +314,73 @@ public static class StatisticsUI
     
     public static void DisplayCompetitorPrices()
     {
-        Console.Clear();
-        Utils.PrintTitle("Competitor Prices");
-
         // ** DEPENDENCIES **
         var allProducts = ProductLogic.GetAllProducts();
-        var overPricedProducts = ProductLogic.GetOverpricedProducts(allProducts);
+        var overPricedProducts = ProductLogic
+            .GetOverpricedProducts(allProducts)
+            .OrderBy(p => p.Name)
+            .ToList();
         Func<double, string, string> priceFormatter = (price, color) => Utils.ChangePriceFormat(price, color);
-        Func<double, string> ownPriceFormatter = price => Utils.ChangePriceFormat(price, "red");
+        int pageSize = 10;
+        int pageIndex = 0;
 
         // ** DISPLAY **
-        var competitorPricesTable = Utils.CreateTable(
-            new[] { "Product Name", "Our Price", "Competitor Price" }
-        );
-
-        foreach (var product in overPricedProducts)
+        while (true)
         {
-            competitorPricesTable.AddRow(
-                product.Name,
-                priceFormatter(product.Price, "red"),
-                priceFormatter(product.CompetitorPrice, "green")
+            Console.Clear();
+            Utils.PrintTitle("Competitor Prices");
+
+            int totalPages = (int)Math.Ceiling(overPricedProducts.Count / (double)pageSize); // pageSize as double to avoid int division. Ceiling to round up.
+
+            var pageItems = overPricedProducts
+                .Skip(pageIndex * pageSize) // Ignore items from previous pages
+                .Take(pageSize) // Take only items for the current page
+                .ToList();
+
+            var competitorPricesTable = Utils.CreateTable(
+                new[] { "Product Name", "Our Price", "Competitor Price" }
             );
-        }
 
-        AnsiConsole.Write(competitorPricesTable);
+            foreach (var product in pageItems)
+            {   
+                competitorPricesTable.AddRow(
+                    product.Name,
+                    priceFormatter(product.Price, "red"),
+                    priceFormatter(product.CompetitorPrice, "green")
+                );
+            }
 
-        // ** USER PROMPT **
-        var selectedChoice = Utils.CreateSelectionPrompt(
-            ["Edit prices", "[red]Go back[/]"]
-        );
+            AnsiConsole.Write(competitorPricesTable);
+            AnsiConsole.MarkupLine($"\n[grey]Page {pageIndex + 1}/{totalPages}  |  Total: {overPricedProducts.Count} products[/]");
 
-        switch (selectedChoice)
-        {
-            case "Edit prices":
-                EditOverpricedProducts(overPricedProducts, priceFormatter);
-                break;
-            case "[red]Go back[/]":
-                return;
+            // ** USER PROMPT **
+            var choices = new List<string>();
+
+            if (pageIndex > 0) choices.Add("Previous page");
+            if (pageIndex < totalPages - 1) choices.Add("Next page");
+
+            choices.Add("Edit prices");
+            choices.Add("[red]Go back[/]");
+
+            var selectedChoice = Utils.CreateSelectionPrompt(
+                choices
+            );
+
+            switch (selectedChoice)
+            {
+                case "Previous page":
+                    pageIndex--;
+                    break;
+
+                case "Next page":
+                    pageIndex++;
+                    break;                
+                case "Edit prices":
+                    EditOverpricedProducts(pageItems, priceFormatter);
+                    break;
+                case "[red]Go back[/]":
+                    return;
+            }
         }
     }
      
