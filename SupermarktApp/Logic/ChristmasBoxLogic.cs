@@ -30,13 +30,13 @@ public static class ChristmasBoxLogic
 
     public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
     {
-        // var eligibleProducts = ProductLogic.GetAllProducts() // get aal products admin selected 
-        //     .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
-        //     .ToList();
-
-        var eligibleProducts = ProductLogic.GetAllProducts() //TEST//
-            .Where(p => p.Visible == 1)
+        var eligibleProducts = ProductLogic.GetAllProducts() // get aal products admin selected 
+            .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
             .ToList();
+
+        // var eligibleProducts = ProductLogic.GetAllProducts() //TEST//
+        //     .Where(p => p.Visible == 1)
+        //     .ToList();
 
 
         var selectedProducts = new List<ProductModel>(); // list of product for the box
