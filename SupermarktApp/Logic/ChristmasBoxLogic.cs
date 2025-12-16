@@ -30,19 +30,19 @@ public static class ChristmasBoxLogic
 
     public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
     {
-        var eligibleProducts = ProductLogic.GetAllProducts()
+        var eligibleProducts = ProductLogic.GetAllProducts() // get aal products admin selected 
             .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
             .ToList();
 
-        var selectedProducts = new List<ProductModel>();
-        double totalValue = 0;
+        var selectedProducts = new List<ProductModel>(); // list of product for the box
+        double totalValue = 0; // tracks selected product prices
 
         foreach (var product in eligibleProducts)
         {
-            selectedProducts.Add(product);
-            totalValue += product.Price;
+            selectedProducts.Add(product); // add product to boxxx
+            totalValue += product.Price;   // add price to total valvue 
 
-            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired
+            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired // check if valid
                 && totalValue >= boxPrice)
                 break;
         }
