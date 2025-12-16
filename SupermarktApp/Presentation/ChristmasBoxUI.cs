@@ -1,5 +1,6 @@
 using Spectre.Console;
 using System;
+using System.Linq;
 
 public static class ChristmasBoxUI
 {
@@ -8,36 +9,41 @@ public static class ChristmasBoxUI
         Console.Clear();
         Utils.PrintTitle("Christmas Boxes");
 
-        //// remove later ////
+        var boxes = ChristmasBoxLogic.GetAvailableBoxes();
+        
+        if (boxes.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No Christmas boxes available at the moment.[/]");
+            AnsiConsole.MarkupLine("\n[grey]Press [green]ENTER[/] to go back[/]");
+            Console.ReadKey();
+            return;
+        }
+        
         var table = Utils.CreateTable(new[]
         {
+            "[white]#[/]",
             "[white]Box[/]",
             "[white]Price[/]",
             "[white]Contents[/]"
         });
-
-        table.AddRow(
-            "Christmas Box €10",
-            "€10",
-            "Chocolate, Cookies, Tea"
-        );
-
-        table.AddRow(
-            "Christmas Box €20",
-            "€20",
-            "Wine, Cheese, Chocolate"
-        );
-
-        table.AddRow(
-            "Christmas Box €50",
-            "€50",
-            "Wine, Cheese, Snacks, Chocolate"
-        );
-
+        
+        for (int i = 0; i < boxes.Count; i++)
+        {
+            var box = boxes[i];
+            var contents = string.Join(", ", box.Products.Select(p => p.Name));
+        
+            table.AddRow(
+                (i + 1).ToString(),
+                box.Name,
+                $"€{box.Price}",
+                contents
+            );
+        }
+        
         AnsiConsole.Write(table);
-
+        
         AnsiConsole.MarkupLine("\n[grey]Press [green]ENTER[/] to go back[/]");
         Console.ReadKey();
-        //// remove later ////
+        
     }
 }
