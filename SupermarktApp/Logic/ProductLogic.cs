@@ -63,4 +63,7 @@ public class ProductLogic
 
         ProductAccess.UpdateProductStock(productId, newQuantity);
     }
+
+    // the product logic to make the admin make product ellible for the christmas box 
+    // ProductAccess.ChangeProductDetails(newProduct);
 }

@@ -44,7 +44,8 @@ public static class MenuUI
                     "Shop Details", 
                     "Settings", 
                     "Logout", 
-                    "Exit"
+                    "Exit",
+                    "Christmas Boxes" // remove later
                     });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
@@ -126,6 +127,9 @@ public static class MenuUI
                     await ExitLogic.ApplicationExitAsync();  //email 
                     SessionManager.Logout();
                     return;
+                case "Christmas Boxes": // X-mas
+                    ChristmasBoxUI.Show();
+                    break;
             }
         }
     }
