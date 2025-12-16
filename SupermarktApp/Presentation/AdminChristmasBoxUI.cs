@@ -12,7 +12,7 @@ public static class AdminChristmasBoxUI
 
         var choices = products
             .Select(p =>
-                $"{p.ID} - {Markup.Escape(p.Name)} [{Markup.Escape(p.Category)}]" // markup escape to prevent rendering errors [ ] 
+                $"{p.ID} - {Markup.Escape(p.Name)} {Markup.Escape(p.Category)}" // markup escape to prevent rendering errors [ ] 
             )
             .ToList();
 
