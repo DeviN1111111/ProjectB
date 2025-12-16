@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 public static class ChristmasBoxLogic
 {
@@ -12,8 +13,35 @@ public static class ChristmasBoxLogic
     // Creates a single Christmas box for a given price
     public static ChristmasBoxModel CreateBox(double boxPrice)
     {
-        // TODO: Select products and build a valid Christmas box
-        return new ChristmasBoxModel();
+        var box = new ChristmasBoxModel
+        {
+            Name = $"Christmas Box €{Math.Round(boxPrice, 2)}",
+            Price = boxPrice
+        };
+
+        if (boxPrice <= 0)
+        {
+            return box;
+        }
+
+        var eligibleProducts = ProductAccess.GetChristmasBoxEligibleProducts()
+            .OrderByDescending(p => p.Price)
+            .ToList();
+
+        decimal runningTotal = 0;
+
+        foreach (var product in eligibleProducts)
+        {
+            box.Products.Add(product);
+            runningTotal += (decimal)product.Price;
+
+            if (box.Products.Count >= ChristmasBoxModel.MinimumProductsRequired && runningTotal >= (decimal)boxPrice)
+            {
+                return box;
+            }
+        }
+
+        return box;
     }
 
     // Validates if a Christmas box meets the business rules
