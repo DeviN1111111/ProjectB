@@ -153,7 +153,7 @@ static class FavoriteListUI
                 table.AddRow(
                     $"[#5dabcf]{product.Name}[/]", 
                     $"{quantity}",
-                    $"[green]€{Math.Round(totalPrice * (1 - productDiscount.Discount.DiscountPercentage / 100), 2)}[/]");
+                    $"[green]{Utils.CalculateDiscountedPrice(totalPrice, productDiscount.Discount.DiscountPercentage)}[/]");
             }
             else
             {

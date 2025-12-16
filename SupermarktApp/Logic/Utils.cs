@@ -16,7 +16,7 @@ static class Utils
             AnsiConsole.Write(
                 new FigletText(title)
                     .Centered()
-                    .Color(MenuUI.AsciiPrimary));        
+                    .Color(ColorUI.AsciiPrimary));        
     }
     /// <summary>
     /// Creates and prints selection prompt with the choices passed.
@@ -89,10 +89,14 @@ static class Utils
     /// </summary>
     /// <param name="columns">IEnumerable of strings for the columns.</param>
     /// <returns>The table.</returns>
-    public static Table CreateTable(IEnumerable<string> columns)
+    public static Table CreateTable(IEnumerable<string> columns, string title = "")
     {
+
         var table = new Table()
-            .BorderColor(MenuUI.AsciiPrimary);
+            .BorderColor(ColorUI.AsciiPrimary);
+
+        if (title != "")
+            table.Title(title);
 
         foreach(string column in columns)
         {
@@ -122,6 +126,22 @@ static class Utils
             prompt.UseConverter(format);
 
         prompt.AddChoices(choices);
+
+        return AnsiConsole.Prompt(prompt);
+    }
+
+    public static List<T> CreateMultiSelectionPromptWithSelectAll<T>(IEnumerable<T> choices, T selectAll, string title= "", Func<T, string>? format= null) where T : notnull
+    {
+        var prompt = new MultiSelectionPrompt<T>()
+            .PageSize(10);
+
+        if (title != "")
+            prompt.Title(title);
+
+        if (format != null)
+            prompt.UseConverter(format);
+
+        prompt.AddChoiceGroup<T>(selectAll ,choices);
 
         return AnsiConsole.Prompt(prompt);
     }
@@ -200,5 +220,19 @@ static class Utils
             });
 
         return AnsiConsole.Prompt(prompt);
+    }
+    
+    /// <summary>
+    /// Calculates discounted price the formatted value
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="PriceBeforeDiscount"></param>
+    /// <param name="discountPercentage"></param>
+    /// <returns>formattedPrice as single string without old price</returns>
+    public static string CalculateDiscountedPrice<T>(T PriceBeforeDiscount, T discountPercentage)
+    {
+        decimal PriceAfterDiscount = Convert.ToDecimal(PriceBeforeDiscount) * (1 - (Convert.ToDecimal(discountPercentage) / 100m));
+
+        return ChangePriceFormat(PriceAfterDiscount);
     }
 }

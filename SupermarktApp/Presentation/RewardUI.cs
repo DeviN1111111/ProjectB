@@ -9,22 +9,18 @@ public static class RewardUI
             Console.Clear();
             Utils.PrintTitle("Reward System");
 
-            AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser.AccountPoints}[/]");
+            AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser!.AccountPoints}[/]");
 
             List<RewardProductDTO> AllRewardProducts = RewardLogic.GetAllRewardItems();
 
             AnsiConsole.MarkupLine("Available Reward Items:");
 
-            var table = new Table();
-            table.AddColumn("Product");
-            table.AddColumn("Points");
+
+            Table table = Utils.CreateTable(new [] { "Product", "Points" });
 
             foreach (var item in AllRewardProducts)
             {
-                table.AddRow(
-                    $"[yellow]{item.Product.Name}[/]",
-                    $"[green]{item.PriceInPoints}[/]"
-                    );
+                table.AddRow($"[yellow]{item.Product.Name}[/]", $"[green]{item.PriceInPoints}[/]");
             }
 
             AnsiConsole.Write(table);
@@ -53,7 +49,7 @@ public static class RewardUI
     {
         var options = new List<string>();
 
-        foreach (var rp in AllRewardProducts)
+        foreach (var rp in AllRewardProducts!)
         {
             options.Add(rp.Product.Name);
         }
@@ -72,13 +68,13 @@ public static class RewardUI
 
         ProductModel? selectedProduct = ProductLogic.GetProductByName(selectedItem);
         RewardProductDTO? selectedReward = RewardLogic.GetRewardItemByProductId(selectedProduct.ID);
-        AddItemToCart(selectedReward);
+        AddItemToCart(selectedReward!);
 
     }
     
     public static void AddItemToCart(RewardProductDTO selectedProduct)
     {
-        if(SessionManager.CurrentUser.AccountPoints < selectedProduct.PriceInPoints)
+        if(SessionManager.CurrentUser!.AccountPoints < selectedProduct.PriceInPoints)
         {
             AnsiConsole.MarkupLine("[red]You do not have enough reward points to redeem this item![/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");

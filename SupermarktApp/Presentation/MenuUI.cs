@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Spectre.Console;
 public static class MenuUI
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
     public static async Task ShowMainMenu()
     {
         while (true)
@@ -90,14 +89,12 @@ public static class MenuUI
                     ProductUI.SearchProduct();
                     break;
                 case "Cart":
-                    Console.Clear();
                     Order.ShowCart();
                     break;
                 case "Return Item":
                     ReturnItemUI.DisplayMenu();
                     break;
                 case "Checklist":
-                    Console.Clear();
                     Order.ShowChecklist();
                     break;
                 case "Order History":

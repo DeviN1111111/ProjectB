@@ -50,8 +50,7 @@ public static class CouponUI
             return false;
 
         // find the applied coupon in the coupons list
-        Coupon appliedCoupon = null
-        ;
+        Coupon appliedCoupon = null;
 
         for (int i = 0; i < coupons.Count; i++)
         {
@@ -93,7 +92,7 @@ public static class CouponUI
     private static void ShowCouponSelection(List<Coupon> coupons)
     {
         var table = new Table()
-            .BorderColor(MenuUI.AsciiPrimary)
+            .BorderColor(ColorUI.AsciiPrimary)
             .AddColumn("Coupon")
             .AddColumn("Credit");
 
