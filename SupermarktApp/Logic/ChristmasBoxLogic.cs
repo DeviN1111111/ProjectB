@@ -4,31 +4,28 @@ using System.Linq;
 public static class ChristmasBoxLogic
 {
     private static readonly Dictionary<int, double> BoxConfigurations = new()
-    {
+    {   // box size (pp), en de prijs van box
         { 2, 15 },
         { 4, 25 },
         { 6, 35 },
         { 8, 45 }
     };
 
-
-
-    public static List<ChristmasBoxModel> GetAvailableBoxes()
-    {
-        var boxes = new List<ChristmasBoxModel>();
+    public static List<ChristmasBoxModel> GetAvailableBoxes() // create all available boxes
+    {   
+        var boxes = new List<ChristmasBoxModel>(); // creates the list of boxes
 
         foreach (var config in BoxConfigurations)
         {
             int persons = config.Key;
             double price = config.Value;
 
-            var box = CreateBox(persons, price);
+            var box = CreateBox(persons, price); // create each box per size
             if (IsValidBox(box))
-                boxes.Add(box);
+                boxes.Add(box); // add to list of boxes
         }
 
-
-        return boxes;
+        return boxes; // return the list of boxes
     }
 
     public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
