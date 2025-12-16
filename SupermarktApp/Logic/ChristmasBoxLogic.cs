@@ -3,60 +3,72 @@ using System.Linq;
 
 public static class ChristmasBoxLogic
 {
-    // Returns all available Christmas boxes (UI will use this later)
+    private static readonly Dictionary<int, double> BoxConfigurations = new()
+    {
+        { 2, 15 },
+        { 4, 25 },
+        { 6, 35 },
+        { 8, 45 }
+    };
+
+
+
     public static List<ChristmasBoxModel> GetAvailableBoxes()
     {
-        // TODO: Generate or fetch Christmas boxes
-        return new List<ChristmasBoxModel>();
-    }
+        var boxes = new List<ChristmasBoxModel>();
 
-    // Creates a single Christmas box for a given price
-    public static ChristmasBoxModel CreateBox(double boxPrice)
-    {
-        var box = new ChristmasBoxModel
+        foreach (var config in BoxConfigurations)
         {
-            Name = $"Christmas Box €{Math.Round(boxPrice, 2)}",
-            Price = boxPrice
-        };
+            int persons = config.Key;
+            double price = config.Value;
 
-        if (boxPrice <= 0)
-        {
-            return box;
+            var box = CreateBox(persons, price);
+            if (IsValidBox(box))
+                boxes.Add(box);
         }
 
-        var eligibleProducts = ProductAccess.GetChristmasBoxEligibleProducts()
-            .OrderByDescending(p => p.Price)
+
+        return boxes;
+    }
+
+    public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
+    {
+        var eligibleProducts = ProductLogic.GetAllProducts()
+            .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
             .ToList();
 
-        decimal runningTotal = 0;
+        var selectedProducts = new List<ProductModel>();
+        double totalValue = 0;
 
         foreach (var product in eligibleProducts)
         {
-            box.Products.Add(product);
-            runningTotal += (decimal)product.Price;
+            selectedProducts.Add(product);
+            totalValue += product.Price;
 
-            if (box.Products.Count >= ChristmasBoxModel.MinimumProductsRequired && runningTotal >= (decimal)boxPrice)
-            {
-                return box;
-            }
+            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired
+                && totalValue >= boxPrice)
+                break;
         }
 
-        return box;
+        return new ChristmasBoxModel
+        {
+            Name = $"Christmas Box for {persons} persons",
+            Price = boxPrice,
+            Category = "ChristmasBox",
+            Visible = 1,
+            Products = selectedProducts
+        };
+
     }
 
-    // Validates if a Christmas box meets the business rules
     public static bool IsValidBox(ChristmasBoxModel box)
     {
-        if (box == null)
-        {
+        if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
             return false;
-        }
 
-        if (!box.HasMinimumProducts())
-        {
+        if (box.TotalProductsValue < (decimal)box.Price)
             return false;
-        }
 
-        return box.TotalProductsValue >= (decimal)box.Price && box.Price > 0;
+        return true;
     }
 }
