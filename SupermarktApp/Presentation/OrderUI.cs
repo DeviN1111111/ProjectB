@@ -32,6 +32,31 @@ public class Order
         
                 if (cartProduct.ProductId == Product.ID)
                 {
+                    // Special display for Christmas boxes
+                    if (Product is ChristmasBoxModel christmasBox)
+                    {
+                        // Add main cart row for the box
+                        cartTable.AddRow(
+                            christmasBox.Name,
+                            cartProduct.Quantity.ToString(),
+                            $"€{christmasBox.Price}",
+                            $"€{Math.Round(christmasBox.Price * cartProduct.Quantity, 2)}"
+                        );                  
+
+                        totalAmount += christmasBox.Price * cartProduct.Quantity;                   
+
+                        // Separate table for box contents
+                        var contentsTable = Utils.CreateTable(new[] { "[grey]Christmas box contents[/]" });                 
+
+                        foreach (var item in christmasBox.Products)
+                        {
+                            contentsTable.AddRow($"- {item.Name}");
+                        }                   
+
+                        AnsiConsole.Write(contentsTable);                   
+                        break;
+                    }
+
                     if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
                     {
                         cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
