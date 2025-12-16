@@ -40,9 +40,6 @@ public class ProductUI
         }
         ProductDetailsUI.ShowProductDetails(product);
 
-        // maak een "mode" voor checklist
-        // gebruiker kan sneller items teovoegen aan checklist -a
-
         if (mode == "checklist")
         {
             int quantity = AskForQuantity(product);

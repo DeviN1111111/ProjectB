@@ -89,37 +89,68 @@ public static class StatisticsUI
             AnsiConsole.WriteLine("Total turnover per category in €:");
             AnsiConsole.WriteLine();
             AnsiConsole.Write(StatisticLogic.CreateBreakdownChart(sales, "Profit"));
-
         }
 
-        if (mostSold != null)
-        {
-            var Table = StatisticLogic.CreateMostSoldTable(startDate, endDate);
-            if (Table == null)
-            {
-                AnsiConsole.MarkupLine("No data available for the selected period.");
-            }
-            else
-            {
-                AnsiConsole.WriteLine();
-                AnsiConsole.WriteLine();
-                if (startDate == DateTime.MinValue)
-                {
-                    AnsiConsole.Write($"Top 5 most sold items of all time were: ");
-                }
-                else
-                {
-                    AnsiConsole.Write($"Top 5 most sold items from {startDate.ToShortDateString()} to {endDate.ToShortDateString()} were: ");
-                }
-                AnsiConsole.WriteLine();
-                AnsiConsole.Write(Table);
-            }
+        // if (mostSold != null)
+        // {
+        //     var Table = StatisticLogic.CreateMostSoldTable(startDate, endDate);
+        //     if (Table == null)
+        //     {
+        //         AnsiConsole.MarkupLine("No data available for the selected period.");
+        //     }
+        //     else
+        //     {
+        //         AnsiConsole.WriteLine();
+        //         AnsiConsole.WriteLine();
+        //         if (startDate == DateTime.MinValue)
+        //         {
+        //             AnsiConsole.Write($"Top 5 most sold items of all time were: ");
+        //         }
+        //         else
+        //         {
+        //             AnsiConsole.Write($"Top 5 most sold items from {startDate.ToShortDateString()} to {endDate.ToShortDateString()} were: ");
+        //         }
+        //         AnsiConsole.WriteLine();
+        //         AnsiConsole.Write(Table);
+        //     }
+        // }
+        // else
+        // {
+        //     AnsiConsole.MarkupLine("No data available for the selected period.");
+        // }
+        // AnsiConsole.MarkupLine("Press [green]ENTER[/] to return to the menu.");
+        // Console.ReadLine();
+        // DisplayMenu();
 
+        if (mostSold == null)
+        {
+            AnsiConsole.MarkupLine("No data available for the selected period.");
+            AnsiConsole.MarkupLine("Press [green]ENTER[/] to return to the menu.");
+            Console.ReadLine();
+            return;
+        }
+
+        var Table = StatisticLogic.CreateMostSoldTable(startDate, endDate);
+        if (Table == null)
+        {
+            AnsiConsole.MarkupLine("No data available for the selected period.");
+            return;
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
+        
+        if (startDate == DateTime.MinValue)
+        {
+            AnsiConsole.Write($"Top 5 most sold items of all time were: ");
         }
         else
         {
-            AnsiConsole.MarkupLine("No data available for the selected period.");
+            AnsiConsole.Write($"Top 5 most sold items from {startDate.ToShortDateString()} to {endDate.ToShortDateString()} were: ");
         }
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(Table);
+
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to return to the menu.");
         Console.ReadLine();
         DisplayMenu();
@@ -132,31 +163,27 @@ public static class StatisticsUI
             var startDate = AnsiConsole.Prompt(new TextPrompt<string>($"Enter the start date for the analytics!:").DefaultValue(firstOrderDate.ToShortDateString()));
             var endDate = AnsiConsole.Prompt(new TextPrompt<string>($"Enter the end date for the analytics!:").DefaultValue(DateTime.Now.ToShortDateString()));
 
-            if (DateTime.TryParse(startDate, out DateTime startDate1) && DateTime.TryParse(endDate, out DateTime endDate1))
+            if (!DateTime.TryParse(startDate, out DateTime startDate1) || !DateTime.TryParse(endDate, out DateTime endDate1))
             {
-                if (startDate1 >= firstOrderDate && endDate1 <= DateTime.Now)
-                {
-                    if (startDate1 <= endDate1)
-                    {
-                        Console.Clear();
-                        Utils.PrintTitle("Supermarket Analytics");
-                        return (startDate1, endDate1);
-                    }
-                    else
-                    {
-                        AnsiConsole.MarkupLine("[red]Start date must be earlier than or equal to end date. Please try again.[/]");
-                    }
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("[red]Invalid date, you cant go back in the time before the first order[/]");
-                }
+                AnsiConsole.MarkupLine("[red]Invalid date format — please enter dates like 31-12-2000. Try again.[/]");
+                continue;
             }
-            else
+
+            if (startDate1 < firstOrderDate || endDate1 > DateTime.Now)
             {
-                AnsiConsole.MarkupLine("[red]Invalid format please try again[/]");
+                AnsiConsole.MarkupLine("[red]Invalid date range: dates must be between the first order and today.[/]");
+                continue;
             }
-    
+
+            if (startDate1 > endDate1)
+            {
+                AnsiConsole.MarkupLine("[red]Start date must be earlier than or equal to end date. Please try again.[/]");
+                continue;
+            }
+        
+            Console.Clear();
+            Utils.PrintTitle("Supermarket Analytics");
+            return (startDate1, DateTime.Parse(endDate));
         }
     }
 
