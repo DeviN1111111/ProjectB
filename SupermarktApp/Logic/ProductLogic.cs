@@ -65,5 +65,9 @@ public class ProductLogic
     }
 
     // the product logic to make the admin make product ellible for the christmas box 
-    // ProductAccess.ChangeProductDetails(newProduct);
+    public static void UpdateProduct(ProductModel product)
+    {
+       ProductAccess.ChangeProductDetails(product);
+    }
+
 }
