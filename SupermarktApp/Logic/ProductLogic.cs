@@ -52,7 +52,12 @@ public class ProductLogic
         bool includeHidden = user == "Admin" || user == "SuperAdmin";
     
         var products = ProductAccess.GetAllProducts(includeHidden); // get all products
-    
+
+        if (!products.Any(p => p.Category == "ChristmasBox"))
+        {
+            var christmasBoxes = ChristmasBoxLogic.GetAvailableBoxes(); // get xmas boxes
+            products.AddRange(christmasBoxes); // add boxes to products
+        }
         return products;
     }
     public static void UpdateStock(int productId, int incomingQuantity)

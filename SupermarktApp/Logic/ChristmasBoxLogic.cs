@@ -43,13 +43,20 @@ public static class ChristmasBoxLogic
             .ToList();
 
         var selectedProducts = new List<ProductModel>(); // list of product for the box
+        var random = new Random();
 
-        foreach (var product in eligibleProducts)
+        foreach (var product in eligibleProducts.OrderBy(_ => random.Next())) // create boxes random items
         {
             selectedProducts.Add(product); // add product to boxxx
 
-            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired)
+            int requiredItems = Math.Max(
+                ChristmasBoxModel.MinimumProductsRequired,
+                persons + 1
+            );
+            
+            if (selectedProducts.Count >= requiredItems)
                 break;
+            
         }
 
         return new ChristmasBoxModel
