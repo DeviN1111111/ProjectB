@@ -371,7 +371,6 @@ public static class StatisticsUI
                 case "Previous page":
                     pageIndex--;
                     break;
-
                 case "Next page":
                     pageIndex++;
                     break;                
@@ -399,7 +398,8 @@ public static class StatisticsUI
         {
             double newPrice = Utils.AskDouble(
                 $"Enter new price for [yellow]{product.Name}[/] " +
-                $"Current Price: {priceFormatter(product.Price, "red")} | Competitor Price: {priceFormatter(product.CompetitorPrice, "green")}): "
+                $"Current Price: {priceFormatter(product.Price, "red")} | Competitor Price: {priceFormatter(product.CompetitorPrice, "green")}): ",
+                min: 0
             );
 
             ProductLogic.LowerPriceForOverpricedProduct(product, newPrice);
