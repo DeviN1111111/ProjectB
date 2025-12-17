@@ -53,10 +53,6 @@ public class ProductLogic
     
         var products = ProductAccess.GetAllProducts(includeHidden); // get all products
     
-        var christmasBoxes = ChristmasBoxLogic.GetAvailableBoxes(); // Get availble xmas boxes
-    
-        products.AddRange(christmasBoxes); // Add boxes to product list
-
         return products;
     }
     public static void UpdateStock(int productId, int incomingQuantity)

@@ -35,24 +35,20 @@ public static class ChristmasBoxLogic
     public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
     {
         var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true) // get aal products admin selected 
-            .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
+            .Where(p =>
+                p.Visible == 1 &&
+                p.Category != null &&
+                p.Category.Equals("ChristmasBoxItem", StringComparison.OrdinalIgnoreCase)
+            )
             .ToList();
 
-        // var eligibleProducts = ProductLogic.GetAllProducts() //TEST//
-        //     .Where(p => p.Visible == 1)
-        //     .ToList();
-
-
         var selectedProducts = new List<ProductModel>(); // list of product for the box
-        double totalValue = 0; // tracks selected product prices
 
         foreach (var product in eligibleProducts)
         {
             selectedProducts.Add(product); // add product to boxxx
-            totalValue += product.Price;   // add price to total valvue 
 
-            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired // check if valid
-                && totalValue >= boxPrice)
+            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired)
                 break;
         }
 
@@ -72,8 +68,8 @@ public static class ChristmasBoxLogic
         if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
             return false;
 
-        if (box.TotalProductsValue < (decimal)box.Price)
-            return false;
+        // if (box.TotalProductsValue < (decimal)box.Price)
+        //     return false;
 
         return true;
     }
