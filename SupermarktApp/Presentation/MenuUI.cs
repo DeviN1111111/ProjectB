@@ -44,18 +44,19 @@ public static class MenuUI
                     "Shop Details", 
                     "Settings", 
                     "Logout", 
-                    "Exit"
+                    "Exit",
+                    "Christmas Boxes" // remove later
                     });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
             {
                 // Options when you're logged in as an admin
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Christmas Box Items", "Logout", "Exit" });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "SuperAdmin")
             {
                 // Options when you're logged in as a superadmin
-                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Logout", "Exit" });
+                options.AddRange(new[] { "Notification", "Management", "Statistics", "Shop Details", "Christmas Box Items", "Logout", "Exit" });
             }
             else
             {
@@ -126,6 +127,12 @@ public static class MenuUI
                     await ExitLogic.ApplicationExitAsync();  //email 
                     SessionManager.Logout();
                     return;
+                case "Christmas Boxes": // X-mas
+                    ChristmasBoxUI.Show();
+                    break;
+                case "Christmas Box Items":
+                    AdminChristmasBoxUI.Show();
+                    break;
             }
         }
     }

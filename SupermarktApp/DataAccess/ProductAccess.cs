@@ -58,6 +58,15 @@ public static class ProductAccess
         );
     }
     
+    public static List<ProductModel> GetChristmasBoxEligibleProducts(bool includeHidden = false)
+    {   // create a query that selects the products admin selected eligible 
+        string sql = includeHidden
+            ? @"SELECT * FROM Products WHERE Category = 'ChristmasBoxItem'"
+            : @"SELECT * FROM Products WHERE Category = 'ChristmasBoxItem' AND Visible = 1";
+
+        return _connection.Query<ProductModel>(sql).ToList();
+    }
+
     public static ProductModel? GetProductByID(int id)
     {
         return _connection.QueryFirstOrDefault<ProductModel>(
@@ -117,4 +126,6 @@ public static class ProductAccess
             new { Id = id }
         );
     }
+
+
 }

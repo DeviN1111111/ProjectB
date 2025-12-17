@@ -201,7 +201,7 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
     var outOfStockProducts = new List<string>();
     var unavailableProducts = new List<string>();
 
-    // 1️⃣ GROUP items by product ID
+    // GROUP items by product ID
     var grouped = pastOrderItems
         .GroupBy(i => i.ProductID)
         .Select(g => new { ProductID = g.Key, QuantityNeeded = g.Count() });
