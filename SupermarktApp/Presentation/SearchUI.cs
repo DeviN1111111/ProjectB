@@ -38,15 +38,18 @@ public static class SearchUI
             if (input.Length != 0)
             {
                 var products = ProductLogic.GetAllProducts();
-                products.AddRange(ChristmasBoxLogic.GetAvailableBoxes()); // add the christmas boxes to the products
+                // products.AddRange(ChristmasBoxLogic.GetAvailableBoxes()); // add the christmas boxes to the products
 
                 List<ProductModel> productList = products
                     .Where(p =>
-                        p.Name.Contains(input, StringComparison.OrdinalIgnoreCase)
-                        || (!string.IsNullOrEmpty(p.Category)
-                            && p.Category.Contains(input, StringComparison.OrdinalIgnoreCase))
+                        (
+                            p.Name.Contains(input, StringComparison.OrdinalIgnoreCase)
+                            || (!string.IsNullOrEmpty(p.Category)
+                                && p.Category.Contains(input, StringComparison.OrdinalIgnoreCase))
+                        )
+                        && p.Category != "ChristmasBoxItem" // hide box contents
                     )
-                    .OrderBy(p => p.Name) // sort by name
+                    .OrderBy(p => p.Name)
                     .Take(10)   // show 10 
                     .ToList();
                 
