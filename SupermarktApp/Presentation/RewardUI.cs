@@ -28,7 +28,7 @@ public static class RewardUI
             var options = new List<string> { "Use reward points", "Go back" }; ;
 
             var prompt = new SelectionPrompt<string>()
-                .Title("Select an item to add to CartProduct (this will be free in checkout)")
+                .Title("Select an item to add to Cart (this will be free in checkout)")
                 .PageSize(10)
                 .AddChoices(options);
                 
@@ -55,7 +55,7 @@ public static class RewardUI
         }
         options.Add("Go back");
         var prompt = new SelectionPrompt<string>()
-            .Title("Select an item to add to CartProduct (this will be free in checkout)")
+            .Title("Select an item to add to Cart (this will be free in checkout)")
             .PageSize(10)
             .AddChoices(options);
 
