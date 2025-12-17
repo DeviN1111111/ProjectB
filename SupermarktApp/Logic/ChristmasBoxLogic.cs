@@ -26,11 +26,13 @@ public static class ChristmasBoxLogic
         }
 
         return boxes; // return the list of boxes
+        // Console.WriteLine($"Created {boxes.Count} Christmas boxes");
+
     }
 
     public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
     {
-        var eligibleProducts = ProductLogic.GetAllProducts() // get aal products admin selected 
+        var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true) // get aal products admin selected 
             .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
             .ToList();
 

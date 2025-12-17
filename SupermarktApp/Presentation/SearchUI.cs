@@ -37,7 +37,15 @@ public static class SearchUI
 
             if (input.Length != 0)
             {
-                List<ProductModel> productList = ProductLogic.SearchProductByName(input);
+                // List<ProductModel> productList = ProductLogic.SearchProductByName(input);
+                List<ProductModel> productList = ProductLogic
+                    .GetAllProducts()
+                    .Where(p =>
+                        p.Name.Contains(input, StringComparison.OrdinalIgnoreCase) ||
+                        p.Category.Contains(input, StringComparison.OrdinalIgnoreCase)
+                    )
+                    .ToList();
+
                 AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
                 if (productList.Count == 0)
                 {
