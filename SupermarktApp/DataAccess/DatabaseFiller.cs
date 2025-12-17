@@ -124,7 +124,8 @@ public class DatabaseFiller
                 Location INTEGER,
                 ExpiryDate DATETIME,
                 Quantity INTEGER NOT NULL DEFAULT 0,
-                Visible INTEGER NOT NULL DEFAULT 1
+                Visible INTEGER NOT NULL DEFAULT 1,
+                CompetitorPrice REAL NOT NULL DEFAULT 0
             );");
 
         _sharedConnection!.Execute(@"
@@ -266,6 +267,7 @@ public class DatabaseFiller
             foreach (string name in entry.Value)
             {
                 var price = GetPriceForCategory(category, random);
+                var competitorPrice = Math.Round(price * (0.8 + random.NextDouble() * 0.4), 2);
                 var nutrition = GenerateNutritionDetails(name, category, random);
                 var description = GenerateDescription(name, category);
                 var expiry = GetExpiryDate(category, random);
@@ -274,6 +276,7 @@ public class DatabaseFiller
                 {
                     Name = name,
                     Price = Math.Round(price, 2),
+                    CompetitorPrice = competitorPrice,
                     NutritionDetails = nutrition,
                     Description = description,
                     Category = category,
@@ -430,8 +433,8 @@ public class DatabaseFiller
     public static void InsertProduct(ProductModel product)
     {
         _sharedConnection!.Execute(@"
-        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity, ExpiryDate, Visible)
-        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @ExpiryDate, @Visible);", product);
+        INSERT INTO Products (Name, Price, NutritionDetails, Description, Category, Location, Quantity, ExpiryDate, Visible, CompetitorPrice)
+        VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @ExpiryDate, @Visible, @CompetitorPrice);", product);
     }
 
     public static void InsertRestockHistory(RestockHistoryModel restockEntry)

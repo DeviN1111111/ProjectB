@@ -57,7 +57,7 @@ public class DiscountsUI
             foreach (DiscountsModel discount in discounts)
             {
                 var product = ProductLogic.GetProductById(discount.ProductID);
-                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]{Utils.CalculateDiscountedPrice(product.Price, discount.DiscountPercentage)}[/]");
+                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike]{Utils.ChangePriceFormat(product.Price, "red")}[/]", $"{Utils.ChangePriceFormat(product.Price * (1 - (discount.DiscountPercentage / 100)), "green")}");
             }
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
@@ -90,7 +90,7 @@ public class DiscountsUI
             foreach (var discount in discounts)
             {
                 var product = ProductLogic.GetProductById(discount.ProductID);
-                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]{Utils.CalculateDiscountedPrice(product.Price, discount.DiscountPercentage)}[/]");
+                table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike]{Utils.ChangePriceFormat(product.Price, "red")}[/]", $"{Utils.ChangePriceFormat(product.Price * (1 - (discount.DiscountPercentage / 100)), "green")}");
             }
             AnsiConsole.Write(table);
             AnsiConsole.MarkupLine("Press [green]any key[/] to continue.");
@@ -125,7 +125,7 @@ public class DiscountsUI
                 ProductDiscountDTO discountedProduct = DiscountsLogic.CheckDiscountByProduct(product)!;
                 if(discountedProduct != null && discountedProduct.Discount!.DiscountType == "Expiry") // Maybe make it page system so page doesnt flood with too many discounts
                 {
-                    table.AddRow($"[blue]{product.Name}[/]", $"[italic yellow]{discount.DiscountPercentage}% OFF[/]", $"[strike][red]€{product.Price}[/][/]", $"[green]{Utils.CalculateDiscountedPrice(product.Price, discount.DiscountPercentage)}[/]");
+                    table.AddRow($"[blue]{discountedProduct.Product.Name}[/]", $"[italic yellow]{discountedProduct.Discount.DiscountPercentage}% OFF[/]", $"[strike]{Utils.ChangePriceFormat(discountedProduct.Product.Price, "red")}[/]", $"{Utils.ChangePriceFormat(discountedProduct.Product.Price * (1 - (discountedProduct.Discount.DiscountPercentage / 100)), "green")}");
                 }      
             }
             AnsiConsole.Write(table);

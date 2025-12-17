@@ -153,14 +153,14 @@ static class FavoriteListUI
                 table.AddRow(
                     $"[#5dabcf]{product.Name}[/]", 
                     $"{quantity}",
-                    $"[green]{Utils.CalculateDiscountedPrice(totalPrice, productDiscount.Discount.DiscountPercentage)}[/]");
+                    $"{Utils.ChangePriceFormat(totalPrice * (1 - productDiscount.Discount.DiscountPercentage / 100), "green")}");
             }
             else
             {
                 table.AddRow(
                     $"[#5dabcf]{product.Name}[/]", 
                     $"{quantity}",
-                    $"[green]€{totalPrice}[/]");
+                    $"{Utils.ChangePriceFormat(totalPrice, "green")}");
             }
         }
 
@@ -409,12 +409,12 @@ static class FavoriteListUI
         {
             var product = item.Product;
             int quantity = item.Quantity;
-            double totalPrice = Math.Round(product.Price * quantity, 2);
+            var totalPrice = Utils.ChangePriceFormat(product.Price * quantity, "green");
 
             table.AddRow(
                 $"[#5dabcf]{product.Name}[/]", 
                 $"{quantity}",
-                $"[green]€{totalPrice}[/]");
+                $"{totalPrice}");
         }
 
         AnsiConsole.Write(table);
