@@ -12,7 +12,7 @@ namespace SupermarktAppTests
 
         [TestMethod]
         [DataRow("test@gmail.com", "password1")]
-        public void AddToCart_ValidProduct_AddsCorrectItemAndQuantity(string email, string password)
+        public void AddToCartProduct_ValidProduct_AddsCorrectItemAndQuantity(string email, string password)
         {
             // Arrange - Add new test user and product to database
             var random = new Random();
@@ -39,20 +39,20 @@ namespace SupermarktAppTests
             var result = LoginLogic.GetUserByEmail(email);
             var addedProduct = ProductAccess.GetProductByName(product.Name);
             
-            CartAccess.AddToCart(result.ID, addedProduct.ID, 2);  // Add new product to cart with quantity 2
+            CartProductAccess.AddToCartProduct(result.ID, addedProduct.ID, 2);  // Add new product to CartProduct with quantity 2
 
             // Assert
-            var cart = CartAccess.GetAllUserProducts(result.ID);
+            var CartProduct = CartProductAccess.GetAllUserProducts(result.ID);
 
-            Assert.HasCount(1, cart);
-            Assert.AreEqual(addedProduct.ID, cart[0].ProductId);
-            Assert.AreEqual(2, cart[0].Quantity);
+            Assert.HasCount(1, CartProduct);
+            Assert.AreEqual(addedProduct.ID, CartProduct[0].ProductId);
+            Assert.AreEqual(2, CartProduct[0].Quantity);
         }
 
 
         [TestMethod]
         [DataRow("test@gmail.com", "password1")]
-        public void Checkout_CartHasItems_CanProceed(string email, string password)
+        public void Checkout_CartProductHasItems_CanProceed(string email, string password)
         {
             // Arrange - Add new test user and product to database
             var random = new Random();
@@ -79,16 +79,16 @@ namespace SupermarktAppTests
             var result = LoginLogic.GetUserByEmail(email);
             var addedProduct = ProductAccess.GetProductByName(product.Name);
             
-            CartAccess.AddToCart(result.ID, addedProduct.ID, 2);  // Add new product to cart with quantity 2
+            CartProductAccess.AddToCartProduct(result.ID, addedProduct.ID, 2);  // Add new product to CartProduct with quantity 2
             
             // Assert
-            var cart = CartAccess.GetAllUserProducts(result.ID);
-            Assert.IsNotEmpty(cart);  // cart contains items, so checkout is possible
+            var CartProduct = CartProductAccess.GetAllUserProducts(result.ID);
+            Assert.IsNotEmpty(CartProduct);  // CartProduct contains items, so checkout is possible
         }
 
         [TestMethod]
         [DataRow("test@gmail.com", "password1")]
-        public void PlaceOrder_ValidCart_CreatesOrderWithItems(string email, string password)
+        public void PlaceOrder_ValidCartProduct_CreatesOrderWithItems(string email, string password)
         {
             // Arrange - Add new test user and product to database
             var random = new Random();
@@ -130,15 +130,15 @@ namespace SupermarktAppTests
             var product2 = ProductAccess.GetProductByName(testProduct2.Name);
 
 
-            CartAccess.AddToCart(result.ID, product1.ID, 2);  // Add new product to cart with quantity 2
-            CartAccess.AddToCart(result.ID, product2.ID, 3);  // Add new product to cart with quantity 3
-            OrderLogic.ProcessPay(CartAccess.GetAllUserProducts(result.ID), ProductAccess.GetAllProducts(), null);
+            CartProductAccess.AddToCartProduct(result.ID, product1.ID, 2);  // Add new product to CartProduct with quantity 2
+            CartProductAccess.AddToCartProduct(result.ID, product2.ID, 3);  // Add new product to CartProduct with quantity 3
+            OrderLogic.ProcessPay(CartProductAccess.GetAllUserProducts(result.ID), ProductAccess.GetAllProducts(), null);
 
             // Assert
             var orderHistory = OrderHistoryAccess.GetOrderByUserId(result.ID);
             Assert.IsNotNull(orderHistory);
 
-            var orderItems = OrderAccess.GetOrderssByOrderId(orderHistory.Id);
+            var orderItems = OrderItemAccess.GetOrderItemsByOrderId(orderHistory.Id);
 
             Assert.HasCount(5, orderItems); // 5 items purchased (2 of product1 and 3 of product2)
             Assert.IsTrue(orderItems.Exists(item => item.ProductID == product1.ID));  // Check that product1 is in the order items

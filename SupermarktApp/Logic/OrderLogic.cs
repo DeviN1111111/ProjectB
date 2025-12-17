@@ -2,28 +2,28 @@ using Spectre.Console;
 
 public class OrderLogic
 {
-    public static void AddToCart(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
+    public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
-        // check if product already in cart
-        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
-        var CartItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
-        if (CartItem != null)
+        // check if product already in CartProduct
+        List<CartProductModel> allUserProducts = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
+        var CartProductItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
+        if (CartProductItem != null)
         {
-            int newQuantity = CartItem.Quantity + quantity;
+            int newQuantity = CartProductItem.Quantity + quantity;
             if (newQuantity > 99)
             {
                 newQuantity = 99; // max stock limit
             }
-            CartAccess.RemoveFromCart(SessionManager.CurrentUser.ID, product.ID);
-            RewardPrice = CartItem.RewardPrice + RewardPrice;
-            discount = CartItem.Discount + discount;
-            CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, newQuantity, RewardPrice);
+            CartProductAccess.RemoveFromCartProduct(SessionManager.CurrentUser.ID, product.ID);
+            RewardPrice = CartProductItem.RewardPrice + RewardPrice;
+            discount = CartProductItem.Discount + discount;
+            CartProductAccess.AddToCartProduct(SessionManager.CurrentUser.ID, product.ID, newQuantity, RewardPrice);
             return;
         }
-        // add new item to cart
-        CartAccess.AddToCart(SessionManager.CurrentUser.ID, product.ID, quantity, RewardPrice);
+        // add new item to CartProduct
+        CartProductAccess.AddToCartProduct(SessionManager.CurrentUser.ID, product.ID, quantity, RewardPrice);
     }
-       public static string AddBirthdayGiftToCart(UserModel user)
+       public static string AddBirthdayGiftToCartProduct(UserModel user)
         {
             if (user == null || SessionManager.CurrentUser == null)
             {
@@ -39,30 +39,30 @@ public class OrderLogic
                 return "No 'Birthday Present' product found in the database.";
             }
 
-            // Ensure we're checking the current user's cart
-            var userCart = CartAccess.GetAllUserProducts(user.ID);
-            var existingItem = userCart.FirstOrDefault(p => p.ProductId == giftProduct.ID);
+            // Ensure we're checking the current user's CartProduct
+            var userCartProduct = CartProductAccess.GetAllUserProducts(user.ID);
+            var existingItem = userCartProduct.FirstOrDefault(p => p.ProductId == giftProduct.ID);
 
             if (existingItem != null)
             {
-                return "Birthday present already in your cart.";
+                return "Birthday present already in your CartProduct.";
             }
 
-        // Add the gift to the cart
-        AddToCart(giftProduct, 1, 0, 0);
-            return $" Happy Birthday, {user.Name}! A free '{giftProduct.Name}' has been added to your cart!";
+        // Add the gift to the CartProduct
+        AddToCartProduct(giftProduct, 1, 0, 0);
+            return $" Happy Birthday, {user.Name}! A free '{giftProduct.Name}' has been added to your Cart!";
         }
 
 
-    public static List<CartModel> AllUserProducts()
+    public static List<CartProductModel> AllUserProducts()
     {
-        List<CartModel> allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
+        List<CartProductModel> allUserProducts = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
         return allUserProducts;
     }
 
-    public static void ClearCart()
+    public static void ClearCartProduct()
     {
-        CartAccess.ClearCart();
+        CartProductAccess.ClearCartProduct();
     }
     public static double DeliveryFee(double totalAmount)
     {
@@ -85,22 +85,22 @@ public class OrderLogic
 
     public static void UpdateStock()
     {
-        List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
+        List<CartProductModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in CartProduct
         List<ProductModel> allProducts = ProductAccess.GetAllProducts();
-        foreach (var cartProduct in allUserProducts)
+        foreach (var CartProductProduct in allUserProducts)
         {
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
-                if (cartProduct.ProductId == Product.ID)
+                if (CartProductProduct.ProductId == Product.ID)
                 {
-                    if (Product.Quantity - cartProduct.Quantity < 0)
+                    if (Product.Quantity - CartProductProduct.Quantity < 0)
                     {
                         AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{Product.Name}'.[/]");
                         Console.ReadKey();
                         continue;
                     }
-                    int newStock = Product.Quantity - cartProduct.Quantity;
+                    int newStock = Product.Quantity - CartProductProduct.Quantity;
                     ProductAccess.UpdateProductStock(Product.ID, newStock);
                 }
             }
@@ -108,13 +108,13 @@ public class OrderLogic
     }
     public static void ChangeQuantity(int productId, int newQuantity)
     {
-        CartAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
+        CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
 
-    // remove a product from cart by product id
-    public static void RemoveFromCart(int productId)
+    // remove a product from CartProduct by product id
+    public static void RemoveFromCartProduct(int productId)
     {
-        double rewardPrice = CartAccess.GetUserProductByProductId(SessionManager.CurrentUser!.ID, productId)!.RewardPrice;
+        double rewardPrice = CartProductAccess.GetUserProductByProductId(SessionManager.CurrentUser!.ID, productId)!.RewardPrice;
         string rewardItemName = ProductAccess.GetProductByID(productId)!.Name;
         if(rewardPrice > 0)
         {
@@ -122,12 +122,12 @@ public class OrderLogic
             RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser!.ID, SessionManager.CurrentUser.AccountPoints);
             AnsiConsole.MarkupLine($"[white]You have been refunded [/][green]{rewardPrice}[/] reward points for [yellow1]{rewardItemName}[/]!");
         }
-        CartAccess.RemoveFromCart(SessionManager.CurrentUser!.ID, productId);
+        CartProductAccess.RemoveFromCartProduct(SessionManager.CurrentUser!.ID, productId);
     }
     public static double CalculateTotalDiscount()
     {
         if (SessionManager.CurrentUser == null) return 0;
-        var allUserProducts = CartAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
+        var allUserProducts = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser.ID);
         double totalDiscount = 0;
         foreach (var item in allUserProducts)
         {
@@ -136,46 +136,46 @@ public class OrderLogic
         return Math.Round(totalDiscount, 2);
     }
     //create a new order for the current user.
-    public static void AddOrderWithItems(List<OrdersModel> cartProducts, List<ProductModel> allProducts)
+    public static void AddOrderWithItems(List<OrderItemsModel> CartProductProducts, List<ProductModel> allProducts)
     {
         // Create a new order and get its ID
         int orderId = OrderHistoryAccess.AddToOrderHistory(SessionManager.CurrentUser!.ID);
-        foreach (var cartProduct in cartProducts)
+        foreach (var CartProductProduct in CartProductProducts)
         {
             // Find the matching product details
-            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == cartProduct.ProductID);
+            var matchingProduct = allProducts.FirstOrDefault(matchingProduct => matchingProduct.ID == CartProductProduct.ProductID);
             var RewardItem = RewardItemsAccess.GetRewardItemByProductId(matchingProduct!.ID);
             if (matchingProduct != null)
             {
                 // Add each item to OrderItems with the new orderId
                 if (RewardItem != null)
                 {
-                    OrderAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, 0.0);
+                    OrderItemAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, 0.0);
                 }
                 else
-                    OrderAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, matchingProduct.Price);
+                    OrderItemAccess.AddToOrders(SessionManager.CurrentUser.ID, orderId, matchingProduct.ID, matchingProduct.Price);
             }
         }
     }
-    public static List<OrdersModel> GetOrderssByOrderId(int orderId)
+    public static List<OrderItemsModel> GetOrderItemsByOrderId(int orderId)
     {
-        return OrderAccess.GetOrderssByOrderId(orderId);
+        return OrderItemAccess.GetOrderItemsByOrderId(orderId);
     }
     public static OrderHistoryModel GetOrderByUserId(int userId) => OrderHistoryAccess.GetOrderByUserId(userId);
-    public static void ProcessPay(List<CartModel> cartProducts, List<ProductModel> allProducts, int? selectedCouponId)
+    public static void ProcessPay(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts, int? selectedCouponId)
     {
-        List<OrdersModel> allOrderItems = new List<OrdersModel>();
+        List<OrderItemsModel> allOrderItems = new List<OrderItemsModel>();
 
-        foreach (var item in cartProducts)
+        foreach (var item in CartProductProducts)
         {
             var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
             if (product == null)
                 continue;
 
-            // Create OrdersModel per quantity
+            // Create OrderItemsModel per quantity
             for (int i = 0; i < item.Quantity; i++)
             {
-                allOrderItems.Add(new OrdersModel
+                allOrderItems.Add(new OrderItemsModel
                 {
                     UserID = SessionManager.CurrentUser!.ID,
                     ProductID = product.ID,
@@ -190,20 +190,13 @@ public class OrderLogic
             OrderLogic.AddOrderWithItems(allOrderItems, allProducts);
         }
 
-        // Apply coupon if selected
-        if (selectedCouponId.HasValue)
-        {
-            CouponLogic.UseCoupon(selectedCouponId.Value);
-            CouponLogic.ResetCouponSelection();
-        }
-
         //  clean up
         OrderLogic.UpdateStock();
-        OrderLogic.ClearCart();
+        OrderLogic.ClearCartProduct();
     }
 public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrder(int orderHistoryId)
 {
-    var pastOrderItems = OrderAccess.GetOrderssByOrderId(orderHistoryId);
+    var pastOrderItems = OrderItemAccess.GetOrderItemsByOrderId(orderHistoryId);
 
     var outOfStockProducts = new List<string>();
     var unavailableProducts = new List<string>();
@@ -240,7 +233,7 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
         // Partial stock situation
         if (stock < needed)
         {
-            AddToCart(product, stock);
+            AddToCartProduct(product, stock);
 
             outOfStockProducts.Add(
                 $"{product.Name} — needed {needed}, only {stock} added"
@@ -250,7 +243,7 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
         }
 
         // Full stock available
-        AddToCart(product, needed);
+        AddToCartProduct(product, needed);
     }
 
     return (outOfStockProducts, unavailableProducts);
@@ -264,17 +257,17 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
 
 // CheckStockBeforeCheckout using tuple
 
-    public static List<string> CheckStockBeforeCheckout(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    public static List<string> CheckStockBeforeCheckout(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
         List<string> outOfStockProducts = new List<string>();
-        foreach (var cartItem in cartProducts)
+        foreach (var CartProductItem in CartProductProducts)
         {
-            var product = ProductAccess.GetProductByID(cartItem.ProductId);
+            var product = ProductAccess.GetProductByID(CartProductItem.ProductId);
             if (product != null)
             {
                 int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
                 
-                if (availableStock < cartItem.Quantity)
+                if (availableStock < CartProductItem.Quantity)
                 {
                     outOfStockProducts.Add(product.Name);
                 }
@@ -285,7 +278,7 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
 
     public static void RemoveAllProductsFromOrder(int orderId)
     {
-        OrderAccess.RemoveAllProductsFromOrder(orderId);
+        OrderItemAccess.RemoveAllProductsFromOrder(orderId);
     } 
     public static void DeleteOrderHistory(int orderId)
     {

@@ -1,4 +1,4 @@
-public class CartModel
+public class CartProductModel
 {
     public int UserId { get; set; }
     public int ProductId { get; set; }
@@ -6,11 +6,11 @@ public class CartModel
     public double Discount { get; set; }
     public double RewardPrice { get; set; } = 0;
 
-    public CartModel(int userId, int productId, int quantity)
+    public CartProductModel(int userId, int productId, int quantity)
     {
         UserId = userId;
         ProductId = productId;
         Quantity = quantity;
     }
-    public CartModel(){}
+    public CartProductModel(){}
 }

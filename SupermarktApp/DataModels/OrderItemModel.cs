@@ -1,4 +1,4 @@
-public class OrdersModel
+public class OrderItemsModel
 {
     public int ID { get; set; }
     public int UserID { get; set; }
@@ -8,17 +8,17 @@ public class OrdersModel
     public DateTime Date { get; set; }
 
 
-    public OrdersModel(int userID)
+    public OrderItemsModel(int userID)
     {
         UserID = userID;
         Date = DateTime.Now;
     }
-    public OrdersModel(int userID, int productID, double price)
+    public OrderItemsModel(int userID, int productID, double price)
     {
         UserID = userID;
         ProductID = productID;
         Price = price;
         Date = DateTime.Now;
     }
-    public OrdersModel() { }
+    public OrderItemsModel() { }
 }

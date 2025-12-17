@@ -2,8 +2,6 @@ using Spectre.Console;
 
 public class NotificationUI
 {
-    public static readonly Color AsciiPrimary = Color.FromHex("#0F4C75");
-    public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
         while (true)
@@ -11,11 +9,11 @@ public class NotificationUI
             Console.Clear();
             Utils.PrintTitle("Notifications");
 
-            var prompt1 = new SelectionPrompt<string>()
-                .AddChoices(new[] { "Fill specific low stock product", "Go back" });
-            string selectedItem = AnsiConsole.Prompt(prompt1);
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .AddChoices(new[] { "Fill specific low stock product", "Go back" }));
 
-            switch (selectedItem)
+            switch (choice)
             {
                 case "Go back":
                     return;
@@ -49,14 +47,14 @@ public class NotificationUI
             LowQuantityProductNames.Add($"ProductID: {product.ID } Name: [yellow]{product.Name}[/] Quantity: [red]{product.Quantity}[/]");
         }
 
-        var itemsToFill = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("[bold white]Select items to fill the quantity:[/]")
-                .NotRequired()
-                .PageSize(20)
-                // .AddChoices(LowQuantityProductNames)
-                .AddChoiceGroup("Select all", LowQuantityProductNames)
-        );
+        var itemsToFill = Utils.CreateMultiSelectionPromptWithSelectAll<string>(LowQuantityProductNames, "Select All", "[bold white]Select items to fill the quantity:[/]");
+        // var itemsToFill = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select items to fill the quantity:[/]")
+        //         .NotRequired()
+        //         .PageSize(20)
+        //         .AddChoiceGroup("Select all", LowQuantityProductNames)
+        // );
 
         if (itemsToFill.Count == 0)
         {
@@ -77,13 +75,12 @@ public class NotificationUI
 
         foreach (var product in itemsToFill)
         {
-            // var productID = product.Split(" ");
-            // price += NotificationLogic.FillProductQuantity(Convert.ToInt32(productID[1]), QuantityFill);
             var productID = int.Parse(product.Split(" ")[1]);
             var cost = NotificationLogic.FillProductQuantity(productID, QuantityFill);
 
             price += cost;
-            RestockHistoryAccess.AddRestockEntry(new RestockHistoryModel(productID, QuantityFill, DateTime.Now, cost / QuantityFill));
+            NotificationLogic.AddRestockEntry(new RestockHistoryModel(productID, QuantityFill, DateTime.Now, cost / QuantityFill));
+
         }
         AnsiConsole.MarkupLine($"[green]Successfully filled the selected products. Total cost: {Utils.ChangePriceFormat(price, "yellow")}[/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");

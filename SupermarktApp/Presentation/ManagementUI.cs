@@ -4,11 +4,6 @@ using System.Globalization;
 
 public static class ManagementUI
 {
-    public static readonly Color Text = Color.FromHex("#E8F1F2");
-    public static readonly Color Hover = Color.FromHex("#006494");
-    public static readonly Color Confirm = Color.FromHex("#13293D");
-    public static readonly Color AsciiPrimary = Color.FromHex("#247BA0");
-    public static readonly Color AsciiSecondary = Color.FromHex("#1B98E0");
     public static void DisplayMenu()
     {
         while (true)
@@ -34,7 +29,7 @@ public static class ManagementUI
             var mainChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[yellow]Choose a category:[/]")
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .AddChoices(items));
 
   
@@ -106,11 +101,11 @@ public static class ManagementUI
         switch (choice)
         {
             case "Edit Shop Description":
-                ShopDetailsUI.PromptDescription();
+                ShopDetailsUI.ChangeDescription();
                 break;
 
             case "Edit Opening Hours":
-                ShopDetailsUI.PromptOpeningHours();
+                ShopDetailsUI.ChangeOpeningHours();
                 break;
 
             case "Back":
@@ -235,11 +230,9 @@ public static class ManagementUI
             case "Add discount on a specific date":
                 DiscountSpecificDate();
                 break;
-
             case "Delete discount on a specific date":
                 DeleteDiscountSpecificDate();
                 break;
-
             case "Back":
                 return;
         }
@@ -260,11 +253,9 @@ public static class ManagementUI
             case "Create Coupon":
                 CreateCouponForUser();
                 break;
-
             case "Edit Coupons":
                 EditCoupons();
                 break;
-
             case "Back":
                 return;
         }
@@ -284,7 +275,6 @@ public static class ManagementUI
             case "Delete Reviews":
                 DeleteReviews();
                 break;
-
             case "Go Back":
                 return;
         }
@@ -302,7 +292,7 @@ public static class ManagementUI
             var choices = allUsers
                 .Select(user =>
                 {
-                    var label = $"User [yellow]{Markup.Escape(user.Name)}[/] - [blue]{Markup.Escape(user.Email)}[/]";
+                    var label = $"User [yellow]{user.Name}[/] - [blue]{user.Email}[/]";
                     return (User: user, Label: label);
                 })
                 .ToList();
@@ -310,7 +300,7 @@ public static class ManagementUI
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Select an user to create a coupon for")
-                     .HighlightStyle(new Style(Hover))
+                     .HighlightStyle(new Style(ColorUI.Hover))
                     .PageSize(10)
                     .AddChoices(choices.Select(c => c.Label).Concat(new[] { "Go back" })));
 
@@ -353,12 +343,12 @@ public static class ManagementUI
             var userSelection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Select a user to edit their coupons")
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .PageSize(10)
-                    .AddChoices(allUsers.Select(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]").Concat(new[] { "Go back" })));
+                    .AddChoices(allUsers.Select(u => $"[yellow]{u.Name}[/] - [blue]{u.Email}[/]").Concat(new[] { "Go back" })));
             if (userSelection == "Go back") break;
 
-            var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{Markup.Escape(u.Name)}[/] - [blue]{Markup.Escape(u.Email)}[/]" == userSelection);
+            var selectedUser = allUsers.FirstOrDefault(u => $"[yellow]{u.Name}[/] - [blue]{u.Email}[/]" == userSelection);
             if (selectedUser == null)
             {
                 AnsiConsole.MarkupLine("[red]User not found.[/]");
@@ -379,7 +369,7 @@ public static class ManagementUI
             var couponSelection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Select a coupon to edit")
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .PageSize(10)
                     .AddChoices(userCoupons.Select(c => $"Coupon #{c.Id} - €[green]{Math.Round(c.Credit, 2)}[/] - {(c.IsValid ? "[green]Valid[/]" : "[red]Invalid[/]")}").Concat(new[] { "Go back" })));
             if (couponSelection == "Go back") return;
@@ -404,7 +394,7 @@ public static class ManagementUI
             var validityChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Set validity:")
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .AddChoices(new[] { "Valid", "Invalid" }));
             var newIsValid = validityChoice == "Valid";
             Console.Clear();
@@ -416,7 +406,7 @@ public static class ManagementUI
             AnsiConsole.MarkupLine($"IsValid: [red]{selectedCoupon.IsValid}[/] -> [green]{newIsValid}[/]");
             var confirm = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .AddChoices(new[] { "Confirm", "Cancel" }));
             if (confirm == "Confirm")
             {
@@ -469,7 +459,7 @@ public static class ManagementUI
 
         var confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Confirm", "Cancel" }));
 
         switch (confirm)
@@ -536,7 +526,7 @@ public static class ManagementUI
         AnsiConsole.MarkupLine($"Are you sure you want to delete [red]{EditProduct.Name}[/]? This action cannot be undone.");
         var confirm = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Confirm", "Cancel" }));
         
         switch (confirm)
@@ -680,13 +670,14 @@ public static class ManagementUI
             DiscountedProductsList.Add($"{discount.ID} / {discount.StartDate:dd-MM-yyyy} to {discount.EndDate:dd-MM-yyyy} / {product.Name} / {discount.DiscountPercentage}%");
         }
 
-        var weeksToDelete = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("[bold white]Select the weeks you want to delete:[/]")
-                .NotRequired()
-                .PageSize(20)
-                .AddChoiceGroup("Select all", DiscountedProductsList)
-        );
+        var weeksToDelete = Utils.CreateMultiSelectionPromptWithSelectAll<string>(DiscountedProductsList, "Select All","[bold white]Select the weeks you want to delete:[/]");
+        // var weeksToDelete = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select the weeks you want to delete:[/]")
+        //         .NotRequired()
+        //         .PageSize(20)
+        //         .AddChoiceGroup("Select all", DiscountedProductsList)
+        // );
 
         if (weeksToDelete.Count == 0)
         {
@@ -729,15 +720,16 @@ public static class ManagementUI
 
             foreach (var review in allReviews)
             {
-                UserModel user = UserAccess.GetUserByID(review.UserId)!;
+                UserModel user = UserSettingsLogic.GetUserByID(review.UserId)!;
                 ReviewList.Add($"ReviewID: {review.Id} User: [yellow]{user.Name}[/] Stars: [green]{review.Stars}[/] Text: [blue]{review.Text}[/]");
             }
 
-            var prompt = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
-                .PageSize(10)
-                .Title("[bold white]Select reviews to delete:[/]")
-                .NotRequired()
-                .AddChoices(ReviewList));
+            var prompt = Utils.CreateMultiSelectionPrompt<string>(ReviewList, "[bold white]Select reviews to delete:[/]");
+            // var prompt = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
+            //     .PageSize(10)
+            //     .Title("[bold white]Select reviews to delete:[/]")
+            //     .NotRequired()
+            //     .AddChoices(ReviewList));
             
             if (prompt.Count == 0)
             {

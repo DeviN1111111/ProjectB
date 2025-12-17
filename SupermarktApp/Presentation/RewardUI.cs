@@ -9,22 +9,18 @@ public static class RewardUI
             Console.Clear();
             Utils.PrintTitle("Reward System");
 
-            AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser.AccountPoints}[/]");
+            AnsiConsole.MarkupLine($"Total Points: [green]{SessionManager.CurrentUser!.AccountPoints}[/]");
 
             List<RewardProductDTO> AllRewardProducts = RewardLogic.GetAllRewardItems();
 
             AnsiConsole.MarkupLine("Available Reward Items:");
 
-            var table = new Table();
-            table.AddColumn("Product");
-            table.AddColumn("Points");
+
+            Table table = Utils.CreateTable(new [] { "Product", "Points" });
 
             foreach (var item in AllRewardProducts)
             {
-                table.AddRow(
-                    $"[yellow]{item.Product.Name}[/]",
-                    $"[green]{item.PriceInPoints}[/]"
-                    );
+                table.AddRow($"[yellow]{item.Product.Name}[/]", $"[green]{item.PriceInPoints}[/]");
             }
 
             AnsiConsole.Write(table);
@@ -32,7 +28,7 @@ public static class RewardUI
             var options = new List<string> { "Use reward points", "Go back" }; ;
 
             var prompt = new SelectionPrompt<string>()
-                .Title("Select an item to add to cart (this will be free in checkout)")
+                .Title("Select an item to add to Cart (this will be free in checkout)")
                 .PageSize(10)
                 .AddChoices(options);
                 
@@ -53,13 +49,13 @@ public static class RewardUI
     {
         var options = new List<string>();
 
-        foreach (var rp in AllRewardProducts)
+        foreach (var rp in AllRewardProducts!)
         {
             options.Add(rp.Product.Name);
         }
         options.Add("Go back");
         var prompt = new SelectionPrompt<string>()
-            .Title("Select an item to add to cart (this will be free in checkout)")
+            .Title("Select an item to add to Cart (this will be free in checkout)")
             .PageSize(10)
             .AddChoices(options);
 
@@ -72,25 +68,25 @@ public static class RewardUI
 
         ProductModel? selectedProduct = ProductLogic.GetProductByName(selectedItem);
         RewardProductDTO? selectedReward = RewardLogic.GetRewardItemByProductId(selectedProduct.ID);
-        AddItemToCart(selectedReward);
+        AddItemToCartProduct(selectedReward!);
 
     }
     
-    public static void AddItemToCart(RewardProductDTO selectedProduct)
+    public static void AddItemToCartProduct(RewardProductDTO selectedProduct)
     {
-        if(SessionManager.CurrentUser.AccountPoints < selectedProduct.PriceInPoints)
+        if(SessionManager.CurrentUser!.AccountPoints < selectedProduct.PriceInPoints)
         {
             AnsiConsole.MarkupLine("[red]You do not have enough reward points to redeem this item![/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
             return;
         }
-        OrderLogic.AddToCart(selectedProduct.Product, 1, selectedProduct.Product.Price, selectedProduct.PriceInPoints);
+        OrderLogic.AddToCartProduct(selectedProduct.Product, 1, selectedProduct.Product.Price, selectedProduct.PriceInPoints);
         
         RewardLogic.ChangeRewardPoints(SessionManager.CurrentUser.ID, SessionManager.CurrentUser.AccountPoints - selectedProduct.PriceInPoints);
         SessionManager.CurrentUser.AccountPoints -= selectedProduct.PriceInPoints;
 
-        AnsiConsole.MarkupLine($"[green]{selectedProduct.Product.Name}[/] has been added to your cart using reward points!");
+        AnsiConsole.MarkupLine($"[green]{selectedProduct.Product.Name}[/] has been added to your Cart using reward points!");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
     }

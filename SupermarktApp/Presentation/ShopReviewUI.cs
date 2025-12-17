@@ -30,15 +30,12 @@ public static class ShopReviewUI
                 case "View My Reviews":
                     ViewMyReviews(logic);
                     break;
-
                 case "Add a Review":
                     AddReview(logic);
                     break;
-
                 case "View All Reviews":
                     ShopDetailsUI.Show();
                     break;
-
                 case "Go Back":
                     return;
             }

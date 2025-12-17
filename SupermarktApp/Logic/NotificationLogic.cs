@@ -26,4 +26,9 @@ public class NotificationLogic
         ProductAccess.UpdateProductStock(productId, newQuantity);
         return product.Price * quantityToAdd;
     }
+
+    public static void AddRestockEntry(RestockHistoryModel model)
+    {
+        RestockHistoryAccess.AddRestockEntry(model);
+    }
 }

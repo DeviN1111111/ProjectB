@@ -1,7 +1,6 @@
 using Spectre.Console;
 public static class SettingsUI
 {
-    public static readonly Color Hover = Color.FromHex("#006494");
     public static void ShowSettingsMenu()
     {
         while (true)
@@ -102,7 +101,7 @@ public static class SettingsUI
         AnsiConsole.MarkupLine("Are you sure you want to enable 2FA?");
         var wantToEnable2FA = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Yes", "No" }));
 
         if (wantToEnable2FA == "Yes")
@@ -147,7 +146,7 @@ public static class SettingsUI
         AnsiConsole.MarkupLine("Are you sure you want to disable 2FA?");
         var wantToEnable2FA = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .HighlightStyle(new Style(Hover))
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { "Yes", "No" }));
 
         if (wantToEnable2FA == "Yes")
@@ -219,60 +218,20 @@ public static class SettingsUI
 
             string NewName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Name[/]:").DefaultValue(SessionManager.CurrentUser!.Name).DefaultValue(SessionManager.CurrentUser.Name));
             string NewLastName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Last Name[/]:").DefaultValue(SessionManager.CurrentUser.LastName).DefaultValue(SessionManager.CurrentUser.LastName));
-            string NewEmail;
-            do
-            {
-                AnsiConsole.MarkupLine("[blue]Email must contain @ and a dot.[/]");
-                NewEmail = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Email[/]:").DefaultValue(SessionManager.CurrentUser.Email));
-
-                if (NewEmail == SessionManager.CurrentUser.Email)
-                {
-                    break;
-                }
-
-                if (!ValidaterLogic.ValidateEmail(NewEmail))
-                {
-                    AnsiConsole.MarkupLine("[red]Invalid email format! Please try again.[/]");
-                    continue;
-                }
-
-                if (UserSettingsLogic.EmailExists(NewEmail))
-                {
-                    AnsiConsole.MarkupLine($"[red]The email [yellow]{NewEmail}[/] is already registered. Please use a different one![/]");
-                    continue;
-                }
-                break;
-
-            } while (true);
+            string NewEmail = LoginUI.AskEmail();
 
             string NewAddress = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Address[/]:").DefaultValue(SessionManager.CurrentUser.Address).DefaultValue(SessionManager.CurrentUser.Address));
-            string NewZipcode;
-            do
-            {
-                NewZipcode = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Zipcode[/]:").DefaultValue(SessionManager.CurrentUser.Zipcode).DefaultValue(SessionManager.CurrentUser.Zipcode));
-            } while (ValidaterLogic.ValidateZipcode(NewZipcode) == false);
+            string NewZipcode = LoginUI.AskZipcode();
             
             string NewCity = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]City[/]:").DefaultValue(SessionManager.CurrentUser.City).DefaultValue(SessionManager.CurrentUser.City));
-            string NewPhoneNumber;
-            do
-            {
-                NewPhoneNumber = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Phone Number[/]:").DefaultValue(SessionManager.CurrentUser.PhoneNumber).DefaultValue(SessionManager.CurrentUser.PhoneNumber));
-            } while (ValidaterLogic.ValidatePhoneNumber(NewPhoneNumber) == false);
+            string NewPhoneNumber = LoginUI.AskPhoneNumber();
 
             string newBirthdate;
-            DateTime Birthdate;
-            do
-            {
-                newBirthdate = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Birthdate (DD-MM-YYYY)[/]:").DefaultValue(SessionManager.CurrentUser.Birthdate.ToString("dd-MM-yyyy")));
-            } while (DateTime.TryParse(newBirthdate, out Birthdate) == false);
+            DateTime Birthdate = LoginUI.AskBirthdate();
+            //(DateTime.TryParse(newBirthdate, out Birthdate) == false)
 
-
-            
             AnsiConsole.WriteLine();
-            var beforeEditTable = new Table()
-                .Title("[red]Before EDIT:[/]")
-                .AddColumn("Field")
-                .AddColumn("Value");
+            Table beforeEditTable = Utils.CreateTable(new [] { "Field", "Value" }, "[red]Before EDIT:[/]");
 
             beforeEditTable.AddRow("Name", $"[red]{SessionManager.CurrentUser.Name}[/]");
             beforeEditTable.AddRow("Lastname", $"[red]{SessionManager.CurrentUser.LastName}[/]");
@@ -283,10 +242,7 @@ public static class SettingsUI
             beforeEditTable.AddRow("Phonenumber", $"[red]{SessionManager.CurrentUser.PhoneNumber}[/]");
             beforeEditTable.AddRow("Birthdate", $"[red]{SessionManager.CurrentUser.Birthdate:dd-MM-yyyy}[/]");
 
-            var afterTable = new Table()
-                .Title("[green]After EDIT:[/]")
-                .AddColumn("Field")
-                .AddColumn("Value");
+            Table afterTable = Utils.CreateTable(new [] { "Field", "Value" }, "[green]After EDIT:[/]");
 
             afterTable.AddRow("Name", $"[green]{NewName}[/]");
             afterTable.AddRow("Lastname", $"[green]{NewLastName}[/]");
@@ -310,7 +266,7 @@ public static class SettingsUI
             AnsiConsole.MarkupLine("Are you sure you want to apply these changes?");
             var confirmChange = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .HighlightStyle(new Style(Hover))
+                    .HighlightStyle(new Style(ColorUI.Hover))
                     .AddChoices(new[] { "Yes", "No" }));
 
             if (confirmChange == "No")

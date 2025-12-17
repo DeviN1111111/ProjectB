@@ -7,11 +7,12 @@ public static class ShopDetailsUI
     public static void Show()
     {
         Console.Clear();
-        ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
         Utils.PrintTitle("Welcome to our Supermarket!");
+        // Table table = Utils.CreateTable(new [] { "[bold #00014d]Day[/]").Centered(), "[bold #00014d]Opening Hours[/]").Centered()});
         var table = new Table();
 
-        var description = shopInfo.Description;
+        List<ShopInfoModel> DescriptionAndWeeks = ShopInfoLogic.GetDescriptionAndAllDays();
+        var description = DescriptionAndWeeks[0].Day;
 
         var body = description;
         var panel = new Panel(body)
@@ -26,45 +27,24 @@ public static class ShopDetailsUI
         table.AddColumn(new TableColumn("[bold #00014d]Day[/]").Centered());
         table.AddColumn(new TableColumn("[bold #00014d]Opening Hours[/]").Centered());
 
-        foreach (var day in ShopInfoLogic.getDayDate())
+        foreach (var day in DescriptionAndWeeks)
         {
-            DateTime date = DateTime.Parse(day[1]);
-            string dayName = date.ToString("dddd", CultureInfo.InvariantCulture);
-
-            if (dayName == "Monday")
+            if (day.OpeningHour == null && day.ClosingHour == null)
             {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourMonday} - {shopInfo.ClosingHourMonday}[/]");
-            }
-            else if (dayName == "Tuesday")
-            {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourTuesday} - {shopInfo.ClosingHourTuesday}[/]");
-            }
-            else if (dayName == "Wednesday")
-            {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourWednesday} - {shopInfo.ClosingHourWednesday}[/]");
-            }
-            else if (dayName == "Thursday")
-            {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourThursday} - {shopInfo.ClosingHourThursday}[/]");
-            }
-            else if (dayName == "Friday")
-            {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourFriday} - {shopInfo.ClosingHourFriday}[/]");
-            }
-            else if (dayName == "Saturday")
-            {
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSaturday} - {shopInfo.ClosingHourSaturday}[/]");
+                continue;
             }
             else
-                table.AddRow($"[bold #125e81]{day[0]}[/]", $"[#5dabcf]{shopInfo.OpeningHourSunday} - {shopInfo.ClosingHourSunday}[/]");
+            {
+                table.AddRow($"[bold #125e81]{day.Day}[/]", $"[#5dabcf]{day.OpeningHour} - {day.ClosingHour}[/]");
+            }
         }
+
         table.Border(TableBorder.Heavy);
         AnsiConsole.WriteLine();
         AnsiConsole.Write(panel); 
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
-
 
         // review
         AnsiConsole.WriteLine();
@@ -109,15 +89,13 @@ public static class ShopDetailsUI
                     Show();
                     return;
                 case "No":
-                    AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
-                    Console.ReadKey();
                     break;
             }
         }   
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue.");
         Console.ReadKey();
     }
-    public static void PromptDescription()
+    public static void ChangeDescription()
     {
         Console.Clear();
         Utils.PrintTitle("Update Description");
@@ -125,24 +103,41 @@ public static class ShopDetailsUI
         ShopInfoLogic.UpdateDescription(description);
         AnsiConsole.MarkupLine("[green]Shop description updated successfully![/]");
         Console.ReadLine();
+        return;
     }
-    public static void PromptOpeningHours()
-    {
-        string openingHour, closingHour;
-        ShopInfoModel shopInfo = ShopInfoLogic.GetShopInfo();
 
+    public static void ChangeOpeningHours()
+    {
         Console.Clear();
         Utils.PrintTitle("Update Opening Hours");
-        var options = new List<string>();
-        options.AddRange(new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
-        var choice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .AddChoices(options));
 
+        var options = new List<string>();
+
+        options.AddRange(new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
+
+        var days = Utils.CreateMultiSelectionPromptWithSelectAll<string>(options, "Select All days", "[bold white]Select the days you want to change for the opening/closing hours:[/]");
+        // var days = AnsiConsole.Prompt(
+        //     new MultiSelectionPrompt<string>()
+        //         .Title("[bold white]Select the days you want to change for the opening/closing hours.[/]")
+        //         .NotRequired()
+        //         .PageSize(20)
+        //         .AddChoiceGroup("Select all days", options)
+        // );
+
+        if (days.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No days selected.[/]");
+            AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue.");
+            Console.ReadKey();
+            return;
+        }
+
+        string openingHour;
+        string closingHour;
         while (true)
         {
-            openingHour = AnsiConsole.Ask<string>($"Enter the new [green]{choice} opening hour[/] (HH:MM or HHMM):").Trim();
-            closingHour = AnsiConsole.Ask<string>($"Enter the new [green]{choice} closing hour[/] (HH:MM or HHMM):").Trim();
+            openingHour = AnsiConsole.Ask<string>($"Enter the new [green]opening hour[/] (HH:MM or HHMM):").Trim();
+            closingHour = AnsiConsole.Ask<string>($"Enter the new [green]closing hour[/] (HH:MM or HHMM):").Trim();
 
             if (Regex.IsMatch(openingHour, @"^\d{4}$"))
                 openingHour = openingHour.Insert(2, ":");
@@ -153,32 +148,11 @@ public static class ShopDetailsUI
                 break;
             AnsiConsole.MarkupLine("[red]Invalid format. Please use HH:MM or HHMM (e.g., 07:00 or 0700).[/]");
         }
-        switch(choice)
-        {
-            case "Monday":
-                shopInfo.OpeningHourMonday = openingHour; shopInfo.ClosingHourMonday = closingHour;
-                break;
-            case "Tuesday":
-                shopInfo.OpeningHourTuesday = openingHour; shopInfo.ClosingHourTuesday = closingHour;
-                break;
-            case "Wednesday":
-                shopInfo.OpeningHourWednesday = openingHour; shopInfo.ClosingHourWednesday = closingHour;
-                break;
-            case "Thursday":
-                shopInfo.OpeningHourThursday = openingHour; shopInfo.ClosingHourThursday = closingHour;
-                break;
-            case "Friday":
-                shopInfo.OpeningHourFriday = openingHour; shopInfo.ClosingHourFriday = closingHour;
-                break;
-            case "Saturday":
-                shopInfo.OpeningHourSaturday = openingHour; shopInfo.ClosingHourSaturday = closingHour;
-                break;
-            case "Sunday":
-                shopInfo.OpeningHourSunday = openingHour; shopInfo.ClosingHourSunday = closingHour;
-                break;
 
+        foreach (var day in days)
+        {
+            ShopInfoLogic.UpdateOpeningHours(openingHour, closingHour, day);
         }
-        ShopInfoLogic.UpdateOpeningHours(shopInfo);
         AnsiConsole.MarkupLine("[green]Shop opening hours updated successfully![/]");
         AnsiConsole.MarkupLine("Press [green]ANY KEY[/] to continue.");
         Console.ReadKey();

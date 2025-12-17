@@ -13,7 +13,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "Orders", "RewardItems",
+        "CartProduct", "Users", "Products", "OrderItems", "RewardItems",
         "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
         "FavoriteLists", "FavoriteListProducts", "RestockHistory"
     };
@@ -151,7 +151,7 @@ public class DatabaseFiller
             );");
 
         _sharedConnection!.Execute(@"
-            CREATE TABLE IF NOT EXISTS Orders (
+            CREATE TABLE IF NOT EXISTS OrderItems (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
                 OrderId INTEGER NOT NULL,
@@ -165,7 +165,7 @@ public class DatabaseFiller
             );");
 
         _sharedConnection!.Execute(@"
-            CREATE TABLE IF NOT EXISTS Cart (
+            CREATE TABLE IF NOT EXISTS CartProduct (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,
@@ -194,21 +194,9 @@ public class DatabaseFiller
         _sharedConnection!.Execute(@"
             CREATE TABLE IF NOT EXISTS ShopInfo (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Description TEXT,
-                OpeningHourMonday TEXT,
-                ClosingHourMonday TEXT,
-                OpeningHourTuesday TEXT,
-                ClosingHourTuesday TEXT,
-                OpeningHourWednesday TEXT,
-                ClosingHourWednesday TEXT,
-                OpeningHourThursday TEXT,
-                ClosingHourThursday TEXT,
-                OpeningHourFriday TEXT,
-                ClosingHourFriday TEXT,
-                OpeningHourSaturday TEXT,
-                ClosingHourSaturday TEXT,
-                OpeningHourSunday TEXT,
-                ClosingHourSunday TEXT
+                Day TEXT,
+                OpeningHour TEXT,
+                ClosingHour TEXT
             );");
 
         _sharedConnection!.Execute(@"
@@ -330,9 +318,9 @@ public class DatabaseFiller
         ProductAccess.ChangeProductDetails(RewardItem2);
         ProductAccess.ChangeProductDetails(RewardItem3);
 
-        ProductAccess.SetProductVisibility(451, false);
-        ProductAccess.SetProductVisibility(452, false);
-        ProductAccess.SetProductVisibility(453, false);
+        ProductAccess.SetProductVisibility(451, true);
+        ProductAccess.SetProductVisibility(452, true);
+        ProductAccess.SetProductVisibility(453, true);
 
         var birthdayPresent = new ProductModel(
             name: "Birthday Present",
@@ -345,6 +333,26 @@ public class DatabaseFiller
             visible: 0
         );
         ProductAccess.AddProduct(birthdayPresent);
+
+        List<ShopInfoModel> listWeek = new List<ShopInfoModel>
+        {
+            new ShopInfoModel(@"
+            Welcome to our supermarket — where freshness comes first.
+            Our bakery opens early with warm, freshly baked bread, and all our vegetables are kept perfectly cooled throughout the day.
+            Most restocking takes place in the evening, so the shelves are full and ready for you every morning.", null!, null!),
+            new ShopInfoModel("Monday", "12:00", "22:00"),
+            new ShopInfoModel("Tuesday", "12:00", "22:00"),
+            new ShopInfoModel("Wednesday", "12:00", "22:00"),
+            new ShopInfoModel("Thursday", "12:00", "22:00"),
+            new ShopInfoModel("Friday", "12:00", "22:00"),
+            new ShopInfoModel("Saturday", "12:00", "22:00"),
+            new ShopInfoModel("Sunday", "12:00", "22:00")
+        };
+
+        foreach (var week in listWeek)
+        {
+            ShopInfoAccess.AddDay(week);
+        }
 
         var weeklyDiscounts = new List<DiscountsModel>();
         var chosen = new HashSet<int>();
@@ -400,37 +408,6 @@ public class DatabaseFiller
             reportOrderProgress?.Invoke(1);
         }
 
-        var defaultShopInfo = new ShopInfoModel
-        {
-            Description = @"
-            Welcome to our supermarket — where freshness comes first.
-            Our bakery opens early with warm, freshly baked bread, and all our vegetables are kept perfectly cooled throughout the day.
-            Most restocking takes place in the evening, so the shelves are full and ready for you every morning.",
-
-            OpeningHourMonday = "07:00",
-            ClosingHourMonday = "22:00",
-
-            OpeningHourTuesday = "07:00",
-            ClosingHourTuesday = "22:00",
-
-            OpeningHourWednesday = "07:00",
-            ClosingHourWednesday = "22:00",
-
-            OpeningHourThursday = "07:00",
-            ClosingHourThursday = "22:00",
-
-            OpeningHourFriday = "07:00",
-            ClosingHourFriday = "22:00",
-
-            OpeningHourSaturday = "08:00",
-            ClosingHourSaturday = "20:00",
-
-            OpeningHourSunday = "08:00",
-            ClosingHourSunday = "20:00"
-        };
-
-        ShopInfoAccess.UpdateShopInfo(defaultShopInfo);
-
         var sampleReviews = new List<ShopReviewModel>
         {
             new() { UserId = 1, Stars = 5, Text = "Absolutely love this place! Always fresh produce and friendly staff." },
@@ -482,7 +459,7 @@ public class DatabaseFiller
     public static void InsertOrderItem(int UserID, int orderId, int productId, double price, DateTime date)
     {
         _sharedConnection!.Execute(@"
-            INSERT INTO Orders (UserID, OrderId, ProductId, Price, Date)
+            INSERT INTO OrderItems (UserID, OrderId, ProductId, Price, Date)
             VALUES (@UserID, @OrderId, @ProductId, @Price, @Date);",
             new { UserID = UserID, OrderId = orderId, ProductId = productId, Price = price, Date = date }
         );
@@ -502,7 +479,7 @@ public class DatabaseFiller
         return new List<UserModel>
         {
             new() { Name = "Mark", LastName = "Dekker", Email = "u", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256787", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
-            new() { Name = "Mark", LastName = "Dekker", Email = "chouchenghong@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
+            new() { Name = "Mark", LastName = "Dekker", Email = "chouchenghon111g@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256897", Birthdate = new DateTime(2005, 11, 13), City = "Rotterdam"},
             new() { Name = "Mark", LastName = "Dekker", Email = "devinnijhof@gmail.com", Password = "u", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143256797", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = true },
             new() { Name = "Mark", LastName = "Dekker", Email = "testing2@gmail.com", Password = "123456", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143257897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam" },
             new() { Name = "Ben", LastName = "Dekker", Email = "a", Password = "a", Address = "newstraat 12", Zipcode = "2234LB", PhoneNumber = "3143567897", Birthdate = new DateTime(random.Next(1950, 2005), random.Next(1, 13), random.Next(1, 29)), City = "Rotterdam", TwoFAEnabled = false, AccountStatus = "Admin" },
