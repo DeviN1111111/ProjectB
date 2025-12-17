@@ -71,7 +71,7 @@ public static class CouponUI
         }
         else
         {
-            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your cart.[/]");
+            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your Cart.[/]");
         }
 
         var action = AnsiConsole.Prompt(
@@ -137,7 +137,7 @@ public static class CouponUI
         Coupon selectedCoupon = coupons[selectedIndex];
         double selectedRounded = Math.Round(selectedCoupon.Credit, 2);
 
-        CouponLogic.ApplyCouponToCart(selectedCoupon);
+        CouponLogic.ApplyCouponToCartProduct(selectedCoupon);
 
         AnsiConsole.MarkupLine("[green]Coupon applied with [yellow]€" + selectedRounded + "[/] credit.[/]");
         AnsiConsole.MarkupLine("Press ENTER to continue");

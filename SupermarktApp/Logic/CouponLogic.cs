@@ -49,7 +49,7 @@ static class CouponLogic
         CouponAccess.AddCoupon(userId, credit);
     }
     public static List<Coupon> GetAllCoupons(int userId) => CouponAccess.GetAllCouponsByUserId(userId);
-    public static void ApplyCouponToCart(Coupon coupon)
+    public static void ApplyCouponToCartProduct(Coupon coupon)
     {
         Order.SelectedCouponId = coupon.Id;
         Order.CouponCredit = Math.Round(coupon.Credit, 2);

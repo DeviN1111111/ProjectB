@@ -25,7 +25,7 @@ public class ChecklistAccess
     }
     public static void ClearChecklist()
     {
-        var sql = $"DELETE FROM Cart WHERE UserId = @UserId";
+        var sql = $"DELETE FROM CartProduct WHERE UserId = @UserId";
         _connection.Execute(sql, new { UserId = SessionManager.CurrentUser!.ID });
     }
     public static void RemoveFromChecklist(int userId, int productId)

@@ -13,7 +13,7 @@ public class DatabaseFiller
 
     public static List<string> allTables = new List<string>()
     {
-        "Cart", "Users", "Products", "OrderItems", "RewardItems",
+        "CartProduct", "Users", "Products", "OrderItems", "RewardItems",
         "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
         "FavoriteLists", "FavoriteListProducts", "RestockHistory"
     };
@@ -164,7 +164,7 @@ public class DatabaseFiller
             );");
 
         _sharedConnection!.Execute(@"
-            CREATE TABLE IF NOT EXISTS Cart (
+            CREATE TABLE IF NOT EXISTS CartProduct (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER NOT NULL,
                 ProductId INTEGER NOT NULL,

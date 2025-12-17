@@ -8,48 +8,48 @@ public class Order
     public static double CouponCredit = 0;
     public static int? SelectedCouponId = null;
     public static double TotalPrice = 0;
-    public static async Task ShowCart()
+    public static async Task ShowCartProduct()
     {
         Console.Clear();
         double totalAmount = 0;
         double totalDiscount = 0;
-        List<CartModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in cart
+        List<CartProductModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in CartProduct
         List<ProductModel> allProducts = ProductLogic.GetAllProducts();  // List of all products dit moet via logic
 
         // Title
         Utils.PrintTitle("Cart");
 
-        // Cart table
-        Table cartTable = Utils.CreateTable(new [] {"[white]Product[/]", "[white]Quantity[/]", "[white]Price[/]", "[white]Total[/]"});
+        // CartProduct table
+        Table CartProductTable = Utils.CreateTable(new [] {"[white]Product[/]", "[white]Quantity[/]", "[white]Price[/]", "[white]Total[/]"});
 
-        // Products in cart
-        foreach (var cartProduct in allUserProducts)
+        // Products in CartProduct
+        foreach (var CartProductProduct in allUserProducts)
         {
             // Get Product id and find match in all products
             foreach (ProductModel Product in allProducts)
             {
                 ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(Product)!;
         
-                if (cartProduct.ProductId == Product.ID)
+                if (CartProductProduct.ProductId == Product.ID)
                 {
                     if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
                     {
-                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
+                        CartProductTable.AddRow(Product.Name, CartProductProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
                     }
                     else if(productDiscount != null)
                     {
                         double priceAfterDiscount = Math.Round(Product.Price * (1 - productDiscount.Discount!.DiscountPercentage / 100), 2);
                         double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
 
-                        totalDiscount += differenceBetweenPriceAndDiscountPrice * cartProduct.Quantity;
+                        totalDiscount += differenceBetweenPriceAndDiscountPrice * CartProductProduct.Quantity;
 
-                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * cartProduct.Quantity, 2)}");
-                        totalAmount = totalAmount + (priceAfterDiscount * cartProduct.Quantity);
+                        CartProductTable.AddRow(Product.Name, CartProductProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * CartProductProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (priceAfterDiscount * CartProductProduct.Quantity);
                     }
                     else
                     {
-                        cartTable.AddRow(Product.Name, cartProduct.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * cartProduct.Quantity, 2)}");
-                        totalAmount = totalAmount + (Product.Price * cartProduct.Quantity);
+                        CartProductTable.AddRow(Product.Name, CartProductProduct.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * CartProductProduct.Quantity, 2)}");
+                        totalAmount = totalAmount + (Product.Price * CartProductProduct.Quantity);
                     }
                 }
             }
@@ -93,7 +93,7 @@ public class Order
             : "[bold white]Summary[/]";
         
         var leftSide = new Rows(
-            cartTable,
+            CartProductTable,
             new Panel(
                 new Markup(
                     $"[bold white]Discount:[/] [red]-€{Math.Round(totalDiscount, 2)}[/]\n" +
@@ -239,7 +239,7 @@ public class Order
 
 
     public static async Task Checkout(
-        List<CartModel> cartProducts, 
+        List<CartProductModel> CartProductProducts, 
         List<ProductModel> allProducts, 
         double totalAmount, 
         double UnpaidFine)
@@ -260,7 +260,7 @@ public class Order
         {
             case "Checkout":
                 // check if all items are in stock
-                var outOfStockProducts = OrderLogic.CheckStockBeforeCheckout(cartProducts, allProducts);
+                var outOfStockProducts = OrderLogic.CheckStockBeforeCheckout(CartProductProducts, allProducts);
                 if (outOfStockProducts.Count > 0)
                 {
                     AnsiConsole.MarkupLine("[red]The following products are out of stock or exceed available quantity:[/]");
@@ -268,15 +268,15 @@ public class Order
                     {
                         AnsiConsole.MarkupLine($"- {productName}");
                     }
-                    AnsiConsole.MarkupLine("Please adjust your cart before proceeding to checkout.");
+                    AnsiConsole.MarkupLine("Please adjust your CartProduct before proceeding to checkout.");
                     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                     Console.ReadKey();
                     return;
                 }
-                // check if cart is empty
-                if (cartProducts.Count == 0 && UnpaidFine <= 0)
+                // check if CartProduct is empty
+                if (CartProductProducts.Count == 0 && UnpaidFine <= 0)
                 {
-                    AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+                    AnsiConsole.MarkupLine("[red]Your Cart is empty![/]");
                     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                     Console.ReadKey();
                     return;
@@ -300,7 +300,7 @@ public class Order
                 switch (option1)
                 {
                     case "Pay now":
-                        OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
+                        OrderLogic.ProcessPay(CartProductProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         RewardLogic.AddRewardPointsToUser(rewardPoints);
                         AnsiConsole.MarkupLine($"[italic yellow]Added {rewardPoints} reward points to your account![/]");
@@ -308,28 +308,28 @@ public class Order
                         Console.ReadKey();
                         break;
                     case "Pay on pickup":
-                        OrderLogic.ProcessPay(cartProducts, allProducts, SelectedCouponId);
+                        OrderLogic.ProcessPay(CartProductProducts, allProducts, SelectedCouponId);
                         AnsiConsole.WriteLine("Thank you purchase succesful!");
                         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                         CouponLogic.ResetCouponSelection();
                         Console.ReadKey();
                         break;
                     case "Pay Later":
-                        PayLater(cartProducts, allProducts);
+                        PayLater(CartProductProducts, allProducts);
                         break;    
                 }
                 break;
 
             case "Remove items":
-                RemoveFromCart(cartProducts, allProducts);
+                RemoveFromCartProduct(CartProductProducts, allProducts);
                 break;
             case "Change quantity":
-                ChangeCartQuantity(cartProducts, allProducts);
+                ChangeCartProductQuantity(CartProductProducts, allProducts);
                 break;
             
             case "Suggested items":
                 await ShowSuggestedItems();
-                await ShowCart();
+                await ShowCartProduct();
                 return;
 
             case "Add coupon":
@@ -342,26 +342,26 @@ public class Order
         return;
     }
 
-    public static void RemoveFromCart(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    public static void RemoveFromCartProduct(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
         // Build list of item names
-        var cartChoices = new List<string>();
-        foreach (var item in cartProducts)
+        var CartProductChoices = new List<string>();
+        foreach (var item in CartProductProducts)
         {
-            var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+            var product = allProducts.FirstOrDefault(CartProductProduct => CartProductProduct.ID == item.ProductId);
             if (product != null)
-                cartChoices.Add($"{product.Name} (x{item.Quantity})");
+                CartProductChoices.Add($"{product.Name} (x{item.Quantity})");
         }
 
-        if (cartChoices.Count == 0)
+        if (CartProductChoices.Count == 0)
         {
-            AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+            AnsiConsole.MarkupLine("[red]Your Cart is empty![/]");
             AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
             Console.ReadKey();
             return;
         }
 
-        var itemsToRemove = Utils.CreateMultiSelectionPrompt<string>(cartChoices, "[bold white]Select items to remove from your cart:[/]");
+        var itemsToRemove = Utils.CreateMultiSelectionPrompt<string>(CartProductChoices, "[bold white]Select items to remove from your CartProduct:[/]");
 
         if (itemsToRemove.Count == 0)
         {
@@ -376,17 +376,17 @@ public class Order
             var productName = choice.Split(" (x")[0];
             var product = allProducts.FirstOrDefault(Product => Product.Name == productName);
             if (product != null)
-                RemoveItemFromCart(product.ID);
+                RemoveItemFromCartProduct(product.ID);
         }
 
         AnsiConsole.MarkupLine("[green]Selected items have been removed![/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
-        ShowCart();
+        ShowCartProduct();
     }
-    private static void RemoveItemFromCart(int productId)
+    private static void RemoveItemFromCartProduct(int productId)
     {
-        OrderLogic.RemoveFromCart(productId);
+        OrderLogic.RemoveFromCartProduct(productId);
     }
 
     public static async Task DisplayOrderHistory()
@@ -558,26 +558,26 @@ public class Order
         {
             var product = suggestions[indexPressed];
             // fill 0 in for the discount and reward
-            OrderLogic.AddToCart(product, 1, 0, 0);
-            AnsiConsole.MarkupLine($"\n[green]Added [yellow]{product.Name}[/] to cart![/]");
+            OrderLogic.AddToCartProduct(product, 1, 0, 0);
+            AnsiConsole.MarkupLine($"\n[green]Added [yellow]{product.Name}[/] to CartProduct![/]");
             Thread.Sleep(800);
         }
         return;
     }
-    public static void ChangeCartQuantity(List<CartModel> cartProducts, List<ProductModel> allProducts)
+    public static void ChangeCartProductQuantity(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
         while (true)
     {
         var productNames = new List<string>();
-                foreach (var item in cartProducts)
+                foreach (var item in CartProductProducts)
                 {
-                    var product = allProducts.FirstOrDefault(cartProduct => cartProduct.ID == item.ProductId);
+                    var product = allProducts.FirstOrDefault(CartProductProduct => CartProductProduct.ID == item.ProductId);
                     if (product != null)
                         productNames.Add($"{product.Name} (x{item.Quantity})");
                 }
                 if (productNames.Count == 0)
                 {
-                    AnsiConsole.MarkupLine("[red]Your cart is empty![/]");
+                    AnsiConsole.MarkupLine("[red]Your CartProduc is empty![/]");
                     AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
                     Console.ReadKey();
                     return;
@@ -671,7 +671,7 @@ public class Order
 
         int actualOrderId = selectedOrder.Id;
         var reorderResult = OrderLogic.ReorderPastOrder(actualOrderId);
-        AnsiConsole.MarkupLine("[green]Items added to cart (where available)![/]");
+        AnsiConsole.MarkupLine("[green]Items added to CartProduct (where available)![/]");
 
         if (reorderResult.Unavailable.Any())
         {
@@ -702,11 +702,11 @@ public class Order
         }
     }
 
-    public async static void PayLater( List<CartModel> cartProducts, List<ProductModel> allProducts)
+    public async static void PayLater( List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
         List<OrderItemsModel> OrderedItems = new List<OrderItemsModel>();  // List to hold order items
 
-        foreach (var item in cartProducts)
+        foreach (var item in CartProductProducts)
         {
             var product = allProducts.FirstOrDefault(p => p.ID == item.ProductId);
             if (product != null)
@@ -737,6 +737,6 @@ public class Order
         Console.ReadKey();
         await PayLaterLogic.Activate(order.Id);
         OrderLogic.UpdateStock();
-        OrderLogic.ClearCart();
+        OrderLogic.ClearCartProduct();
     }
 }

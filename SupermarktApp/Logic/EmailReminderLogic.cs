@@ -3,11 +3,11 @@ using System.Text;
 public static class EmailReminderLogic
 {
     private static readonly string TemplatePath = 
-        Path.Combine("EmailTemplates", "CartReminderTemplate.html");
+        Path.Combine("EmailTemplates", "CartProductReminderTemplate.html");
 
-    public static async Task SendCartReminderAsync(string userEmail, List<CartModel> items)
+    public static async Task SendCartProductReminderAsync(string userEmail, List<CartProductModel> items)
     {
-        string subject = "You left items in your cart!";
+        string subject = "You left items in your CartProduct!";
 
         string template = File.ReadAllText(TemplatePath);
         string body = BuildEmailBody(items, template);
@@ -20,7 +20,7 @@ public static class EmailReminderLogic
         );
     }
 
-    private static string BuildEmailBody(List<CartModel> items, string template)
+    private static string BuildEmailBody(List<CartProductModel> items, string template)
     {
         var itemListBuilder = new StringBuilder();
 
