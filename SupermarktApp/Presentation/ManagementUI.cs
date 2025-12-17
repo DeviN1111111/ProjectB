@@ -16,7 +16,6 @@ public static class ManagementUI
                 "Products",
                 "Shop Settings",
                 "Discounts",
-                "Manage Users",
                 "Coupons",
                 "Reviews",
                 "Go back"
