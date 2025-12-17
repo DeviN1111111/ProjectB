@@ -12,8 +12,8 @@ public static class StatisticsUI
 
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title($"Select the [#{Text.ToHex()}]time period[/]")
-                .HighlightStyle(new Style(Hover))
+                .Title($"Select the [#{ColorUI.Text.ToHex()}]time period[/]")
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { 
                     "Today", 
                     "This Week", 
@@ -55,7 +55,6 @@ public static class StatisticsUI
             case "Competitor prices":
                 DisplayCompetitorPrices();
                 break;
-
             default:
                 AnsiConsole.MarkupLine("[red]Invalid selection[/]");
                 break;
@@ -387,6 +386,7 @@ public static class StatisticsUI
                 case "Previous page":
                     pageIndex--;
                     break;
+
                 case "Next page":
                     pageIndex++;
                     break;                
@@ -414,8 +414,7 @@ public static class StatisticsUI
         {
             double newPrice = Utils.AskDouble(
                 $"Enter new price for [yellow]{product.Name}[/] " +
-                $"Current Price: {priceFormatter(product.Price, "red")} | Competitor Price: {priceFormatter(product.CompetitorPrice, "green")}): ",
-                min: 0
+                $"Current Price: {priceFormatter(product.Price, "red")} | Competitor Price: {priceFormatter(product.CompetitorPrice, "green")}): "
             );
 
             ProductLogic.LowerPriceForOverpricedProduct(product, newPrice);
