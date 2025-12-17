@@ -53,7 +53,7 @@ public class ProductLogic
     
         var products = ProductAccess.GetAllProducts(includeHidden); // get all products
 
-        if (!products.Any(p => p.Category == "ChristmasBox"))
+        if (!products.Any(p => p is ChristmasBoxModel))
         {
             var christmasBoxes = ChristmasBoxLogic.GetAvailableBoxes(); // get xmas boxes
             products.AddRange(christmasBoxes); // add boxes to products

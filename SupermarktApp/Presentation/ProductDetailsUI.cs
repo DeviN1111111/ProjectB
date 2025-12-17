@@ -4,7 +4,13 @@ using Spectre.Console;
 public static class ProductDetailsUI
 {
     public static void ShowProductDetails(ProductModel product)
-    {
+    {   
+        if (product is ChristmasBoxModel box)
+        {
+            ShowChristmasBoxDetails(box);
+            return;
+        }
+
         Console.Clear();
         string ProductPrice = product.Price.ToString();
         Utils.PrintTitle("Product Details");
@@ -94,4 +100,45 @@ public static class ProductDetailsUI
             .Border(BoxBorder.Double);
         AnsiConsole.Write(panel);
     }
+
+    private static void ShowChristmasBoxDetails(ChristmasBoxModel box)
+    {
+        Console.Clear();
+        Utils.PrintTitle("Christmas Box Details");
+
+        var contents = string.Join(
+            "\n",
+            box.Products.Select(p => $"• {p.Name}")
+        );
+
+        var body =
+            $"[bold #00014d]Name:[/] [#5dabcf]{box.Name}[/]\n" +
+            $"[bold #00014d]Price:[/] [#5dabcf]€{box.Price}[/]\n\n" +
+            $"[bold #00014d]Contents:[/]\n[#5dabcf]{contents}[/]";
+
+        var panel = new Panel(body)
+        {
+            Padding = new Padding(1, 1),
+            Border = BoxBorder.Heavy,
+            Header = new PanelHeader($"[bold #1B98E0]{box.Name}[/]")
+        };
+
+        AnsiConsole.Write(panel);
+
+        var choice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .AddChoices(
+                    "Add to Cart",
+                    "Go back"
+                )
+        );
+
+        if (choice == "Add to Cart")
+        {
+            OrderLogic.AddToCartProduct(box, 1);
+            AnsiConsole.MarkupLine("[green]Christmas box added to cart![/]");
+            Thread.Sleep(800);
+        }
+    }
+
 }

@@ -42,8 +42,9 @@ public static class SearchUI
 
                 List<ProductModel> productList = products
                     .Where(p =>
-                        p.Name.StartsWith(input, StringComparison.OrdinalIgnoreCase) // ||
-                        //p.Category.StartsWith(input, StringComparison.OrdinalIgnoreCase)
+                        p.Name.Contains(input, StringComparison.OrdinalIgnoreCase)
+                        || (!string.IsNullOrEmpty(p.Category)
+                            && p.Category.Contains(input, StringComparison.OrdinalIgnoreCase))
                     )
                     .OrderBy(p => p.Name) // sort by name
                     .Take(10)   // show 10 

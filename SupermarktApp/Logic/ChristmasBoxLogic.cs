@@ -21,7 +21,7 @@ public static class ChristmasBoxLogic
             double price = config.Value;
 
             var box = CreateBox(persons, price); // create each box per size
-            Console.WriteLine($"Created box for {persons} persons with {box.Products.Count} products, total value {box.TotalProductsValue}");
+            // Console.WriteLine($"Created box for {persons} persons with {box.Products.Count} products, total value {box.TotalProductsValue}"); //test
 
             if (IsValidBox(box))
                 boxes.Add(box); // add to list of boxes
@@ -49,18 +49,20 @@ public static class ChristmasBoxLogic
         {
             selectedProducts.Add(product); // add product to boxxx
 
+            // add 1 items to minimun with bigger boxes
             int requiredItems = Math.Max(
                 ChristmasBoxModel.MinimumProductsRequired,
                 persons + 1
             );
-            
+
             if (selectedProducts.Count >= requiredItems)
                 break;
-            
+
         }
 
         return new ChristmasBoxModel
         {
+            ID = -persons, // negative IDs = virtual products
             Name = $"Christmas Box for {persons} persons",
             Price = boxPrice,
             Category = "ChristmasBox",
