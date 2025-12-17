@@ -85,7 +85,7 @@ static class Utils
         }
     }
     /// <summary>
-    /// Creates a table with the strings passed.
+    /// Creates an empty table with the strings passed as columns.
     /// </summary>
     /// <param name="columns">IEnumerable of strings for the columns.</param>
     /// <returns>The table.</returns>
@@ -113,7 +113,8 @@ static class Utils
     public static List<T> CreateMultiSelectionPrompt<T>(IEnumerable<T> choices, string title= "", Func<T, string>? format= null) where T : notnull
     {
         var prompt = new MultiSelectionPrompt<T>()
-            .PageSize(10);
+            .PageSize(10)
+            .NotRequired();
 
         if (title != "")
             prompt.Title(title);
@@ -162,9 +163,9 @@ static class Utils
     {
         if (color != null)
         {
-            return $"[{color}]€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",") + "[/]";
+            return $"[{color}]€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(",",".") + "[/]";
         }
-        return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(".",",");
+        return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(",",".");
     }
     /// <summary>
     /// Calculates discounted price and returns a formatted string with old and new price.
@@ -193,6 +194,29 @@ static class Utils
     public static int AskInt(string text, int? min = null, int? max = null)
     {
         var prompt = new TextPrompt<int>(text ?? "Enter a number")
+            .PromptStyle("green")
+            .ValidationErrorMessage("[red]Invalid number.[/]")
+            .Validate(num =>
+            {
+                if (min.HasValue && num < min.Value)
+                    return ValidationResult.Error($"[red]Minimum is {min.Value}[/]");
+                if (max.HasValue && num > max.Value)
+                    return ValidationResult.Error($"[red]Maximum is {max.Value}[/]");
+                return ValidationResult.Success();
+            });
+
+        return AnsiConsole.Prompt(prompt);
+    }
+    /// <summary>
+    /// Prompts the user to enter a double within an optional range.
+    /// </summary>
+    /// <param name="text">The text prompt</param>
+    /// <param name="min">The minimum acceptable value (inclusive)</param>
+    /// <param name="max">The maximum acceptable value (inclusive)</param>
+    /// <returns>User input as a double.</returns>
+    public static double AskDouble(string text, double? min = null, double? max = null)
+    {
+        var prompt = new TextPrompt<double>(text ?? "Enter a number")
             .PromptStyle("green")
             .ValidationErrorMessage("[red]Invalid number.[/]")
             .Validate(num =>

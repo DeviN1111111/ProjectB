@@ -63,4 +63,27 @@ public class ProductLogic
 
         ProductAccess.UpdateProductStock(productId, newQuantity);
     }
+
+    public static (ProductModel?, double) GetProductWithCompetitorPrice(int id)
+    {
+        var product = ProductAccess.GetProductByID(id);
+        if (product == null)
+        {
+            return (null, 0);
+        }
+
+        var competitorPrice = ProductAccess.GetCompetitorPriceByID(id);
+        return (product, competitorPrice);
+    }
+
+    public static List<ProductModel> GetOverpricedProducts(List<ProductModel> products)
+    {
+        return products.Where(p => p.Price > p.CompetitorPrice).ToList();
+    }
+
+    public static void LowerPriceForOverpricedProduct(ProductModel product, double newPrice)
+    {
+        product.Price = newPrice;
+        ProductAccess.ChangeProductDetails(product);
+    }
 }
