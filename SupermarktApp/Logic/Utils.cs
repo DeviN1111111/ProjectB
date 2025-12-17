@@ -202,14 +202,14 @@ static class Utils
 
         string oldPrice = ChangePriceFormat(PriceBeforeDiscount);
 
-        return $"[strike red]{oldPrice}[/] [green]{newPrice}[/]";
+        return $"{ChangePriceFormat(oldPrice, "strike red")} {ChangePriceFormat(newPrice, "green")}";
     }
     /// <summary>
     /// Prompts the user to enter an integer within an optional range.
     /// </summary>
     /// <param name="text">The text prompt</param>
     /// <param name="min">The minimum acceptable value (inclusive)</param>
-    /// <param name="max">The maximum acceptable value (inclusive)</param>
+    /// <param name="max">The maximum acceptable value (inclusive)</param>01
     /// <returns>User input as an integer.</returns>
     public static int AskInt(string text, int? min = null, int? max = null)
     {
