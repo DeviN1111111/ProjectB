@@ -21,6 +21,8 @@ public static class ChristmasBoxLogic
             double price = config.Value;
 
             var box = CreateBox(persons, price); // create each box per size
+            Console.WriteLine($"Created box for {persons} persons with {box.Products.Count} products, total value {box.TotalProductsValue}");
+
             if (IsValidBox(box))
                 boxes.Add(box); // add to list of boxes
         }

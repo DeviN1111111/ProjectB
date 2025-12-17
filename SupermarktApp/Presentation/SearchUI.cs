@@ -37,9 +37,10 @@ public static class SearchUI
 
             if (input.Length != 0)
             {
-                // get the products from model and not databse
-                List<ProductModel> productList = ProductLogic
-                    .GetAllProducts()
+                var products = ProductLogic.GetAllProducts();
+                products.AddRange(ChristmasBoxLogic.GetAvailableBoxes()); // add the christmas boxes to the products
+
+                List<ProductModel> productList = products
                     .Where(p =>
                         p.Name.StartsWith(input, StringComparison.OrdinalIgnoreCase) // ||
                         //p.Category.StartsWith(input, StringComparison.OrdinalIgnoreCase)
