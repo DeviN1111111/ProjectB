@@ -11,11 +11,11 @@ public static class ReturnItemLogic
     public static List<ProductModel> CheckReturnableProducts(OrderHistoryModel orderHistory)
     {
         return OrderLogic
-            .GetOrderssByOrderId(orderHistory.Id)
+            .GetOrderItemsByOrderId(orderHistory.Id)
             .Select(o => ProductLogic.GetProductById(o.ProductID))
             .ToList();        
     }
-    public static List<(ProductModel Product, int Quantity, double UnitPrice)> GetReturnableProductsWithQuantity(List<OrdersModel> orderLines)
+    public static List<(ProductModel Product, int Quantity, double UnitPrice)> GetReturnableProductsWithQuantity(List<OrderItemsModel> orderLines)
     {
         return orderLines
             .GroupBy(o => o.ProductID)
@@ -43,6 +43,6 @@ public static class ReturnItemLogic
     }
     public static void RemoveProductQuantityFromOrder(int orderId, int productId, int quantity)
     {
-        OrderAccess.RemoveProductQuantityFromOrder(orderId, productId, quantity);
+        OrderItemAccess.RemoveProductQuantityFromOrder(orderId, productId, quantity);
     }
 }

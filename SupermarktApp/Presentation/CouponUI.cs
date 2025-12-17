@@ -50,8 +50,7 @@ public static class CouponUI
             return false;
 
         // find the applied coupon in the coupons list
-        Coupon appliedCoupon = null
-        ;
+        Coupon appliedCoupon = null;
 
         for (int i = 0; i < coupons.Count; i++)
         {
@@ -72,7 +71,7 @@ public static class CouponUI
         }
         else
         {
-            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your cart.[/]");
+            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your Cart.[/]");
         }
 
         var action = AnsiConsole.Prompt(
@@ -93,7 +92,7 @@ public static class CouponUI
     private static void ShowCouponSelection(List<Coupon> coupons)
     {
         var table = new Table()
-            .BorderColor(MenuUI.AsciiPrimary)
+            .BorderColor(ColorUI.AsciiPrimary)
             .AddColumn("Coupon")
             .AddColumn("Credit");
 
@@ -138,7 +137,7 @@ public static class CouponUI
         Coupon selectedCoupon = coupons[selectedIndex];
         string selectedRounded = Utils.ChangePriceFormat(selectedCoupon.Credit, "yellow");
 
-        CouponLogic.ApplyCouponToCart(selectedCoupon);
+        CouponLogic.ApplyCouponToCartProduct(selectedCoupon);
 
         AnsiConsole.MarkupLine("[green]Coupon applied with " + selectedRounded + " credit.[/]");
         AnsiConsole.MarkupLine("Press ENTER to continue");

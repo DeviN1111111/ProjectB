@@ -25,4 +25,9 @@ public class UserSettingsLogic
     {
         return UserAccess.EmailExists(email);
     }
+
+    public static UserModel GetUserByID(int ID)
+    {
+        return UserAccess.GetUserByID(ID);
+    }
 }

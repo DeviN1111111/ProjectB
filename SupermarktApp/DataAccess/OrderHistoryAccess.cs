@@ -12,10 +12,10 @@ public static class OrderHistoryAccess
         return orderId;
     }
 
-    public static List<OrdersModel> GetOrdersByUserId(int userId)
+    public static List<OrderItemsModel> GetOrdersByUserId(int userId)
     {
         var query = "SELECT * FROM OrderHistory WHERE UserId = @UserId ORDER BY Date DESC;";
-        return _connection.Query<OrdersModel>(query, new { UserId = userId }).AsList();
+        return _connection.Query<OrderItemsModel>(query, new { UserId = userId }).AsList();
     }
     public static List<OrderHistoryModel> GetAllUserOrders(int userId)
     {

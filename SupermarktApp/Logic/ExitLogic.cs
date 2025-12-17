@@ -7,17 +7,17 @@ public static class ExitLogic
         if (user == null) return;
         if (user.AccountStatus != "User") return;
 
-        await ProcessCartReminderAsync(user.ID, user.Email);
+        await ProcessCartProductReminderAsync(user.ID, user.Email);
     }
 
-    private static async Task ProcessCartReminderAsync(int userId, string userEmail)
+    private static async Task ProcessCartProductReminderAsync(int userId, string userEmail)
     {
-        var cartItems = CartAccess.GetAllUserProducts(userId);
+        var CartProductItems = CartProductAccess.GetAllUserProducts(userId);
 
-        if (cartItems != null && cartItems.Count > 0)
+        if (CartProductItems != null && CartProductItems.Count > 0)
         {
-            await EmailReminderLogic.SendCartReminderAsync(userEmail, cartItems);
-            SessionManager.HasSentExitCartEmail = true;
+            await EmailReminderLogic.SendCartProductReminderAsync(userEmail, CartProductItems);
+            SessionManager.HasSentExitCartProductEmail = true;
         }
     }
 

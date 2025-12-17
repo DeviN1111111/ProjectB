@@ -2,8 +2,6 @@ using Spectre.Console;
 
 public class ProductUI
 {
-    // add to basket and add to checklist had dubbel code 
-    // heb er dit van gemaakt :) -a
     private static int AskForQuantity(ProductModel product)
     {
         while(true)
@@ -42,9 +40,6 @@ public class ProductUI
         }
         ProductDetailsUI.ShowProductDetails(product);
 
-        // maak een "mode" voor checklist
-        // gebruiker kan sneller items teovoegen aan checklist -a
-
         if (mode == "checklist")
         {
             int quantity = AskForQuantity(product);
@@ -58,7 +53,7 @@ public class ProductUI
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .AddChoices(new[]{
-                "Add to basket",
+                "Add to Cart",
                 "Add to checklist",
                 "Show on map",
                 "Go back"
@@ -67,11 +62,11 @@ public class ProductUI
 
         switch (options)
         {
-            case "Add to basket":
+            case "Add to Cart":
                 {
                     int quantity = AskForQuantity(product);
-                    OrderLogic.AddToCart(product, quantity);
-                    AnsiConsole.MarkupLine($"[green]{quantity}x {product.Name} added to cart![/]");
+                    OrderLogic.AddToCartProduct(product, quantity);
+                    AnsiConsole.MarkupLine($"[green]{quantity}x {product.Name} added to CartProduct![/]");
                     break;
                 }
 
