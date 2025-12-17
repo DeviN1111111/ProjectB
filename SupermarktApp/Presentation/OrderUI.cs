@@ -36,14 +36,14 @@ public class Order
                     if (Product is ChristmasBoxModel christmasBox)
                     {
                         // Add main cart row for the box
-                        cartTable.AddRow(
+                        CartProductTable.AddRow(
                             christmasBox.Name,
-                            cartProduct.Quantity.ToString(),
+                            CartProductProduct.Quantity.ToString(),
                             $"€{christmasBox.Price}",
-                            $"€{Math.Round(christmasBox.Price * cartProduct.Quantity, 2)}"
+                            $"€{Math.Round(christmasBox.Price * CartProductProduct.Quantity, 2)}"
                         );                  
 
-                        totalAmount += christmasBox.Price * cartProduct.Quantity;                   
+                        totalAmount += christmasBox.Price * CartProductProduct.Quantity;                   
 
                         // Separate table for box contents
                         var contentsTable = Utils.CreateTable(new[] { "[grey]Christmas box contents[/]" });                 
