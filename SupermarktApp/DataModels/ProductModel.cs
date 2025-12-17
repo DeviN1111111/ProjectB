@@ -9,6 +9,7 @@ public class ProductModel
     public int Location { get; set; }
     public int Quantity { get; set; }
     public int Visible { get; set; } = 1;
+    public double CompetitorPrice { get; set; }
     public double DiscountPercentage { get; set; }
     public string DiscountType{ get; set;}
     public DateTime ExpiryDate { get; set; }

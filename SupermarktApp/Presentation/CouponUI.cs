@@ -64,14 +64,14 @@ public static class CouponUI
 
         if (appliedCoupon != null)
         {
-            var credit = Math.Round(appliedCoupon.Credit, 2);
+            var credit = Utils.ChangePriceFormat(appliedCoupon.Credit);
             AnsiConsole.MarkupLine(
-                "[green]You already have a coupon applied with [yellow]€" +
+                "[green]You already have a coupon applied with [yellow]" +
                 credit + "[/] credit.[/]");
         }
         else
         {
-            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your cart.[/]");
+            AnsiConsole.MarkupLine("[green]You already have a coupon applied to your Cart.[/]");
         }
 
         var action = AnsiConsole.Prompt(
@@ -101,11 +101,11 @@ public static class CouponUI
         for (int i = 0; i < coupons.Count; i++)
         {
             int number = i + 1;
-            double credit = Math.Round(coupons[i].Credit, 2);
+            string credit = Utils.ChangePriceFormat(coupons[i].Credit, "green");
 
-            table.AddRow($"#{number}", $"€[green]{credit}[/]");
+            table.AddRow($"#{number}", $"{credit}");
 
-            string label = $"Coupon #{number} - €[green]{credit}[/]";
+            string label = $"Coupon #{number} - {credit}";
             labels.Add(label);
         }
 
@@ -135,11 +135,11 @@ public static class CouponUI
 
         // selected coupon is now the one at selectedIndex
         Coupon selectedCoupon = coupons[selectedIndex];
-        double selectedRounded = Math.Round(selectedCoupon.Credit, 2);
+        string selectedRounded = Utils.ChangePriceFormat(selectedCoupon.Credit, "yellow");
 
-        CouponLogic.ApplyCouponToCart(selectedCoupon);
+        CouponLogic.ApplyCouponToCartProduct(selectedCoupon);
 
-        AnsiConsole.MarkupLine("[green]Coupon applied with [yellow]€" + selectedRounded + "[/] credit.[/]");
+        AnsiConsole.MarkupLine("[green]Coupon applied with " + selectedRounded + " credit.[/]");
         AnsiConsole.MarkupLine("Press ENTER to continue");
     }
 }

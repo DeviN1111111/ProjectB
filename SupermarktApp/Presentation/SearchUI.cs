@@ -60,7 +60,7 @@ public static class SearchUI
                     }
                     else
                     {
-                        string yellowPrice = $"[yellow]€{product.Price.ToString()}[/]";
+                        string yellowPrice = $"{Utils.ChangePriceFormat(product.Price, "yellow")}";
                         table.AddRow(product.Name, yellowPrice);
                     }
                 }

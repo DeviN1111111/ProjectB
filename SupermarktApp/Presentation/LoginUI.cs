@@ -56,7 +56,7 @@ public static class LoginUI
     //                     // Check if they already got a gift this year
     //                     if (user.LastBirthdayGift == null || user.LastBirthdayGift.Value.Year < DateTime.Today.Year)
     //                     {
-    //                         OrderLogic.AddBirthdayGiftToCart(user);
+    //                         OrderLogic.AddBirthdayGiftToCartProduct(user);
 
     //                         // Update last birthday gift date
     //                         user.LastBirthdayGift = DateTime.Today;
@@ -403,7 +403,7 @@ public static class LoginUI
         {
             if (user.LastBirthdayGift == null || user.LastBirthdayGift.Value.Year < DateTime.Today.Year)
             {
-                OrderLogic.AddBirthdayGiftToCart(user);
+                OrderLogic.AddBirthdayGiftToCartProduct(user);
                 user.LastBirthdayGift = DateTime.Today;
                 LoginLogic.UpdateLastBirthdayGiftDate(user.ID, user.LastBirthdayGift.Value);
             }

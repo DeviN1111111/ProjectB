@@ -9,15 +9,15 @@ public static class ProductAccess
     public static void AddProduct(ProductModel product)
     {
         _connection.Execute(@"INSERT INTO Products 
-            (Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible)
-            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
+            (Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible, CompetitorPrice)
+            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible, @CompetitorPrice)", product);
     }
 
     public static void AddProductUnitTest(ProductModel product)
     {
         _connection.Execute(@"INSERT INTO Products 
-            (ID, Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible)
-            VALUES (@ID, @Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible)", product);
+            (ID, Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible, CompetitorPrice)
+            VALUES (@ID, @Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible, @CompetitorPrice)", product);
     }
 
     public static List<ProductModel> SearchProductByName(string name, bool includeHidden = false)
@@ -50,6 +50,14 @@ public static class ProductAccess
         return _connection.Query<ProductModel>(sql).ToList();
     }
 
+    public static double GetCompetitorPriceByID(int id)
+    {
+        return _connection.ExecuteScalar<double>(
+            "SELECT CompetitorPrice FROM Products WHERE Id = @Id",
+            new { Id = id }
+        );
+    }
+    
     public static List<ProductModel> GetChristmasBoxEligibleProducts(bool includeHidden = false)
     {   // create a query that selects the products admin selected eligible 
         string sql = includeHidden
@@ -94,7 +102,8 @@ public static class ProductAccess
             Category = @Category,
             Location = @Location,
             Quantity = @Quantity,
-            Visible = @Visible
+            Visible = @Visible,
+            CompetitorPrice = @CompetitorPrice
             WHERE 
             ID = @ID", newProduct);
     }
@@ -104,7 +113,7 @@ public static class ProductAccess
         _connection.Execute(@"UPDATE Products SET Visible = 0 WHERE ID = @ID", new { ID });
     }
 
-        public static void SetProductVisibility(int productId, bool isVisible)
+    public static void SetProductVisibility(int productId, bool isVisible)
     {
         _connection.Execute("UPDATE Products SET Visible = @Visible WHERE Id = @Id;",
             new { Visible = isVisible ? 1 : 0, Id = productId });

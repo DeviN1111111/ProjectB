@@ -90,7 +90,7 @@ public static class MenuUI
                     ProductUI.SearchProduct();
                     break;
                 case "Cart":
-                    Order.ShowCart();
+                    Order.ShowCartProduct();
                     break;
                 case "Return Item":
                     ReturnItemUI.DisplayMenu();

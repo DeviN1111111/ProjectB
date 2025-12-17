@@ -153,21 +153,21 @@ static class FavoriteListUI
                 table.AddRow(
                     $"[#5dabcf]{product.Name}[/]", 
                     $"{quantity}",
-                    $"[green]{Utils.CalculateDiscountedPrice(totalPrice, productDiscount.Discount.DiscountPercentage)}[/]");
+                    $"{Utils.ChangePriceFormat(totalPrice * (1 - productDiscount.Discount.DiscountPercentage / 100), "green")}");
             }
             else
             {
                 table.AddRow(
                     $"[#5dabcf]{product.Name}[/]", 
                     $"{quantity}",
-                    $"[green]€{totalPrice}[/]");
+                    $"{Utils.ChangePriceFormat(totalPrice, "green")}");
             }
         }
 
         AnsiConsole.Write(table);
 
         var choices = new [] {
-            "Add products to cart",
+            "Add products to CartProduct",
             "Edit list",
             $"[red]Go back[/]"
         };
@@ -175,8 +175,8 @@ static class FavoriteListUI
 
         switch (selectedChoice)
         {
-            case "Add products to cart":
-                AddProductsToCart(list);
+            case "Add products to CartProduct":
+                AddProductsToCartProduct(list);
                 ViewLists();
                 break;
             case "Edit list":
@@ -291,7 +291,7 @@ static class FavoriteListUI
         Console.ReadKey();
         return;        
     }
-    public static void AddProductsToCart(FavoriteListModel list)
+    public static void AddProductsToCartProduct(FavoriteListModel list)
     {
         var selectedChoice = Utils.CreateSelectionPrompt(new [] {"Add all products", "Add specific products", "[red]Go back[/]"});
         var allProductsInList = list.Products;
@@ -303,11 +303,11 @@ static class FavoriteListUI
                 var product = ProductLogic.GetProductById(item.ProductId);
                 if (product.Quantity >= item.Quantity)
                 {
-                    OrderLogic.AddToCart(item.Product, item.Quantity);
+                    OrderLogic.AddToCartProduct(item.Product, item.Quantity);
                 }
                 else
                 {
-                    OrderLogic.AddToCart(item.Product, product.Quantity);
+                    OrderLogic.AddToCartProduct(item.Product, product.Quantity);
                 }
             }
         }
@@ -325,24 +325,24 @@ static class FavoriteListUI
                 item => $"{item.Product.Name} | x{item.Quantity}"
             );
 
-            var listToAddToCart = EditQuantity(list, selectedProducts, false);
+            var listToAddToCartProduct = EditQuantity(list, selectedProducts, false);
 
-            foreach(var item in listToAddToCart)
+            foreach(var item in listToAddToCartProduct)
             {
                 var product = ProductLogic.GetProductById(item.ProductId);
                 if (product.Quantity >= item.Quantity)
                 {
-                    OrderLogic.AddToCart(item.Product, item.Quantity);
+                    OrderLogic.AddToCartProduct(item.Product, item.Quantity);
                 }
                 else
                 {
-                    OrderLogic.AddToCart(item.Product, product.Quantity);
+                    OrderLogic.AddToCartProduct(item.Product, product.Quantity);
                 }
             }
         }
         else return;
 
-        AnsiConsole.MarkupLine("Products added to cart.");
+        AnsiConsole.MarkupLine("Products added to CartProduct.");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
         return;
@@ -409,12 +409,12 @@ static class FavoriteListUI
         {
             var product = item.Product;
             int quantity = item.Quantity;
-            double totalPrice = Math.Round(product.Price * quantity, 2);
+            var totalPrice = Utils.ChangePriceFormat(product.Price * quantity, "green");
 
             table.AddRow(
                 $"[#5dabcf]{product.Name}[/]", 
                 $"{quantity}",
-                $"[green]€{totalPrice}[/]");
+                $"{totalPrice}");
         }
 
         AnsiConsole.Write(table);

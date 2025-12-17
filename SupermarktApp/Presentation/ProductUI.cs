@@ -53,7 +53,7 @@ public class ProductUI
         var options = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .AddChoices(new[]{
-                "Add to basket",
+                "Add to Cart",
                 "Add to checklist",
                 "Show on map",
                 "Go back"
@@ -62,11 +62,11 @@ public class ProductUI
 
         switch (options)
         {
-            case "Add to basket":
+            case "Add to Cart":
                 {
                     int quantity = AskForQuantity(product);
-                    OrderLogic.AddToCart(product, quantity);
-                    AnsiConsole.MarkupLine($"[green]{quantity}x {product.Name} added to cart![/]");
+                    OrderLogic.AddToCartProduct(product, quantity);
+                    AnsiConsole.MarkupLine($"[green]{quantity}x {product.Name} added to CartProduct![/]");
                     break;
                 }
 

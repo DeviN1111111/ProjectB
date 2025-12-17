@@ -16,6 +16,7 @@ public static class ManagementUI
                 "Products",
                 "Shop Settings",
                 "Discounts",
+                "Manage Users",
                 "Coupons",
                 "Reviews",
                 "Go back"
@@ -58,6 +59,7 @@ public static class ManagementUI
             }
         }
     }
+    
     static void ShowProductMenu()
     {
         var choice = AnsiConsole.Prompt(
