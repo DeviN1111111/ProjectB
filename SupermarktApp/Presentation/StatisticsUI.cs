@@ -12,8 +12,8 @@ public static class StatisticsUI
 
         var period = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title($"Select the [#{Text.ToHex()}]time period[/]")
-                .HighlightStyle(new Style(Hover))
+                .Title($"Select the [#{ColorUI.Text.ToHex()}]time period[/]")
+                .HighlightStyle(new Style(ColorUI.Hover))
                 .AddChoices(new[] { 
                     "Today", 
                     "This Week", 
