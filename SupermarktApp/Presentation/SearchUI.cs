@@ -37,14 +37,17 @@ public static class SearchUI
 
             if (input.Length != 0)
             {
-                // List<ProductModel> productList = ProductLogic.SearchProductByName(input);
+                // get the products from model and not databse
                 List<ProductModel> productList = ProductLogic
                     .GetAllProducts()
                     .Where(p =>
-                        p.Name.Contains(input, StringComparison.OrdinalIgnoreCase) ||
-                        p.Category.Contains(input, StringComparison.OrdinalIgnoreCase)
+                        p.Name.StartsWith(input, StringComparison.OrdinalIgnoreCase) // ||
+                        //p.Category.StartsWith(input, StringComparison.OrdinalIgnoreCase)
                     )
+                    .OrderBy(p => p.Name) // sort by name
+                    .Take(10)   // show 10 
                     .ToList();
+                
 
                 AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
                 if (productList.Count == 0)
