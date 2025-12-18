@@ -4,28 +4,25 @@ public class OrderLogic
 {
     public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
-        if (product is ChristmasBoxModel)
+        bool isBox = product.Category == "ChristmasBox";
+        if (isBox) // check if bought already
         {
-            var boughtAlready = CartProductAccess
+            var alreadyInCart = CartProductAccess
                 .GetAllUserProducts(SessionManager.CurrentUser!.ID)
-                .FirstOrDefault(cp => cp.ProductId == product.ID);
-            if (boughtAlready != null)
-            {
-                return;
-            }
-            quantity = 1; // user can only buy one box per size
-        
+                .Any(cp => cp.ProductId == product.ID);
+
+            if (alreadyInCart) return;
+
+            quantity = 1;
         }
+
         Console.WriteLine($"DEBUG add to cart: {product.Name}, ID = {product.ID}, Qty = {quantity}"); //// DEBUGGUGUGGU
         // check if product already in CartProduct
         List<CartProductModel> allUserProducts = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
         var CartProductItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartProductItem != null)
         {
-            if (product is ChristmasBoxModel) // 
-            {
-                return;
-            }
+            if (isBox) return; // if bought already
 
             int newQuantity = CartProductItem.Quantity + quantity;
             if (newQuantity > 99)
@@ -186,6 +183,8 @@ public class OrderLogic
                 "[yellow]You can only buy one Christmas box per size.[/]"
             );
             Console.ReadKey();
+            // overwrite the hoeveelheid van xmas box
+            CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, 1);
             return;
         }
         CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);

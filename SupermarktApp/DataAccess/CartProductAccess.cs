@@ -8,6 +8,11 @@ public class CartProductAccess
 
     public static void AddToCartProduct(int userId, int productId, int quantity, double rewardPrice = 0)
     {
+        var product = ProductAccess.GetProductByID(productId);
+        if (product != null && product.Category == "ChristmasBox")
+        {
+            quantity = 1; // HARD RULE!!!! keep it at one if Xmas box!
+        }
         var sql = $"INSERT INTO {Table} (UserId, ProductId, Quantity, RewardPrice) VALUES (@UserId, @ProductId, @Quantity, @RewardPrice)";
         _connection.Execute(sql, new { UserId = userId, ProductId = productId, Quantity = quantity, RewardPrice = rewardPrice });
     }
