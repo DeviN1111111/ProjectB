@@ -6,14 +6,14 @@ public class OrderLogic
     {
         if (product is ChristmasBoxModel)
         {
-            var existing = CartProductAccess
-                .GetCartProductsByUserId(SessionManager.CurrentUser!.ID)
+            var boughtAlready = CartProductAccess
+                .GetAllUserProducts(SessionManager.CurrentUser!.ID)
                 .FirstOrDefault(cp => cp.ProductId == product.ID);
-            if (existing != null)
+            if (boughtAlready != null)
             {
                 return;
             }
-            quantity = 1;
+            quantity = 1; // user can only buy one box per size
         
         }
         Console.WriteLine($"DEBUG add to cart: {product.Name}, ID = {product.ID}, Qty = {quantity}"); //// DEBUGGUGUGGU
