@@ -4,14 +4,20 @@ public class OrderLogic
 {
     public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
-        bool isBox = product.Category == "ChristmasBox";
-        if (isBox) // check if bought already
-        {
-            var alreadyInCart = CartProductAccess
-                .GetAllUserProducts(SessionManager.CurrentUser!.ID)
-                .Any(cp => cp.ProductId == product.ID);
 
-            if (alreadyInCart) return;
+        if (product.Category == "ChristmasBox") // check if bought already
+        {
+            var boughtAlready = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID).Any(cp => cp.ProductId == product.ID);
+
+            if (boughtAlready)
+            {
+                AnsiConsole.MarkupLine(
+                    "[yellow]You can only buy one Christmas box per size.[/]"
+                );
+                AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
+                Console.ReadKey();
+                return;
+            }
 
             quantity = 1;
         }
@@ -22,7 +28,7 @@ public class OrderLogic
         var CartProductItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartProductItem != null)
         {
-            if (isBox) return; // if bought already
+            // if (isBox) return; // if bought already
 
             int newQuantity = CartProductItem.Quantity + quantity;
             if (newQuantity > 99)

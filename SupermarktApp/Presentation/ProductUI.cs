@@ -15,6 +15,15 @@ public class ProductUI
                 continue;
             }
 
+            // user can not add more than 1 to the cart 
+            if (product.Category == "ChristmasBox" && quantity != 1)
+            {
+                AnsiConsole.MarkupLine(
+                    "[yellow]You can only buy one Christmas box per size.[/]"
+                );
+                continue;
+            }
+
             if (quantity <= 0)
             {
                 AnsiConsole.MarkupLine("[red]Quantity must be at least 1.[/]");
