@@ -22,63 +22,31 @@ public class Order
         // CartProduct table
         Table CartProductTable = Utils.CreateTable(new [] {"[white]Product[/]", "[white]Quantity[/]", "[white]Price[/]", "[white]Total[/]"});
 
-        // Products in CartProduct
-        foreach (var CartProductProduct in allUserProducts)
+        var displayItems = OrderLogic.GetCartDisplayItems();
+        foreach (var item in displayItems)
         {
-            // Get Product id and find match in all products
-            foreach (ProductModel Product in allProducts)
+            CartProductTable.AddRow(
+                item.Name,
+                item.Quantity.ToString(),
+                item.PriceText,
+                item.TotalText
+            );
+
+            totalAmount += item.TotalValue;
+            totalDiscount += item.DiscountValue;
+
+            // Optional: show contents for Christmas boxes
+            if (item.Contents != null && item.Contents.Any())
             {
-                ProductDiscountDTO productDiscount = DiscountsLogic.CheckDiscountByProduct(Product)!;
-        
-                if (CartProductProduct.ProductId == Product.ID)
-                {
-                    // Special display for Christmas boxes
-                    if (Product is ChristmasBoxModel christmasBox)
-                    {
-                        // Add main cart row for the box
-                        CartProductTable.AddRow(
-                            christmasBox.Name,
-                            CartProductProduct.Quantity.ToString(),
-                            $"€{christmasBox.Price}",
-                            $"€{Math.Round(christmasBox.Price * CartProductProduct.Quantity, 2)}"
-                        );                  
+                var contentsTable = Utils.CreateTable(new[] { "[grey]Christmas box contents[/]" });
 
-                        totalAmount += christmasBox.Price * CartProductProduct.Quantity;                   
+                foreach (var name in item.Contents)
+                    contentsTable.AddRow($"- {name}");
 
-                        // Separate table for box contents
-                        var contentsTable = Utils.CreateTable(new[] { "[grey]Christmas box contents[/]" });                 
-
-                        foreach (var item in christmasBox.Products)
-                        {
-                            contentsTable.AddRow($"- {item.Name}");
-                        }                   
-
-                        AnsiConsole.Write(contentsTable);                   
-                        break;
-                    }
-
-                    if(RewardLogic.GetRewardItemByProductId(Product.ID) != null) // if the product is a reward item print FREE
-                    {
-                        CartProductTable.AddRow(Product.Name, CartProductProduct.Quantity.ToString(), $"[green]FREE![/]", $"[green]FREE![/]");
-                    }
-                    else if(productDiscount != null)
-                    {
-                        double priceAfterDiscount = Math.Round(Product.Price * (1 - productDiscount.Discount!.DiscountPercentage / 100), 2);
-                        double differenceBetweenPriceAndDiscountPrice = Product.Price - priceAfterDiscount;
-
-                        totalDiscount += differenceBetweenPriceAndDiscountPrice * CartProductProduct.Quantity;
-
-                        CartProductTable.AddRow(Product.Name, CartProductProduct.Quantity.ToString(), $"[strike red]€{Product.Price}[/][green] €{priceAfterDiscount}[/]", $"€{Math.Round(priceAfterDiscount * CartProductProduct.Quantity, 2)}");
-                        totalAmount = totalAmount + (priceAfterDiscount * CartProductProduct.Quantity);
-                    }
-                    else
-                    {
-                        CartProductTable.AddRow(Product.Name, CartProductProduct.Quantity.ToString(), $"€{Product.Price}", $"€{Math.Round(Product.Price * CartProductProduct.Quantity, 2)}");
-                        totalAmount = totalAmount + (Product.Price * CartProductProduct.Quantity);
-                    }
-                }
+                AnsiConsole.Write(contentsTable);
             }
         }
+
 
         double deliveryFee = allUserProducts.Count == 0 ? 0 : OrderLogic.DeliveryFee(totalAmount);
         var currentUser = SessionManager.CurrentUser!;
