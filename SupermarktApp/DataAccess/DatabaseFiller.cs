@@ -125,7 +125,8 @@ public class DatabaseFiller
                 ExpiryDate DATETIME,
                 Quantity INTEGER NOT NULL DEFAULT 0,
                 Visible INTEGER NOT NULL DEFAULT 1,
-                CompetitorPrice REAL NOT NULL DEFAULT 0
+                CompetitorPrice REAL NOT NULL DEFAULT 0,
+                IsChristmasBoxItem INTEGER NOT NULL DEFAULT 0
             );");
 
         _sharedConnection!.Execute(@"
@@ -299,6 +300,34 @@ public class DatabaseFiller
             InsertProduct(product);
             reportProductProgress?.Invoke(1);
         }
+    
+        // 🎄 Seed Christmas Box base products (ONCE)
+        var christmasBoxes = new Dictionary<int, double>
+        {
+            { 2, 15 },
+            { 4, 25 },
+            { 6, 35 },
+            { 8, 45 }
+        };
+        
+        foreach (var (persons, price) in christmasBoxes)
+        {
+            InsertProduct(new ProductModel
+            {
+                Name = $"Christmas Box ({persons} persons)",
+                Price = price,
+                Category = "ChristmasBox",
+                Quantity = 999,
+                Visible = 1,
+                IsChristmasBoxItem = false,
+                NutritionDetails = "Varies",
+                Description = "A festive Christmas box filled with selected products.",
+                Location = 0
+            });
+        
+            reportProductProgress?.Invoke(1);
+        }
+
 
         DiscountsLogic.AddExpiryDateDiscounts(1, 50); // Add default expiry date discounts
 

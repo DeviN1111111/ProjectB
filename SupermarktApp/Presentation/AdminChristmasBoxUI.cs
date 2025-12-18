@@ -15,6 +15,7 @@ public static class AdminChristmasBoxUI
             products,
             "[white]Select products for Christmas boxes[/]",
             p => $"{p.ID} - {p.Name} ({p.Category})"
+            // p => $"{p.ID} - {p.Name} (Eligible: {p.IsChristmasBoxItem})"
         );
 
         // Add items to christmas category
