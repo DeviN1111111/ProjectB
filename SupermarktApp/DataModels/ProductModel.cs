@@ -13,6 +13,7 @@ public class ProductModel
     public double DiscountPercentage { get; set; }
     public string DiscountType{ get; set;}
     public DateTime ExpiryDate { get; set; }
+    public bool IsChristmasBoxItem { get; set; } // can it be USED in a box
 
     public ProductModel(string name, double price, string nutritionDetails, string description, string category, int location, int quantity, int visible)
     {

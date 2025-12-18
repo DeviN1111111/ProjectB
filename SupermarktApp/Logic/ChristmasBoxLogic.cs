@@ -15,70 +15,50 @@ public static class ChristmasBoxLogic
     {   
         var boxes = new List<ChristmasBoxModel>(); // creates the list of boxes
 
-        foreach (var config in BoxConfigurations)
-        {
-            int persons = config.Key;
-            double price = config.Value;
-
-            var box = CreateBox(persons, price); // create each box per size
-            // Console.WriteLine($"Created box for {persons} persons with {box.Products.Count} products, total value {box.TotalProductsValue}"); //test
-
-            if (IsValidBox(box))
-                boxes.Add(box); // add to list of boxes
-        }
-
-        return boxes; // return the list of boxes
-        // Console.WriteLine($"Created {boxes.Count} Christmas boxes");
-
-    }
-
-    public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
-    {
-        var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true) // get aal products admin selected 
-            .Where(p =>
-                p.Visible == 1 &&
-                p.Category != null &&
-                p.Category.Equals("ChristmasBoxItem", StringComparison.OrdinalIgnoreCase)
-            )
+        var baseBoxProducts = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => p.Category == "ChristmasBox" && p.Visible == 1)
             .ToList();
 
-        var selectedProducts = new List<ProductModel>(); // list of product for the box
-        var random = new Random();
-
-        foreach (var product in eligibleProducts.OrderBy(_ => random.Next())) // create boxes random items
+        // debug
+        Console.WriteLine($"DEBUG: baseBoxProducts count = {baseBoxProducts.Count}");
+        
+        foreach (var baseProduct in baseBoxProducts)
         {
-            selectedProducts.Add(product); // add product to boxxx
-
-            // add 1 items to minimun with bigger boxes
-            int requiredItems = Math.Max(
-                ChristmasBoxModel.MinimumProductsRequired,
-                persons + 1
-            );
-
-            if (selectedProducts.Count >= requiredItems)
-                break;
-
+            boxes.Add(CreateBox(baseProduct));
         }
 
-        return new ChristmasBoxModel
-        {
-            ID = -persons, // negative IDs = virtual products
-            Name = $"Christmas Box for {persons} persons",
-            Price = boxPrice,
-            Category = "ChristmasBox",
-            Visible = 1,
-            Products = selectedProducts
-        };
+        return boxes;
 
     }
+
+    public static ChristmasBoxModel CreateBox(ProductModel baseProduct)
+    {
+        var products = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p =>
+                p.Visible == 1 &&
+                p.IsChristmasBoxItem
+            )
+            .Take(ChristmasBoxModel.MinimumProductsRequired)
+            .ToList();
+
+    
+        return new ChristmasBoxModel
+        {
+            ID = baseProduct.ID,  
+            Name = baseProduct.Name,
+            Price = baseProduct.Price,
+            Category = baseProduct.Category,
+            Visible = baseProduct.Visible,
+            Products = products
+        };
+    }
+
 
     public static bool IsValidBox(ChristmasBoxModel box)
     {
         if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
             return false;
 
-        // if (box.TotalProductsValue < (decimal)box.Price)
-        //     return false;
 
         return true;
     }

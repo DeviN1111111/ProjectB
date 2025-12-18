@@ -20,10 +20,7 @@ public static class AdminChristmasBoxUI
         // Add items to christmas category
         foreach (var product in selectedProducts)
         {
-            product.Category = product.Category == "ChristmasBoxItem"
-                ? "Regular"
-                : "ChristmasBoxItem";
-
+            product.IsChristmasBoxItem = !product.IsChristmasBoxItem;
             ProductLogic.UpdateProduct(product);
         }
 
