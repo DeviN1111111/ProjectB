@@ -20,8 +20,8 @@ public static class ChristmasBoxLogic
             .ToList();
 
         // debug
-        Console.WriteLine($"DEBUG: baseBoxProducts count = {baseBoxProducts.Count}");
-        
+        // Console.WriteLine($"DEBUG: baseBoxProducts count = {baseBoxProducts.Count}");
+
         foreach (var baseProduct in baseBoxProducts)
         {
             boxes.Add(CreateBox(baseProduct));

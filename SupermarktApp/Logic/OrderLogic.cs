@@ -178,7 +178,8 @@ public class OrderLogic
     }
     public static void ChangeQuantity(int productId, int newQuantity)
     {   
-        var product = ProductAcces.GetProductByID(prooductId);
+        var product = ProductAccess.GetProductByID(productId);
+        // the box can only be bought once
         if (product is ChristmasBoxModel)
         {
             AnsiConsole.MarkupLine(
