@@ -5,8 +5,8 @@ public class OrderLogic
     public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
 
-        if (product.Category == "ChristmasBox") // check if bought already
-        {
+        if (product.Category == "ChristmasBox") 
+        {   // check if bought already
             var boughtAlready = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID).Any(cp => cp.ProductId == product.ID);
 
             if (boughtAlready)
