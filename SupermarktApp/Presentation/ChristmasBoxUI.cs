@@ -30,7 +30,9 @@ public static class ChristmasBoxUI
         for (int i = 0; i < boxes.Count; i++)
         {
             var box = boxes[i];
-            var contents = string.Join(", ", box.Products.Select(p => p.Name));
+            var contents = box.Products.Any()
+                ? string.Join(", ", box.Products.Select(p => p.Name))
+                : "[grey]No items yet[/]";
         
             table.AddRow(
                 (i + 1).ToString(),
@@ -45,7 +47,33 @@ public static class ChristmasBoxUI
 
         AnsiConsole.MarkupLine("\n[grey]Select a Christmas box to add to cart[/]");
         AnsiConsole.MarkupLine("[grey]Or press [green]ENTER[/] to go back[/]");
+        
+        //  "go back" option
+        var backOption = new ChristmasBoxModel
+        {
+            ID = -1,
+            Name = "Go back",
+            Price = 0
+        };
 
+        var selectableBoxes = boxes
+            .Append(backOption)
+            .ToList();
+
+        var selectedBox = Utils.CreateSelectionPrompt(
+            selectableBoxes,
+            title: "[white]Choose a Christmas box[/]",
+            format: box =>
+                box.ID == -1
+                    ? "[grey]Go back[/]"
+                    : $"{box.Name} — €{box.Price}"
+        );
+
+        // escape
+        if (selectedBox.ID == -1)
+        {
+            return;
+        }
         // selection prompt using the boxes themselves
         var selectedBox = Utils.CreateSelectionPrompt(
             boxes,
