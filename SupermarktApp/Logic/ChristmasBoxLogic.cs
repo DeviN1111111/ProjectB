@@ -51,7 +51,7 @@ public static class ChristmasBoxLogic
 
         var random = new Random();
 
-        var products = ProductAccess.GetAllProducts(includeHidden: true)
+        var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true)
             .Where(p => p.Visible == 1 && p.IsChristmasBoxItem && p.Price > 0)
             .OrderBy(_ => random.Next())   // show them random
             .ToList();
@@ -72,6 +72,7 @@ public static class ChristmasBoxLogic
                     break;
             }
 
+
         return new ChristmasBoxModel
         {
             ID = baseProduct.ID,  
@@ -79,7 +80,7 @@ public static class ChristmasBoxLogic
             Price = baseProduct.Price,
             Category = baseProduct.Category,
             Visible = baseProduct.Visible,
-            Products = products
+            Products = selectedProducts
         };
     }
 
