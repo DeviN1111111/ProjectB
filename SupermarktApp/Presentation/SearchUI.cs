@@ -37,7 +37,29 @@ public static class SearchUI
 
             if (input.Length != 0)
             {
-                List<ProductModel> productList = ProductLogic.SearchProductByName(input);
+                var products = ProductLogic.GetAllProducts();
+                if (!products.Any(p => p.Category == "ChristmasBox"))
+                {
+                    products.AddRange(ChristmasBoxLogic.GetAvailableBoxes());
+                }
+
+
+                List<ProductModel> productList = products
+                    .Where(p =>
+                        (
+                            p.Name.Contains(input, StringComparison.OrdinalIgnoreCase)
+                            || (!string.IsNullOrEmpty(p.Category)
+                                && p.Category.Contains(input, StringComparison.OrdinalIgnoreCase))
+                        )
+                        && p.Category != "ChristmasBoxItem" // hide box contents
+                    )
+                    .GroupBy(p => p.Name)  
+                    .Select(g => g.First())
+                    .OrderBy(p => p.Name)
+                    .Take(10)   // show 10 
+                    .ToList();
+                
+
                 AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
                 if (productList.Count == 0)
                 {
@@ -91,10 +113,26 @@ public static class SearchUI
                             .PageSize(10)
                             .AddChoices(productNames));
 
-                    return ProductLogic.GetProductByName(product);
+                    var selectedProduct = ProductLogic.GetProductByName(product);
+
+                    // If is a Christmas box add directly to cart
+                    if (selectedProduct is ChristmasBoxModel box)
+                    {
+                        Console.WriteLine($"DEBUG add to cart: {box.Name}, ID = {box.ID}");
+
+                        OrderLogic.AddToCartProduct(box, 1);
+
+                        AnsiConsole.MarkupLine($"[green]{box.Name} added to cart![/]");
+                        Thread.Sleep(800); //weg later
+
+                        continue;
+                    }
+                    // normal items go to details screen
+                    return selectedProduct;
                 }
             }
         }
         return null!;
+        // continue;
     }
 }

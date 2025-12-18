@@ -10,31 +10,20 @@ public static class AdminChristmasBoxUI
 
         var products = ProductLogic.GetAllProducts();
 
-        var choices = products
-            .Select(p =>
-                $"{p.ID} - {Markup.Escape(p.Name)} {Markup.Escape(p.Category)}" // markup escape to prevent rendering errors [ ] 
-            )
-            .ToList();
-
-        var selected = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("[white]Select a product to toggle Christmas box eligibility[/]")
-                .AddChoices(choices)
+        // Multi-select products
+        var selectedProducts = Utils.CreateMultiSelectionPrompt(
+            products,
+            "[white]Select products for Christmas boxes[/]",
+            p => $"{p.ID} - {p.Name} ({p.Category})"
+            // p => $"{p.ID} - {p.Name} (Eligible: {p.IsChristmasBoxItem})"
         );
 
-        int productId = int.Parse(selected.Split('-')[0].Trim());
-        var product = products.First(p => p.ID == productId);
-
-        if (product.Category == "ChristmasBoxItem")
+        // Add items to christmas category
+        foreach (var product in selectedProducts)
         {
-            product.Category = "Regular";
+            product.IsChristmasBoxItem = !product.IsChristmasBoxItem;
+            ProductLogic.UpdateProduct(product);
         }
-        else
-        {
-            product.Category = "ChristmasBoxItem";
-        }
-
-        ProductLogic.UpdateProduct(product);
 
         AnsiConsole.MarkupLine("[green]Product updated successfully![/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");

@@ -8,9 +8,4 @@ public class ChristmasBoxModel : ProductModel
         // calculate total price content box
         Products.Sum(p => (decimal)p.Price);  
 
-    public bool IsValid()
-    {
-        return Products.Count >= MinimumProductsRequired
-               && TotalProductsValue >= (decimal)Price;
-    }
 }

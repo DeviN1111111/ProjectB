@@ -51,7 +51,17 @@ public class ProductLogic
         string? user = SessionManager.CurrentUser?.AccountStatus;
         bool includeHidden = user == "Admin" || user == "SuperAdmin";
     
-        return ProductAccess.GetAllProducts(includeHidden);
+        var products = ProductAccess.GetAllProducts(includeHidden); // get all products
+        // if (!products.Any(p => p is ChristmasBoxModel))
+        // {
+        //     var christmasBoxes = ChristmasBoxLogic.GetAvailableBoxes(); // get xmas boxes
+        //     products.AddRange(christmasBoxes); // add boxes to products
+        // }
+        // return products; 
+        var christmasBoxes = ChristmasBoxLogic.GetAvailableBoxes(); // get xmas boxes
+        products.AddRange(christmasBoxes); // add boxes to products
+        
+        return products;
     }
     public static void UpdateStock(int productId, int incomingQuantity)
     {

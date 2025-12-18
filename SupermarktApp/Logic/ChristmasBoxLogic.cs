@@ -15,60 +15,78 @@ public static class ChristmasBoxLogic
     {   
         var boxes = new List<ChristmasBoxModel>(); // creates the list of boxes
 
-        foreach (var config in BoxConfigurations)
-        {
-            int persons = config.Key;
-            double price = config.Value;
-
-            var box = CreateBox(persons, price); // create each box per size
-            if (IsValidBox(box))
-                boxes.Add(box); // add to list of boxes
-        }
-
-        return boxes; // return the list of boxes
-    }
-
-    public static ChristmasBoxModel CreateBox(int persons, double boxPrice)
-    {
-        var eligibleProducts = ProductLogic.GetAllProducts() // get aal products admin selected 
-            .Where(p => p.Category == "ChristmasBoxItem" && p.Visible == 1)
+        var baseBoxProducts = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => p.Category == "ChristmasBox" && p.Visible == 1)
             .ToList();
 
-        // var eligibleProducts = ProductLogic.GetAllProducts() //TEST//
-        //     .Where(p => p.Visible == 1)
-        //     .ToList();
+        // debug
+        // Console.WriteLine($"DEBUG: baseBoxProducts count = {baseBoxProducts.Count}");
 
-
-        var selectedProducts = new List<ProductModel>(); // list of product for the box
-        double totalValue = 0; // tracks selected product prices
-
-        foreach (var product in eligibleProducts)
+        foreach (var baseProduct in baseBoxProducts)
         {
-            selectedProducts.Add(product); // add product to boxxx
-            totalValue += product.Price;   // add price to total valvue 
-
-            if (selectedProducts.Count >= ChristmasBoxModel.MinimumProductsRequired // check if valid
-                && totalValue >= boxPrice)
-                break;
+            boxes.Add(CreateBox(baseProduct)); // add products to box
         }
+        return boxes;
+    }
+
+    public static ChristmasBoxModel CreateBox(ProductModel baseProduct)
+    {
+        int persons = int.Parse( // change the number in the string to int
+            new string(
+                baseProduct.Name
+                .Where(char.IsDigit)
+                .ToArray()
+            )
+        );
+
+        // so you can add items bases on price
+        double targetPrice = persons switch
+        {   // grap per persons the price
+            2 => 15,
+            4 => 25,
+            6 => 35,
+            8 => 45,
+            _ => baseProduct.Price 
+        };
+
+        var random = new Random();
+
+        var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => p.Visible == 1 && p.IsChristmasBoxItem && p.Price > 0)
+            .OrderBy(_ => random.Next())   // show them random
+            .ToList();
+        
+            // fill box up until price is reached
+            var selectedProducts = new List<ProductModel>();
+            double currentTotal = 0;
+
+            foreach (var product in eligibleProducts)
+            {
+                if (currentTotal + product.Price > targetPrice)
+                    continue;
+
+                selectedProducts.Add(product);
+                currentTotal += product.Price;
+
+                if (currentTotal >= targetPrice)
+                    break;
+            }
+
 
         return new ChristmasBoxModel
         {
-            Name = $"Christmas Box for {persons} persons",
-            Price = boxPrice,
-            Category = "ChristmasBox",
-            Visible = 1,
+            ID = baseProduct.ID,  
+            Name = baseProduct.Name,
+            Price = baseProduct.Price,
+            Category = baseProduct.Category,
+            Visible = baseProduct.Visible,
             Products = selectedProducts
         };
-
     }
 
     public static bool IsValidBox(ChristmasBoxModel box)
     {
         if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
-            return false;
-
-        if (box.TotalProductsValue < (decimal)box.Price)
             return false;
 
         return true;

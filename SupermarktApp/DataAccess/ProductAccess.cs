@@ -9,15 +9,15 @@ public static class ProductAccess
     public static void AddProduct(ProductModel product)
     {
         _connection.Execute(@"INSERT INTO Products 
-            (Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible, CompetitorPrice)
-            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible, @CompetitorPrice)", product);
+            (Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible, CompetitorPrice, IsChristmasBoxItem)
+            VALUES (@Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible, @CompetitorPrice, @IsChristmasBoxItem)", product);
     }
 
     public static void AddProductUnitTest(ProductModel product)
     {
         _connection.Execute(@"INSERT INTO Products 
-            (ID, Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible, CompetitorPrice)
-            VALUES (@ID, @Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible, @CompetitorPrice)", product);
+            (ID, Name, Price, NutritionDetails, Description, Category, Location, Quantity, Visible, CompetitorPrice, IsChristmasBoxItem)
+            VALUES (@ID, @Name, @Price, @NutritionDetails, @Description, @Category, @Location, @Quantity, @Visible, @CompetitorPrice, @IsChristmasBoxItem)", product);
     }
 
     public static List<ProductModel> SearchProductByName(string name, bool includeHidden = false)
@@ -58,14 +58,14 @@ public static class ProductAccess
         );
     }
     
-    public static List<ProductModel> GetChristmasBoxEligibleProducts(bool includeHidden = false)
-    {   // create a query that selects the products admin selected eligible 
-        string sql = includeHidden
-            ? @"SELECT * FROM Products WHERE Category = 'ChristmasBoxItem'"
-            : @"SELECT * FROM Products WHERE Category = 'ChristmasBoxItem' AND Visible = 1";
+    // public static List<ProductModel> GetChristmasBoxEligibleProducts(bool includeHidden = false)
+    // {   // create a query that selects the products admin selected eligible 
+    //     string sql = includeHidden
+    //         ? @"SELECT * FROM Products WHERE Category = 'ChristmasBoxItem'"
+    //         : @"SELECT * FROM Products WHERE Category = 'ChristmasBoxItem' AND Visible = 1";
 
-        return _connection.Query<ProductModel>(sql).ToList();
-    }
+    //     return _connection.Query<ProductModel>(sql).ToList();
+    // }
 
     public static ProductModel? GetProductByID(int id)
     {
@@ -103,7 +103,8 @@ public static class ProductAccess
             Location = @Location,
             Quantity = @Quantity,
             Visible = @Visible,
-            CompetitorPrice = @CompetitorPrice
+            CompetitorPrice = @CompetitorPrice,
+            IsChristmasBoxItem = @IsChristmasBoxItem
             WHERE 
             ID = @ID", newProduct);
     }

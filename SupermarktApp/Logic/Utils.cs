@@ -179,14 +179,21 @@ static class Utils
     /// <param name="color">Optional color for the price</param>
     /// <typeparam name="T"></typeparam>
     /// <returns>Formatted price string</returns>
-    public static string ChangePriceFormat<T>(T price, string? color = null)
+    public static string ChangePriceFormat(decimal price, string? color = null)
     {
+        string formatted = "€" + price.ToString("0.00").Replace(".", ","); // replaces the . with, and add € infront
+
         if (color != null)
-        {
-            return $"[{color}]€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(",",".") + "[/]";
-        }
-        return "€" + Math.Round(Convert.ToDecimal(price), 2).ToString("0.00").Replace(",",".");
+            return $"[{color}]{formatted}[/]";
+
+        return formatted;
     }
+    public static string ChangePriceFormat(double price, string? color = null)  // overload priceformat to take double 
+    {
+        return ChangePriceFormat((decimal)price, color);  // to decimal
+    }
+
+
     /// <summary>
     /// Calculates discounted price and returns a formatted string with old and new price.
     /// </summary>
@@ -196,13 +203,15 @@ static class Utils
     /// <returns>the formatted string with old and new price</returns>
     public static string CalculateDiscountedPriceString<T>(T PriceBeforeDiscount, T discountPercentage)
     {
-        decimal PriceAfterDiscount = Convert.ToDecimal(PriceBeforeDiscount) * (1 - (Convert.ToDecimal(discountPercentage) / 100m));
+        decimal priceBefore = Convert.ToDecimal(PriceBeforeDiscount);
+        decimal discount = Convert.ToDecimal(discountPercentage);
 
-        string newPrice = ChangePriceFormat(PriceAfterDiscount);
+        decimal priceAfter = priceBefore * (1 - discount / 100m);
 
-        string oldPrice = ChangePriceFormat(PriceBeforeDiscount);
+        string oldPriceFormatted = ChangePriceFormat(priceBefore, "strike red");
+        string newPriceFormatted = ChangePriceFormat(priceAfter, "green");
 
-        return $"{ChangePriceFormat(oldPrice, "strike red")} {ChangePriceFormat(newPrice, "green")}";
+        return $"{oldPriceFormatted} {newPriceFormatted}";
     }
     /// <summary>
     /// Prompts the user to enter an integer within an optional range.

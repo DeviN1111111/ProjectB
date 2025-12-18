@@ -4,6 +4,25 @@ public class OrderLogic
 {
     public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
+
+        if (product.Category == "ChristmasBox") 
+        {   // check if bought already
+            var boughtAlready = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID).Any(cp => cp.ProductId == product.ID);
+
+            if (boughtAlready)
+            {
+                AnsiConsole.MarkupLine(
+                    "[yellow]You can only buy one Christmas box per size.[/]"
+                );
+                AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
+                Console.ReadKey();
+                return;
+            }
+
+            quantity = 1;
+        }
+        // Console.WriteLine($"DEBUG add to cart: {product.Name}, ID = {product.ID}, Qty = {quantity}"); //// DEBUGGUGUGGU
+
         // check if product already in CartProduct
         List<CartProductModel> allUserProducts = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
         var CartProductItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
@@ -23,6 +42,58 @@ public class OrderLogic
         // add new item to CartProduct
         CartProductAccess.AddToCartProduct(SessionManager.CurrentUser.ID, product.ID, quantity, RewardPrice);
     }
+
+    public static List<CartDisplayItemDTO> GetCartDisplayItems()
+    {
+        var cartItems = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
+        var products = ProductLogic.GetAllProducts();
+
+        var result = new List<CartDisplayItemDTO>();
+
+        foreach (var cartItem in cartItems)
+        {
+            var product = products.First(p => p.ID == cartItem.ProductId);
+
+            // Xmas box
+            if (product is ChristmasBoxModel box)
+            {
+                double totalBoxValue = box.Price * cartItem.Quantity;
+
+                result.Add(new CartDisplayItemDTO
+                {
+                    ProductId = box.ID,
+                    Name = box.Name,
+                    Quantity = cartItem.Quantity,
+                    PriceText = $"€{box.Price:0.00}",
+                    TotalText = $"€{totalBoxValue:0.00}",
+
+                    TotalValue = totalBoxValue,
+                    DiscountValue = 0,
+                    Contents = box.Products.Select(p => p.Name).ToList()
+                });
+
+                continue;
+            }
+
+            // Normal product
+            double totalValue = product.Price * cartItem.Quantity;            
+
+            result.Add(new CartDisplayItemDTO
+            {
+                ProductId = product.ID,
+                Name = product.Name,
+                Quantity = cartItem.Quantity,
+                PriceText = $"€{product.Price:0.00}",
+                TotalText = $"€{totalValue:0.00}",          
+
+                TotalValue = totalValue,
+                DiscountValue = 0
+            });
+        }
+
+        return result;
+    }
+
        public static string AddBirthdayGiftToCartProduct(UserModel user)
         {
             if (user == null || SessionManager.CurrentUser == null)
@@ -106,8 +177,21 @@ public class OrderLogic
             }
         }
     }
+
     public static void ChangeQuantity(int productId, int newQuantity)
-    {
+    {   
+        // var product = ProductAccess.GetProductByID(productId);
+        // // the box can only be bought once
+        // if (product is ChristmasBoxModel)
+        // {
+        //     AnsiConsole.MarkupLine(
+        //         "[yellow]You can only buy one Christmas box per size.[/]"
+        //     );
+        //     Console.ReadKey();
+        //     // overwrite the hoeveelheid van xmas box
+        //     CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, 1);
+        //     return;
+        // }
         CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
 
