@@ -25,7 +25,7 @@ public static class AdminChristmasBoxUI
             ProductLogic.UpdateProduct(product);
         }
 
-        AnsiConsole.MarkupLine("[green]Product updated successfully![/]");
+        // AnsiConsole.MarkupLine("[green]Product updated successfully![/]");
         AnsiConsole.MarkupLine("Press [green]ENTER[/] to continue");
         Console.ReadKey();
     }

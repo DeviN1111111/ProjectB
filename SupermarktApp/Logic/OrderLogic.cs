@@ -7,15 +7,28 @@ public class OrderLogic
 
         if (product.Category == "ChristmasBox") 
         {   // check if bought already
-            var boughtAlready = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID).Any(cp => cp.ProductId == product.ID);
+            // var boughtAlready = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID).Any(cp => cp.ProductId == product.ID);
 
-            if (boughtAlready)
+            // if (boughtAlready)
+            // {
+            //     AnsiConsole.MarkupLine(
+            //         "[yellow]You can only buy one Christmas box per size.[/]"
+            //     );
+            //     AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
+            //     Console.ReadKey();
+            //     return;
+            // }
+            var cartItems = CartProductAccess
+                .GetAllUserProducts(SessionManager.CurrentUser!.ID);
+
+            // t
+            if (cartItems.Any(cp => cp.ProductId == product.ID))
             {
                 AnsiConsole.MarkupLine(
                     "[yellow]You can only buy one Christmas box per size.[/]"
                 );
-                AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
-                Console.ReadKey();
+                // AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
+                // Console.ReadKey();
                 return;
             }
 
@@ -180,18 +193,6 @@ public class OrderLogic
 
     public static void ChangeQuantity(int productId, int newQuantity)
     {   
-        // var product = ProductAccess.GetProductByID(productId);
-        // // the box can only be bought once
-        // if (product is ChristmasBoxModel)
-        // {
-        //     AnsiConsole.MarkupLine(
-        //         "[yellow]You can only buy one Christmas box per size.[/]"
-        //     );
-        //     Console.ReadKey();
-        //     // overwrite the hoeveelheid van xmas box
-        //     CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, 1);
-        //     return;
-        // }
         CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
 

@@ -72,7 +72,6 @@ public static class ChristmasBoxLogic
                     break;
             }
 
-
         return new ChristmasBoxModel
         {
             ID = baseProduct.ID,  
