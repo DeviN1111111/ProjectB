@@ -41,6 +41,24 @@ public static class ChristmasBoxUI
         }
         
         AnsiConsole.Write(table);
+
+
+        AnsiConsole.MarkupLine("\n[grey]Select a Christmas box to add to cart[/]");
+        AnsiConsole.MarkupLine("[grey]Or press [green]ENTER[/] to go back[/]");
+
+        // selection prompt using the boxes themselves
+        var selectedBox = Utils.CreateSelectionPrompt(
+            boxes,
+            title: "[white]Choose a Christmas box[/]",
+            format: box => $"{box.Name} — €{box.Price}"
+        );
+
+        // addtocart
+        OrderLogic.AddToCartProduct(selectedBox, 1);
+
+        AnsiConsole.MarkupLine(
+            $"[green]{selectedBox.Name} added to cart![/]"
+        );
         
         AnsiConsole.MarkupLine("\n[grey]Press [green]ENTER[/] to go back[/]");
         Console.ReadKey();

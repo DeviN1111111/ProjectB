@@ -34,6 +34,7 @@ public static class MenuUI
                 options.AddRange(new[] { 
                     "Order", 
                     "Cart", 
+                    "Christmas Boxes", // remove later
                     "Checklist", 
                     "Order History", 
                     "Favorite Lists", 
@@ -44,8 +45,7 @@ public static class MenuUI
                     "Shop Details", 
                     "Settings", 
                     "Logout", 
-                    "Exit",
-                    "Christmas Boxes" // remove later
+                    "Exit"
                     });
             }
             else if (SessionManager.CurrentUser.AccountStatus == "Admin")
