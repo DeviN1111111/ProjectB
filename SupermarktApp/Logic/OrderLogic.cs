@@ -22,6 +22,11 @@ public class OrderLogic
         var CartProductItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
         if (CartProductItem != null)
         {
+            if (product is ChristmasBoxModel) // 
+            {
+                return;
+            }
+
             int newQuantity = CartProductItem.Quantity + quantity;
             if (newQuantity > 99)
             {
@@ -172,7 +177,16 @@ public class OrderLogic
         }
     }
     public static void ChangeQuantity(int productId, int newQuantity)
-    {
+    {   
+        var product = ProductAcces.GetProductByID(prooductId);
+        if (product is ChristmasBoxModel)
+        {
+            AnsiConsole.MarkupLine(
+                "[yellow]You can only buy one Christmas box per size.[/]"
+            );
+            Console.ReadKey();
+            return;
+        }
         CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
 
