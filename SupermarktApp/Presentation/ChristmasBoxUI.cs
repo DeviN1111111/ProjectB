@@ -76,7 +76,7 @@ public static class ChristmasBoxUI
         
         // addtocart
         OrderLogic.AddToCartProduct(selectedBox, 1);
-        AnsiConsole.MarkupLine($"[green]{selectedBox.Name} successfully added to cart![/]");
+        // AnsiConsole.MarkupLine($"[green]{selectedBox.Name} successfully added to cart![/]");
 
         AnsiConsole.MarkupLine("\n[grey]Press [green]ENTER[/] to go back[/]");
         Console.ReadKey();
