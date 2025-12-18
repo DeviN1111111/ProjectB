@@ -24,24 +24,31 @@ public static class ChristmasBoxLogic
 
         foreach (var baseProduct in baseBoxProducts)
         {
-            boxes.Add(CreateBox(baseProduct));
+            boxes.Add(CreateBox(baseProduct)); // add products to box
         }
-
         return boxes;
-
     }
 
     public static ChristmasBoxModel CreateBox(ProductModel baseProduct)
     {
-        var products = ProductAccess.GetAllProducts(includeHidden: true)
-            .Where(p =>
-                p.Visible == 1 &&
-                p.IsChristmasBoxItem
+        int persons = int.Parse( // change the number in the string to int
+            new string(
+                baseProduct.Name
+                .Where(char.IsDigit)
+                .ToArray()
             )
-            .Take(ChristmasBoxModel.MinimumProductsRequired)
+        );
+
+        // so you can add items bases on persons
+        int itemCount = persons + 1; //add one more item than amount of persons
+        var random = new Random();
+
+        var products = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => p.Visible == 1 && p.IsChristmasBoxItem)
+            .OrderBy(_ => random.Next())   // show them random
+            .Take(itemCount)
             .ToList();
 
-    
         return new ChristmasBoxModel
         {
             ID = baseProduct.ID,  
@@ -58,7 +65,6 @@ public static class ChristmasBoxLogic
     {
         if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
             return false;
-
 
         return true;
     }
