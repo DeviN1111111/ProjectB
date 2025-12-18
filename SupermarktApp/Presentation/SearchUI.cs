@@ -107,10 +107,26 @@ public static class SearchUI
                             .PageSize(10)
                             .AddChoices(productNames));
 
-                    return ProductLogic.GetProductByName(product);
+                    var selectedProduct = ProductLogic.GetProductByName(product);
+
+                    // If is a Christmas box add directly to cart
+                    if (selectedProduct is ChristmasBoxModel box)
+                    {
+                        Console.WriteLine($"DEBUG add to cart: {box.Name}, ID = {box.ID}");
+
+                        OrderLogic.AddToCartProduct(box, 1);
+
+                        AnsiConsole.MarkupLine($"[green]{box.Name} added to cart![/]");
+                        Thread.Sleep(800); //weg later
+
+                        continue;
+                    }
+                    // normal items go to details screen
+                    return selectedProduct;
                 }
             }
         }
         return null!;
+        // continue;
     }
 }

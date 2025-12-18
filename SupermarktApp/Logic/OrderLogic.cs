@@ -4,7 +4,7 @@ public class OrderLogic
 {
     public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
-        Console.WriteLine($"DEBUG add to cart: {product.Name}, ID = {product.ID}, Qty = {quantity}");
+        Console.WriteLine($"DEBUG add to cart: {product.Name}, ID = {product.ID}, Qty = {quantity}"); //// DEBUGGUGUGGU
         // check if product already in CartProduct
         List<CartProductModel> allUserProducts = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
         var CartProductItem = allUserProducts.FirstOrDefault(item => item.ProductId == product.ID);
