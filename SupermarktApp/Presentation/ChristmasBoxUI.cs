@@ -74,13 +74,7 @@ public static class ChristmasBoxUI
         {
             return;
         }
-        // selection prompt using the boxes themselves
-        var selectedBox = Utils.CreateSelectionPrompt(
-            boxes,
-            title: "[white]Choose a Christmas box[/]",
-            format: box => $"{box.Name} — €{box.Price}"
-        );
-
+        
         // addtocart
         OrderLogic.AddToCartProduct(selectedBox, 1);
 
