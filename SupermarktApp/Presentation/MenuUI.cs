@@ -66,8 +66,8 @@ public static class MenuUI
 
             var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .AddChoices(options));
-
+                .AddChoices(options)
+                .PageSize(100));
 
             switch (choice)
             {
