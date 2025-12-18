@@ -39,15 +39,38 @@ public static class ChristmasBoxLogic
             )
         );
 
-        // so you can add items bases on persons
-        int itemCount = persons + 1; //add one more item than amount of persons
+        // so you can add items bases on price
+        double targetPrice = persons switch
+        {   // grap per persons the price
+            2 => 15,
+            4 => 25,
+            6 => 35,
+            8 => 45,
+            _ => baseProduct.Price 
+        };
+
         var random = new Random();
 
         var products = ProductAccess.GetAllProducts(includeHidden: true)
-            .Where(p => p.Visible == 1 && p.IsChristmasBoxItem)
+            .Where(p => p.Visible == 1 && p.IsChristmasBoxItem && p.Price > 0)
             .OrderBy(_ => random.Next())   // show them random
-            .Take(itemCount)
             .ToList();
+        
+            // fill box up until price is reached
+            var selectedProducts = new List<ProductModel>();
+            double currentTotal = 0;
+
+            foreach (var product in eligibleProducts)
+            {
+                if (currentTotal + product.Price > targetPrice)
+                    continue;
+
+                selectedProducts.Add(product);
+                currentTotal += product.Price;
+
+                if (currentTotal >= targetPrice)
+                    break;
+            }
 
         return new ChristmasBoxModel
         {
@@ -59,7 +82,6 @@ public static class ChristmasBoxLogic
             Products = products
         };
     }
-
 
     public static bool IsValidBox(ChristmasBoxModel box)
     {
