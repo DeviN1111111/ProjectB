@@ -82,12 +82,4 @@ public static class ChristmasBoxLogic
             Products = selectedProducts
         };
     }
-
-    public static bool IsValidBox(ChristmasBoxModel box)
-    {
-        if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
-            return false;
-
-        return true;
-    }
 }
