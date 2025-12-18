@@ -38,7 +38,11 @@ public static class SearchUI
             if (input.Length != 0)
             {
                 var products = ProductLogic.GetAllProducts();
-                // products.AddRange(ChristmasBoxLogic.GetAvailableBoxes()); // add the christmas boxes to the products
+                if (!products.Any(p => p.Category == "ChristmasBox"))
+                {
+                    products.AddRange(ChristmasBoxLogic.GetAvailableBoxes());
+                }
+
 
                 List<ProductModel> productList = products
                     .Where(p =>
@@ -49,6 +53,8 @@ public static class SearchUI
                         )
                         && p.Category != "ChristmasBoxItem" // hide box contents
                     )
+                    .GroupBy(p => p.Name)  
+                    .Select(g => g.First())
                     .OrderBy(p => p.Name)
                     .Take(10)   // show 10 
                     .ToList();
