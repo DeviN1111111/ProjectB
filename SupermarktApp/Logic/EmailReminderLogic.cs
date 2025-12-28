@@ -8,19 +8,19 @@ public static class EmailReminderLogic
     public static async Task SendCartProductReminderAsync(string userEmail, List<CartProductModel> items)
     {
 
-        // invalid or fake email (dev/test users)
-        if (string.IsNullOrWhiteSpace(userEmail) || !userEmail.Contains("@"))
-        {
-            Console.WriteLine("Cart reminder skipped: user has no valid email.");
-            return;
-        }
+        // // invalid or fake email (dev/test users)
+        // if (string.IsNullOrWhiteSpace(userEmail) || !userEmail.Contains("@"))
+        // {
+        //     Console.WriteLine("Cart reminder skipped: user has no valid email.");
+        //     return;
+        // }
 
-        // missing email template
-        if (!File.Exists(TemplatePath))
-        {
-            Console.WriteLine("Cart reminder skipped: email template not found.");
-            return;
-        }
+        // // missing email template
+        // if (!File.Exists(TemplatePath))
+        // {
+        //     Console.WriteLine("Cart reminder skipped: email template not found.");
+        //     return;
+        // }
 
         string subject = "You left items in your CartProduct!";
 
