@@ -25,7 +25,7 @@ public static class AdminChristmasBoxUI
 
             categories.Add("Exit");
 
-            var chosenCategory = Utils.CreateMultiSelectionPrompt(
+            var chosenCategory = Utils.CreateSelectionPrompt(
                 categories, "[white]Pick a category to manage (or Exit)[/]");
 
             if (chosenCategory == "Exit")
@@ -100,5 +100,10 @@ public static class AdminChristmasBoxUI
                 continue;
             }
         }
+    }
+    private static void Pause()
+    {
+        AnsiConsole.MarkupLine("\nPress [green]ENTER[/] to continue");
+        Console.ReadLine();
     }
 }
