@@ -8,8 +8,15 @@ public class OrderLogic
         if (product.Category == "ChristmasBox") 
         {   // check if bought already
 
-            var cartItems = CartProductAccess
-                .GetAllUserProducts(SessionManager.CurrentUser!.ID);
+            // Lifetime restriction
+            if (OrderItemAccess.HasUserPurchasedProduct(SessionManager.CurrentUser!.ID, product.ID))
+            {
+                AnsiConsole.MarkupLine("[yellow]You already purchased this Christmas box size before.[/]");
+                return;
+            }
+
+            // Cart restriction
+            var cartItems = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
 
             if (cartItems.Any(cp => cp.ProductId == product.ID))
             {
@@ -189,7 +196,7 @@ public class OrderLogic
         var product = ProductAccess.GetProductByID(productId);
         if (product == null) return;
     
-        // Xmas box: hard lock to 1
+        // Christmas boxes cannot change quantity
         if (product.Category == "ChristmasBox")
         {
             newQuantity = 1;
@@ -332,6 +339,13 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
             );
 
             continue;
+        }
+
+        // // blockif it is a christmas box that has already been purchased
+        if (product.Category == "ChristmasBox" && OrderItemAccess.HasUserPurchasedProduct(SessionManager.CurrentUser!.ID, product.ID))
+        {
+            unavailableProducts.Add($"{product.Name} (Already purchased before)");
+            continue;        
         }
 
         // Full stock available

@@ -41,14 +41,12 @@ public static class ChristmasBoxLogic
         );
 
         // so you can add items bases on price
-        double targetPrice = persons switch
-        {   // grap per persons the price
-            2 => 15,
-            4 => 25,
-            6 => 35,
-            8 => 45,
-            _ => baseProduct.Price 
-        };
+        double targetPrice = BoxConfigurations.TryGetValue(persons, out var price)
+            ? price
+            : baseProduct.Price;
+
+        double minFill = targetPrice * 0.90;
+        double maxFill = targetPrice;
 
         var random = new Random();
 
@@ -63,21 +61,40 @@ public static class ChristmasBoxLogic
 
             foreach (var product in eligibleProducts)
             {
-                if (currentTotal + product.Price > targetPrice)
+                if (currentTotal + product.Price > maxFill)
                     continue;
 
                 selectedProducts.Add(product);
                 currentTotal += product.Price;
 
-                if (currentTotal >= targetPrice)
+                if (currentTotal >= minFill)
                     break;
+            }
+
+            // Second pass: cheap fillers
+            if (currentTotal < minFill)
+            {
+                foreach (var product in eligibleProducts.OrderBy(p => p.Price))
+                {
+                    if (selectedProducts.Any(p => p.ID == product.ID))
+                        continue;
+
+                    if (currentTotal + product.Price > maxFill)
+                        continue;
+
+                    selectedProducts.Add(product);
+                    currentTotal += product.Price;
+
+                    if (currentTotal >= minFill)
+                        break;
+                }
             }
 
         return new ChristmasBoxModel
         {
             ID = baseProduct.ID,  
             Name = baseProduct.Name,
-            Price = baseProduct.Price,
+            Price = targetPrice,
             Category = baseProduct.Category,
             Visible = baseProduct.Visible,
             Products = selectedProducts
