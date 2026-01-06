@@ -2,24 +2,19 @@ using Spectre.Console;
 
 public class OrderLogic
 {
+    public static int userId = SessionManager.CurrentUser?.ID ?? 0;
     public static void AddToCartProduct(ProductModel product, int quantity, double discount = 0, double RewardPrice = 0)
     {
-        int userId = SessionManager.CurrentUser!.ID;
-
         // Christmas box restrictions
         if (product.Category == "ChristmasBox") 
         {   // check if bought already
             bool hasBox = CartProductAccess.GetAllUserProducts(userId).Any(cp => cp.ProductId == product.ID);
             if (hasBox)
             {
-                AnsiConsole.MarkupLine(
-                    "[yellow]You can only buy one Christmas box per size.[/]"
-                );
-                AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
+                AnsiConsole.MarkupLine("[yellow]Only one Christmas box allowed per size.[/]");
                 Console.ReadKey();
                 return;
             }
-
             quantity = 1;
         }
         // Console.WriteLine($"DEBUG add to cart: {product.Name}, ID = {product.ID}, Qty = {quantity}"); //// DEBUGGUGUGGU
@@ -143,7 +138,7 @@ public class OrderLogic
     {
         List<CartProductModel> cart = AllUserProducts(); 
         List<ProductModel> Products = ProductAccess.GetAllProducts();
-        foreach (ProductModel item in cart)
+        foreach (CartProductModel item in cart)
         {
             var matchingProduct = Products.FirstOrDefault(p => p.ID == item.ProductId);
 
@@ -157,7 +152,7 @@ public class OrderLogic
                 AnsiConsole.MarkupLine($"[red]Stock error:[/] {matchingProduct.Name} is oversold.");
                 continue;
             }
-            ProductAccess.UpdateProductQuantity(matchingProduct.ID, newStock);
+            ProductAccess.UpdateProductStock(matchingProduct.ID, newStock);
         }
     }
 

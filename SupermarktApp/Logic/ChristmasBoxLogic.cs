@@ -72,7 +72,6 @@ public static class ChristmasBoxLogic
                     break;
             }
 
-
         return new ChristmasBoxModel
         {
             ID = baseProduct.ID,  
@@ -82,13 +81,5 @@ public static class ChristmasBoxLogic
             Visible = baseProduct.Visible,
             Products = selectedProducts
         };
-    }
-
-    public static bool IsValidBox(ChristmasBoxModel box)
-    {
-        if (box.Products.Count < ChristmasBoxModel.MinimumProductsRequired)
-            return false;
-
-        return true;
     }
 }
