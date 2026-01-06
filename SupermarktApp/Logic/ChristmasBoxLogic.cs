@@ -134,4 +134,18 @@ public static class ChristmasBoxLogic
             ProductAccess.ChangeProductDetails(p);
         }
     }
+
+    public static bool TryAddChristmasBoxToCart(ChristmasBoxModel box)
+    {
+        // one Christmas box per size
+        bool alreadyInCart = CartProductAccess
+            .GetAllUserProducts(SessionManager.CurrentUser!.ID)
+            .Any(cp => cp.ProductId == box.ID);
+
+        if (alreadyInCart)
+            return false;
+
+        OrderLogic.AddToCartProduct(box, 1);
+        return true;
+    }
 }
