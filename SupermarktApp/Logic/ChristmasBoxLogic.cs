@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public static class ChristmasBoxLogic
 {
@@ -101,7 +102,7 @@ public static class ChristmasBoxLogic
         };
     }
 
-    public static List<ProductModel> GetProductForChristmasBoxAdmin()
+    public static List<ProductModel> GetAllProductsForChristmasBoxAdmin()
     {
         return ProductAccess.GetAllProducts(includeHidden: true)
             .Where(p => p.Category != "ChristmasBox")

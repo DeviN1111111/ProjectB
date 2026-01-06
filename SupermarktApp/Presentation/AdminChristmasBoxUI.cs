@@ -13,7 +13,7 @@ public static class AdminChristmasBoxUI
             Console.Clear();
             Utils.PrintTitle("Christmas Box Admin");
 
-            var allProducts = ProductLogic.GetAllProductsForChristmasBoxAdmin()
+            var allProducts = ChristmasBoxLogic.GetAllProductsForChristmasBoxAdmin()
                 .OrderBy(p => p.Category)
                 .ThenBy(p => p.Name)
                 .ToList();
@@ -32,7 +32,7 @@ public static class AdminChristmasBoxUI
                 return;
             
             var productsInCategory = allProducts
-                .Where (p => p.Catagory == chosenCategory)
+                .Where (p => p.Category == chosenCategory)
                 .OrderBy(p => p.Name)
                 .ToList();
 
@@ -56,13 +56,13 @@ public static class AdminChristmasBoxUI
                     continue;
                 
                 case "Mark ALL as eligible":
-                    ProductLogic.SetChristmasBoxEligibility(productsInCategory.Select(p => p.ID), true);
+                    ChristmasBoxLogic.SetChristmasBoxEligibility(productsInCategory.Select(p => p.ID), true);
                     AnsiConsole.MarkupLine($"[green]Marked {productsInCategory.Count} item(s) as eligible.[/]");
                     Pause();
                     continue;
 
                 case "Remove ALL eligibility":
-                ProductLogic.SetChristmasBoxEligibility(
+                ChristmasBoxLogic.SetChristmasBoxEligibility(
                     productsInCategory.Select(p => p.ID),
                     false
                 );
@@ -90,7 +90,7 @@ public static class AdminChristmasBoxUI
                     continue;
                 }
 
-                ProductLogic.ToggleChristmasBoxEligibility(
+                ChristmasBoxLogic.ToggleChristmasBoxEligibility(
                     selected.Select(p => p.ID)
                 );
                 AnsiConsole.MarkupLine(
