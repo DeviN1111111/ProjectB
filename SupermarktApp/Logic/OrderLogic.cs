@@ -7,21 +7,10 @@ public class OrderLogic
 
         if (product.Category == "ChristmasBox") 
         {   // check if bought already
-            // var boughtAlready = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID).Any(cp => cp.ProductId == product.ID);
 
-            // if (boughtAlready)
-            // {
-            //     AnsiConsole.MarkupLine(
-            //         "[yellow]You can only buy one Christmas box per size.[/]"
-            //     );
-            //     AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
-            //     Console.ReadKey();
-            //     return;
-            // }
             var cartItems = CartProductAccess
                 .GetAllUserProducts(SessionManager.CurrentUser!.ID);
 
-            // t
             if (cartItems.Any(cp => cp.ProductId == product.ID))
             {
                 AnsiConsole.MarkupLine(
@@ -191,10 +180,28 @@ public class OrderLogic
         }
     }
 
+    // public static void ChangeQuantity(int productId, int newQuantity)
+    // {   
+    //     CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
+    // }
     public static void ChangeQuantity(int productId, int newQuantity)
-    {   
+    {
+        var product = ProductAccess.GetProductByID(productId);
+        if (product == null) return;
+    
+        // Xmas box: hard lock to 1
+        if (product.Category == "ChristmasBox")
+        {
+            newQuantity = 1;
+        }
+    
+        // Normal product limits
+        if (newQuantity < 1) newQuantity = 1;
+        if (newQuantity > 99) newQuantity = 99;
+    
         CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
+
 
     // remove a product from CartProduct by product id
     public static void RemoveFromCartProduct(int productId)

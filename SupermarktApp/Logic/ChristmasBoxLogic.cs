@@ -5,10 +5,11 @@ public static class ChristmasBoxLogic
 {
     private static readonly Dictionary<int, double> BoxConfigurations = new()
     {   // box size (pp), en de prijs van box
-        { 2, 15 },
-        { 4, 25 },
-        { 6, 35 },
-        { 8, 45 }
+        { 1, 15 },
+        { 2, 25 },
+        { 4, 35 },
+        { 6, 45 },
+        { 8, 55 }
     };
 
     public static List<ChristmasBoxModel> GetAvailableBoxes() // create all available boxes
