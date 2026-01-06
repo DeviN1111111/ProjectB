@@ -100,4 +100,37 @@ public static class ChristmasBoxLogic
             Products = selectedProducts
         };
     }
+
+    public static List<ProductModel> GetProductForChristmasBoxAdmin()
+    {
+        return ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => p.Category != "ChristmasBox")
+            .ToList();
+    }
+
+    public static void SetChristmasBoxEligibility(IEnumerable<int> productIds, bool eligible)
+    {
+        var products = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => productIds.Contains(p.ID))
+            .ToList();
+
+        foreach (var p in products)
+        {
+            p.IsChristmasBoxItem = eligible;
+            ProductAccess.ChangeProductDetails(p);
+        }
+    }
+
+    public static void ToggleChristmasBoxEligibility(IEnumerable<int> productIds)
+    {
+        var products = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p=> productIds.Contains (p.ID))
+            .ToList();
+        
+        foreach (var p in products)
+        {
+            p.IsChristmasBoxItem = !p.IsChristmasBoxItem;
+            ProductAccess.ChangeProductDetails(p);
+        }
+    }
 }
