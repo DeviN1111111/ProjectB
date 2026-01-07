@@ -170,19 +170,19 @@ public class OrderLogic
 
         foreach (var cartItem in cartItems)
         {
-            var product = ProductAccess.GetProductByID(cartItem.ProductId);
+            var product = ProductAccess.GetProductByID(cartItem.ProductId); 
 
             if(product == null)
                 continue;
             
-            if (product.Category == "ChristmasBox")
+            if (product.Category == "ChristmasBox") // check if the item is a christmas box
             {
-                var box = ChristmasBoxLogic.CreateBox(product);
+                var box = ChristmasBoxLogic.CreateBox(product);  // box contents
 
                 foreach (var contentItem in box.Products)
                 {
-                    int available = ProductAccess.GetProductQuantityByID(contentItem.ID);
-                    int newStock = available - cartItem.Quantity;
+                    int available = ProductAccess.GetProductQuantityByID(contentItem.ID); // old stock
+                    int newStock = available - cartItem.Quantity; // new stock
 
                     if (newStock < 0)
                     {
@@ -190,12 +190,12 @@ public class OrderLogic
                         Console.ReadKey();
                         continue;
                     }
-                    ProductAccess.UpdateProductStock(contentItem.ID, newStock);
+                    ProductAccess.UpdateProductStock(contentItem.ID, newStock); // update
                 }
                 continue;
             }
-            // generate contents at checkout and subtract stock for each content item
-            // 🛒 Normal product
+
+
             int stock = ProductAccess.GetProductQuantityByID(product.ID);
             int updated = stock - cartItem.Quantity;
 
