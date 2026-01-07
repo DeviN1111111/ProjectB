@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Spectre.Console;
 
 public class OrderLogic
@@ -197,14 +198,14 @@ public class OrderLogic
             // 🛒 Normal product
             int stock = ProductAccess.GetProductQuantityByID(product.ID);
             int updated = stock - cartItem.Quantity;
-    
+
             if (updated < 0)
             {
                 AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{product.Name}'.[/]");
                 Console.ReadKey();
                 continue;
             }
-    
+
             ProductAccess.UpdateProductStock(product.ID, updated);
 
         }
@@ -400,18 +401,34 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
 // CheckStockBeforeCheckout using tuple
     public static List<string> CheckStockBeforeCheckout(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
-        List<string> outOfStockProducts = new List<string>();
-        foreach (var CartProductItem in CartProductProducts)
+        var outOfStockProducts = new List<string>();
+
+        foreach (var cartProductItem in CartProductProducts)
         {
-            var product = ProductAccess.GetProductByID(CartProductItem.ProductId);
-            if (product != null)
+            var product = ProductAccess.GetProductByID(cartProductItem.ProductId);
+            if (product == null)
+                continue;
+
+            if (product.Category == "ChristmasBox")
             {
-                int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
-                
-                if (availableStock < CartProductItem.Quantity)
+                var box = ChristmasBoxLogic.CreateBox(product);
+
+                foreach (var contentItem in box.Products)
                 {
-                    outOfStockProducts.Add(product.Name);
+                    int available = ProductAccess.GetProductQuantityByID(contentItem.ID);
+
+                    if(available < cartProductItem.Quantity)
+                    {
+                        outOfStockProducts.Add($"{contentItem.Name} (Christmas box item)");
+                    }
                 }
+                continue;
+            }
+            int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
+            
+            if (availableStock < cartProductItem.Quantity)
+            {
+                outOfStockProducts.Add(product.Name);
             }
         }
         return outOfStockProducts;
