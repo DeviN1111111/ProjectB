@@ -209,28 +209,6 @@ public class OrderLogic
             ProductAccess.UpdateProductStock(product.ID, updated);
 
         }
-
-        // List<CartProductModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in CartProduct
-        // List<ProductModel> allProducts = ProductAccess.GetAllProducts();
-        // foreach (var CartProductProduct in allUserProducts)
-        // {
-        //     // Get Product id and find match in all products
-        //     foreach (ProductModel Product in allProducts)
-        //     {
-        //         if (CartProductProduct.ProductId == Product.ID)
-        //         {
-        //             if (Product.Quantity - CartProductProduct.Quantity < 0)
-        //             {
-        //                 AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{Product.Name}'.[/]");
-        //                 Console.ReadKey();
-        //                 continue;
-        //             }
-        //             int newStock = Product.Quantity - CartProductProduct.Quantity;
-        //             ProductAccess.UpdateProductStock(Product.ID, newStock);
-        //         }
-        //     }
-        // }
-
     }
     public static void ChangeQuantity(int productId, int newQuantity)
     {
