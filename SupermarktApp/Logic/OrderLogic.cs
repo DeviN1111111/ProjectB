@@ -165,32 +165,72 @@ public class OrderLogic
 
     public static void UpdateStock()
     {
-        List<CartProductModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in CartProduct
-        List<ProductModel> allProducts = ProductAccess.GetAllProducts();
-        foreach (var CartProductProduct in allUserProducts)
+        var cartItems = OrderLogic.AllUserProducts(); // current user cart items
+
+        foreach (var cartItem in cartItems)
         {
-            // Get Product id and find match in all products
-            foreach (ProductModel Product in allProducts)
+            var product = ProductAccess.GetProductByID(cartItem.ProductId);
+
+            if(product == null)
+                continue;
+            
+            if (product.Category == "ChristmasBox")
             {
-                if (CartProductProduct.ProductId == Product.ID)
+                var box = ChristmasBoxLogic.CreateBox(product);
+
+                foreach (var contentItem in box.Products)
                 {
-                    if (Product.Quantity - CartProductProduct.Quantity < 0)
+                    int available = ProductAccess.GetProductQuantityByID(contentItem.ID);
+                    int newStock = available - cartItem.Quantity;
+
+                    if (newStock < 0)
                     {
-                        AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{Product.Name}'.[/]");
+                        AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{contentItem.Name}' (Christmas box item).[/]");
                         Console.ReadKey();
                         continue;
                     }
-                    int newStock = Product.Quantity - CartProductProduct.Quantity;
-                    ProductAccess.UpdateProductStock(Product.ID, newStock);
+                    ProductAccess.UpdateProductStock(contentItem.ID, newStock);
                 }
+                continue;
             }
-        }
-    }
+            // generate contents at checkout and subtract stock for each content item
+            // 🛒 Normal product
+            int stock = ProductAccess.GetProductQuantityByID(product.ID);
+            int updated = stock - cartItem.Quantity;
+    
+            if (updated < 0)
+            {
+                AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{product.Name}'.[/]");
+                Console.ReadKey();
+                continue;
+            }
+    
+            ProductAccess.UpdateProductStock(product.ID, updated);
 
-    // public static void ChangeQuantity(int productId, int newQuantity)
-    // {   
-    //     CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
-    // }
+        }
+
+        // List<CartProductModel> allUserProducts = OrderLogic.AllUserProducts();  // List of user Products in CartProduct
+        // List<ProductModel> allProducts = ProductAccess.GetAllProducts();
+        // foreach (var CartProductProduct in allUserProducts)
+        // {
+        //     // Get Product id and find match in all products
+        //     foreach (ProductModel Product in allProducts)
+        //     {
+        //         if (CartProductProduct.ProductId == Product.ID)
+        //         {
+        //             if (Product.Quantity - CartProductProduct.Quantity < 0)
+        //             {
+        //                 AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{Product.Name}'.[/]");
+        //                 Console.ReadKey();
+        //                 continue;
+        //             }
+        //             int newStock = Product.Quantity - CartProductProduct.Quantity;
+        //             ProductAccess.UpdateProductStock(Product.ID, newStock);
+        //         }
+        //     }
+        // }
+
+    }
     public static void ChangeQuantity(int productId, int newQuantity)
     {
         var product = ProductAccess.GetProductByID(productId);
@@ -208,8 +248,6 @@ public class OrderLogic
     
         CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
-
-
     // remove a product from CartProduct by product id
     public static void RemoveFromCartProduct(int productId)
     {
@@ -354,15 +392,12 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
 
     return (outOfStockProducts, unavailableProducts);
 }
-
     public static List<OrderHistoryModel> GetAllUserOrders(int userId)
     {
         List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
         return allOrders;
     }
-
 // CheckStockBeforeCheckout using tuple
-
     public static List<string> CheckStockBeforeCheckout(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
         List<string> outOfStockProducts = new List<string>();
@@ -381,7 +416,6 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
         }
         return outOfStockProducts;
     }
-
     public static void RemoveAllProductsFromOrder(int orderId)
     {
         OrderItemAccess.RemoveAllProductsFromOrder(orderId);
