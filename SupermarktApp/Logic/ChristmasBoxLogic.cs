@@ -31,8 +31,10 @@ public static class ChristmasBoxLogic
         return boxes;
     }
 
-    public static ChristmasBoxModel CreateBox(ProductModel baseProduct)
+    public static ChristmasBoxModel CreateBox(ProductModel baseProduct, Random? random = null)
     {
+        random ??= new Random();
+        
         int persons = int.Parse( // change the number in the string to int
             new string(
                 baseProduct.Name
@@ -48,8 +50,6 @@ public static class ChristmasBoxLogic
 
         double minFill = targetPrice * 0.90;
         double maxFill = targetPrice;
-
-        var random = new Random();
 
         var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true)
             .Where(p => p.Visible == 1 && p.IsChristmasBoxItem && p.Price > 0)
