@@ -664,7 +664,7 @@ public class Order
 
         int actualOrderId = selectedOrder.Id;
         var reorderResult = OrderLogic.ReorderPastOrder(actualOrderId);
-        AnsiConsole.MarkupLine("[green]Items added to CartProduct (where available)![/]");
+        // AnsiConsole.MarkupLine("[green]Items added to CartProduct (where available)![/]");
 
         if (reorderResult.Unavailable.Any())
         {

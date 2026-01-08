@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using Spectre.Console;
 
@@ -111,10 +112,18 @@ public static class ProductDetailsUI
             box.Products.Select(p => $"• {p.Name}")
         );
 
+        int boxesLeft = ChristmasBoxLogic.GetBoxesLeft(box);
+
+        string availabilityText = boxesLeft <= 0    
+            ? "[red]OUT OF STOCK[/]"
+            : $"[yellow]{boxesLeft}[/] [grey](based on contents)[/]";
+
         var body =
             $"[bold #00014d]Name:[/] [#5dabcf]{box.Name}[/]\n" +
-            $"[bold #00014d]Price:[/] [#5dabcf]€{box.Price}[/]\n\n" +
+            $"[bold #00014d]Price:[/] [#5dabcf]€{box.Price}[/]\n" +
+            $"[bold #00014d]Availability:[/] {availabilityText}\n\n" +
             $"[bold #00014d]Contents:[/]\n[#5dabcf]{contents}[/]";
+
 
         var panel = new Panel(body)
         {
@@ -125,19 +134,20 @@ public static class ProductDetailsUI
 
         AnsiConsole.Write(panel);
 
-        var choice = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .AddChoices(
-                    "Add to Cart",
-                    "Go back"
-                )
+        var choices = boxesLeft <= 0
+            ? new[] { "Go back" }
+            : new[] { "Add to Cart", "Go back" };
+
+        // Use Utils for selection
+        string choice = Utils.CreateSelectionPrompt(
+            choices,
+            title: "[white]What would you like to do?[/]"
         );
 
         if (choice == "Add to Cart")
         {
             OrderLogic.AddToCartProduct(box, 1);
             AnsiConsole.MarkupLine("[green]Christmas box added to cart![/]");
-            Thread.Sleep(800);
         }
     }
 

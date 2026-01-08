@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Spectre.Console;
 
 public class OrderLogic
@@ -7,12 +8,31 @@ public class OrderLogic
     {
         // Christmas box restrictions
         if (product.Category == "ChristmasBox") 
-        {   // check if bought already
-            bool hasBox = CartProductAccess.GetAllUserProducts(userId).Any(cp => cp.ProductId == product.ID);
-            if (hasBox)
+        {   
+            var box = product as ChristmasBoxModel ?? ChristmasBoxLogic.CreateBox(product);
+
+            if (box.Products == null || box.Products.Count == 0)
             {
-                AnsiConsole.MarkupLine("[yellow]Only one Christmas box allowed per size.[/]");
-                Console.ReadKey();
+                AnsiConsole.MarkupLine("[red]This Christmas box is not available yet.[/]");
+                return;
+            }
+            product = box;
+
+            // check if bought already
+            if (OrderItemAccess.HasUserPurchasedProduct(SessionManager.CurrentUser!.ID, product.ID))
+            {
+                AnsiConsole.MarkupLine("[yellow]You already purchased this Christmas box size before.[/]");
+                return;
+            }
+            // cant add to cart
+            var cartItems = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
+
+            if (cartItems.Any(cp => cp.ProductId == product.ID))
+            {
+                AnsiConsole.MarkupLine(
+                    "[yellow]You can only buy one Christmas box per size.[/]"
+                );
+
                 return;
             }
             quantity = 1;
@@ -136,43 +156,78 @@ public class OrderLogic
 
     public static void UpdateStock()
     {
-        List<CartProductModel> cart = AllUserProducts(); 
-        List<ProductModel> Products = ProductAccess.GetAllProducts();
-        foreach (CartProductModel item in cart)
-        {
-            var matchingProduct = Products.FirstOrDefault(p => p.ID == item.ProductId);
+        var cartItems = OrderLogic.AllUserProducts(); // current user cart items
 
-            if (matchingProduct is null)
+        foreach (var cartItem in cartItems)
+        {
+            var product = ProductAccess.GetProductByID(cartItem.ProductId); 
+
+            if(product == null)
                 continue;
             
-            int newStock = matchingProduct.Quantity - item.Quantity;
-            if (newStock < 0)
+            if (product.Category == "ChristmasBox") // check if the item is a christmas box
             {
-                newStock = 0; // Prevent negative stock
-                AnsiConsole.MarkupLine($"[red]Stock error:[/] {matchingProduct.Name} is oversold.");
+                var box = ChristmasBoxLogic.CreateBox(product);  // box contents
+
+                foreach (var contentItem in box.Products)
+                {
+                    int available = ProductAccess.GetProductQuantityByID(contentItem.ID); // old stock
+                    int newStock = available - cartItem.Quantity; // new stock
+
+                    if (newStock < 0)
+                    {
+                        AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{contentItem.Name}' (Christmas box item).[/]");
+                        Console.ReadKey();
+                        continue;
+                    }
+                    ProductAccess.UpdateProductStock(contentItem.ID, newStock); // update
+                }
+                int boxStock = ProductAccess.GetProductQuantityByID(product.ID);
+                int newBoxStock = boxStock - cartItem.Quantity;
+                
+                if (newBoxStock < 0)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error: Not enough stock for '{product.Name}'.[/]");
+                    Console.ReadKey(true);
+                    continue;
+                }
+                
+                ProductAccess.UpdateProductStock(product.ID, newBoxStock);
                 continue;
             }
-            ProductAccess.UpdateProductStock(matchingProduct.ID, newStock);
+
+
+            int stock = ProductAccess.GetProductQuantityByID(product.ID);
+            int updated = stock - cartItem.Quantity;
+
+            if (updated < 0)
+            {
+                AnsiConsole.MarkupLine($"[red]Error: Not enough stock for product '{product.Name}'.[/]");
+                Console.ReadKey();
+                continue;
+            }
+
+            ProductAccess.UpdateProductStock(product.ID, updated);
+
         }
     }
-
     public static void ChangeQuantity(int productId, int newQuantity)
-    {   
-        // var product = ProductAccess.GetProductByID(productId);
-        // // the box can only be bought once
-        // if (product is ChristmasBoxModel)
-        // {
-        //     AnsiConsole.MarkupLine(
-        //         "[yellow]You can only buy one Christmas box per size.[/]"
-        //     );
-        //     Console.ReadKey();
-        //     // overwrite the hoeveelheid van xmas box
-        //     CartProductAccess.UpdateProductQuantity(userId, productId, 1);
-        //     return;
-        // }
-        CartProductAccess.UpdateProductQuantity(userId, productId, newQuantity);
+    {
+        var product = ProductAccess.GetProductByID(productId);
+        if (product == null) return;
+    
+        // Christmas boxes cannot change quantity
+        if (product.Category == "ChristmasBox")
+        {
+            newQuantity = 1;
+        }
+    
+        // Normal product limits
+        if (newQuantity < 1) newQuantity = 1;
+        if (newQuantity > 99) newQuantity = 99;
+    
+        CartProductAccess.UpdateProductQuantity(SessionManager.CurrentUser!.ID, productId, newQuantity);
     }
-
     // remove a product from CartProduct by product id
     public static void RemoveFromCartProduct(int productId)
     {
@@ -302,38 +357,59 @@ public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrd
             continue;
         }
 
+        // // blockif it is a christmas box that has already been purchased
+        if (product.Category == "ChristmasBox" && OrderItemAccess.HasUserPurchasedProduct(SessionManager.CurrentUser!.ID, product.ID))
+        {
+            unavailableProducts.Add($"{product.Name} (Already purchased before)");
+            continue;        
+        }
+
         // Full stock available
         AddToCartProduct(product, needed);
     }
 
     return (outOfStockProducts, unavailableProducts);
 }
-
     public static List<OrderHistoryModel> GetAllUserOrders(int userId)
     {
         List<OrderHistoryModel> allOrders = OrderHistoryAccess.GetAllUserOrders(userId);
         return allOrders;
     }
-
+// CheckStockBeforeCheckout using tuple
     public static List<string> CheckStockBeforeCheckout(List<CartProductModel> CartProductProducts, List<ProductModel> allProducts)
     {
-        List<string> outOfStockProducts = new List<string>();
-        foreach (var CartProductItem in CartProductProducts)
+        var outOfStockProducts = new List<string>();
+
+        foreach (var cartProductItem in CartProductProducts)
         {
-            var product = ProductAccess.GetProductByID(CartProductItem.ProductId);
-            if (product != null)
+            var product = ProductAccess.GetProductByID(cartProductItem.ProductId);
+            if (product == null)
+                continue;
+
+            if (product.Category == "ChristmasBox")
             {
-                int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
-                
-                if (availableStock < CartProductItem.Quantity)
+                var box = ChristmasBoxLogic.CreateBox(product);
+
+                foreach (var contentItem in box.Products)
                 {
-                    outOfStockProducts.Add(product.Name);
+                    int available = ProductAccess.GetProductQuantityByID(contentItem.ID);
+
+                    if(available < cartProductItem.Quantity)
+                    {
+                        outOfStockProducts.Add($"{contentItem.Name} (Christmas box item)");
+                    }
                 }
+                continue;
+            }
+            int availableStock = ProductAccess.GetProductQuantityByID(product.ID);
+            
+            if (availableStock < cartProductItem.Quantity)
+            {
+                outOfStockProducts.Add(product.Name);
             }
         }
         return outOfStockProducts;
     }
-
     public static void RemoveAllProductsFromOrder(int orderId)
     {
         OrderItemAccess.RemoveAllProductsFromOrder(orderId);

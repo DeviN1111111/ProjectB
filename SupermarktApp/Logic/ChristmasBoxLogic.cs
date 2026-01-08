@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public static class ChristmasBoxLogic
 {
     private static readonly Dictionary<int, double> BoxConfigurations = new()
     {   // box size (pp), en de prijs van box
-        { 2, 15 },
-        { 4, 25 },
-        { 6, 35 },
-        { 8, 45 }
+        { 1, 15 },
+        { 2, 25 },
+        { 4, 35 },
+        { 6, 45 },
+        { 8, 55 }
     };
 
     public static List<ChristmasBoxModel> GetAvailableBoxes() // create all available boxes
@@ -29,8 +31,10 @@ public static class ChristmasBoxLogic
         return boxes;
     }
 
-    public static ChristmasBoxModel CreateBox(ProductModel baseProduct)
+    public static ChristmasBoxModel CreateBox(ProductModel baseProduct, Random? random = null)
     {
+        random ??= new Random();
+        
         int persons = int.Parse( // change the number in the string to int
             new string(
                 baseProduct.Name
@@ -40,16 +44,12 @@ public static class ChristmasBoxLogic
         );
 
         // so you can add items bases on price
-        double targetPrice = persons switch
-        {   // grap per persons the price
-            2 => 15,
-            4 => 25,
-            6 => 35,
-            8 => 45,
-            _ => baseProduct.Price 
-        };
+        double targetPrice = BoxConfigurations.TryGetValue(persons, out var price)
+            ? price
+            : baseProduct.Price;
 
-        var random = new Random();
+        double minFill = targetPrice * 0.90;
+        double maxFill = targetPrice;
 
         var eligibleProducts = ProductAccess.GetAllProducts(includeHidden: true)
             .Where(p => p.Visible == 1 && p.IsChristmasBoxItem && p.Price > 0)
@@ -62,24 +62,118 @@ public static class ChristmasBoxLogic
 
             foreach (var product in eligibleProducts)
             {
-                if (currentTotal + product.Price > targetPrice)
+                if (currentTotal + product.Price > maxFill)
                     continue;
 
                 selectedProducts.Add(product);
                 currentTotal += product.Price;
 
-                if (currentTotal >= targetPrice)
+                if (currentTotal >= minFill)
                     break;
+            }
+
+            // Second pass: cheap fillers
+            if (currentTotal < minFill)
+            {
+                foreach (var product in eligibleProducts.OrderBy(p => p.Price))
+                {
+                    if (selectedProducts.Any(p => p.ID == product.ID))
+                        continue;
+
+                    if (currentTotal + product.Price > maxFill)
+                        continue;
+
+                    selectedProducts.Add(product);
+                    currentTotal += product.Price;
+
+                    if (currentTotal >= minFill)
+                        break;
+                }
             }
 
         return new ChristmasBoxModel
         {
             ID = baseProduct.ID,  
             Name = baseProduct.Name,
-            Price = baseProduct.Price,
+            Price = targetPrice,
             Category = baseProduct.Category,
             Visible = baseProduct.Visible,
             Products = selectedProducts
         };
+    }
+
+    public static List<ProductModel> GetAllProductsForChristmasBoxAdmin()
+    {
+        return ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => p.Category != "ChristmasBox")
+            .ToList();
+    }
+
+    public static void SetChristmasBoxEligibility(IEnumerable<int> productIds, bool eligible)
+    {
+        var products = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p => productIds.Contains(p.ID))
+            .ToList();
+
+        foreach (var p in products)
+        {
+            p.IsChristmasBoxItem = eligible;
+            ProductAccess.ChangeProductDetails(p);
+        }
+    }
+
+    public static void ToggleChristmasBoxEligibility(IEnumerable<int> productIds)
+    {
+        var products = ProductAccess.GetAllProducts(includeHidden: true)
+            .Where(p=> productIds.Contains (p.ID))
+            .ToList();
+        
+        foreach (var p in products)
+        {
+            p.IsChristmasBoxItem = !p.IsChristmasBoxItem;
+            ProductAccess.ChangeProductDetails(p);
+        }
+    }
+
+    public static bool TryAddChristmasBoxToCart(ChristmasBoxModel box)
+    {
+        // if admin has nog chosen items fot xmas box
+        if (box.Products == null || box.Products.Count == 0)
+        {
+            return false;
+        }
+
+        int userId = SessionManager.CurrentUser!.ID;
+        bool alreadyPurchased = OrderItemAccess.HasUserPurchasedProduct(userId, box.ID);
+        if (alreadyPurchased)
+        {
+            return false;
+        }
+        // one Christmas box per size
+        bool alreadyInCart = CartProductAccess
+            .GetAllUserProducts(SessionManager.CurrentUser!.ID)
+            .Any(cp => cp.ProductId == box.ID);
+
+        if (alreadyInCart)
+            return false;
+
+        OrderLogic.AddToCartProduct(box, 1);
+        return true;
+    }
+
+    public static int GetBoxesLeft(ChristmasBoxModel box) // for the stock quantity
+    {
+        if (box.Products == null || box.Products.Count == 0)
+            return 0;
+
+        int max = int.MaxValue;
+
+        foreach (var item in box.Products)
+        {
+            int available = ProductAccess.GetProductQuantityByID(item.ID);
+            max = Math.Min(max, available);
+        }
+
+        return max == int.MaxValue ? 0 : max;
     }
 }

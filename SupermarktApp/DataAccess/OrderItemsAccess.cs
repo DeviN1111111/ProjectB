@@ -263,4 +263,23 @@ public static class OrderItemAccess
 
         _connection.Execute(sql, new { OrderId = orderId, ProductId = productId, Quantity = quantity });
     }
+
+    // check is the user has already bought the item (christmas box)
+    public static bool HasUserPurchasedProduct(int userId, int productId)
+    {
+        var sql = @"
+            SELECT 1
+            FROM OrderItems oi
+            JOIN OrderHistory oh ON oi.OrderId = oh.Id
+            WHERE oi.UserID = @UserId
+              AND oi.ProductID = @ProductId
+              AND oh.IsPaid = 1
+            LIMIT 1;
+        ";
+
+        return _connection.ExecuteScalar<int?>(
+            sql, 
+            new {UserId = userId, ProductId = productId}
+        ) !=null;
+    }
 }

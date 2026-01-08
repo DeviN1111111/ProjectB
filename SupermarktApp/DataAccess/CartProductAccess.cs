@@ -43,6 +43,11 @@ public class CartProductAccess
     
     public static void UpdateProductQuantity(int userId, int productId, int newQuantity)
     {
+        var product = ProductAccess.GetProductByID(productId);
+        if (product != null && product.Category == "ChristmasBox")
+        {
+            newQuantity = 1; // HARD RULE!!!! keep it at one if Xmas box!
+        }
         var sql = $"UPDATE {Table} SET Quantity = @Quantity WHERE UserId = @UserId AND ProductId = @ProductId";
         _connection.Execute(sql, new { Quantity = newQuantity, UserId = userId, ProductId = productId });
     }
