@@ -109,6 +109,10 @@ public static class ChristmasBoxUI
             {
                 AnsiConsole.MarkupLine("\n[red]This Christmas box is not available yet.[/]");
             }
+            else if (OrderItemAccess.HasUserPurchasedProduct(SessionManager.CurrentUser!.ID, selectedBox.ID))
+            {
+                AnsiConsole.MarkupLine("\n[yellow]You already purchased this Christmas box size before.[/]");
+            }
             else
             {
                 AnsiConsole.MarkupLine("\n[red]You can only buy one Christmas box per size.[/]");

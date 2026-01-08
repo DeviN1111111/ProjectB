@@ -142,6 +142,13 @@ public static class ChristmasBoxLogic
         {
             return false;
         }
+
+        int userId = SessionManager.CurrentUser!.ID;
+        bool alreadyPurchased = OrderItemAccess.HasUserPurchasedProduct(userId, box.ID);
+        if (alreadyPurchased)
+        {
+            return false;
+        }
         // one Christmas box per size
         bool alreadyInCart = CartProductAccess
             .GetAllUserProducts(SessionManager.CurrentUser!.ID)

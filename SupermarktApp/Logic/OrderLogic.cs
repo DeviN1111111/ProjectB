@@ -8,16 +8,23 @@ public class OrderLogic
     {
         // Christmas box restrictions
         if (product.Category == "ChristmasBox") 
-        {   // check if bought already
+        {   
+            var box = product as ChristmasBoxModel ?? ChristmasBoxLogic.CreateBox(product);
 
-            // Lifetime restriction
+            if (box.Products == null || box.Products.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]This Christmas box is not available yet.[/]");
+                return;
+            }
+            product = box;
+
+            // check if bought already
             if (OrderItemAccess.HasUserPurchasedProduct(SessionManager.CurrentUser!.ID, product.ID))
             {
                 AnsiConsole.MarkupLine("[yellow]You already purchased this Christmas box size before.[/]");
                 return;
             }
-
-            // Cart restriction
+            // cant add to cart
             var cartItems = CartProductAccess.GetAllUserProducts(SessionManager.CurrentUser!.ID);
 
             if (cartItems.Any(cp => cp.ProductId == product.ID))
@@ -25,8 +32,7 @@ public class OrderLogic
                 AnsiConsole.MarkupLine(
                     "[yellow]You can only buy one Christmas box per size.[/]"
                 );
-                // AnsiConsole.MarkupLine("[grey]Press ENTER to continue.[/]");
-                // Console.ReadKey();
+
                 return;
             }
             quantity = 1;
