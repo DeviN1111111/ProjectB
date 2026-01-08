@@ -137,6 +137,11 @@ public static class ChristmasBoxLogic
 
     public static bool TryAddChristmasBoxToCart(ChristmasBoxModel box)
     {
+        // if admin has nog chosen items fot xmas box
+        if (box.Products == null || box.Products.Count == 0)
+        {
+            return false;
+        }
         // one Christmas box per size
         bool alreadyInCart = CartProductAccess
             .GetAllUserProducts(SessionManager.CurrentUser!.ID)
@@ -147,5 +152,21 @@ public static class ChristmasBoxLogic
 
         OrderLogic.AddToCartProduct(box, 1);
         return true;
+    }
+
+    public static int GetBoxesLeft(ChristmasBoxModel box) // for the stock quantity
+    {
+        if (box.Products == null || box.Products.Count == 0)
+            return 0;
+
+        int max = int.MaxValue;
+
+        foreach (var item in box.Products)
+        {
+            int available = ProductAccess.GetProductQuantityByID(item.ID);
+            max = Math.Min(max, available);
+        }
+
+        return max == int.MaxValue ? 0 : max;
     }
 }

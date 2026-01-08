@@ -192,6 +192,17 @@ public class OrderLogic
                     }
                     ProductAccess.UpdateProductStock(contentItem.ID, newStock); // update
                 }
+                int boxStock = ProductAccess.GetProductQuantityByID(product.ID);
+                int newBoxStock = boxStock - cartItem.Quantity;
+                
+                if (newBoxStock < 0)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error: Not enough stock for '{product.Name}'.[/]");
+                    Console.ReadKey(true);
+                    continue;
+                }
+                
+                ProductAccess.UpdateProductStock(product.ID, newBoxStock);
                 continue;
             }
 
