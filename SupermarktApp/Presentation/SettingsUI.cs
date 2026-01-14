@@ -218,7 +218,7 @@ public static class SettingsUI
 
             string NewName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Name[/]:").DefaultValue(SessionManager.CurrentUser!.Name).DefaultValue(SessionManager.CurrentUser.Name));
             string NewLastName = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Last Name[/]:").DefaultValue(SessionManager.CurrentUser.LastName).DefaultValue(SessionManager.CurrentUser.LastName));
-            string NewEmail = LoginUI.AskEmail();
+            string NewEmail = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Email[/]:").DefaultValue(SessionManager.CurrentUser.Email).DefaultValue(SessionManager.CurrentUser.Email));
 
             string NewAddress = AnsiConsole.Prompt(new TextPrompt<string>("Enter your [bold yellow]Address[/]:").DefaultValue(SessionManager.CurrentUser.Address).DefaultValue(SessionManager.CurrentUser.Address));
             string NewZipcode = LoginUI.AskZipcode();
