@@ -114,9 +114,8 @@ public class OrderLogic
                 return "Error: No logged-in user found.";
             }
 
-            // Find the birthday gift (case-insensitive)
             var giftProduct = ProductAccess.GetAllProducts()
-                .FirstOrDefault(p => p.Name.Equals("Birthday Present", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(p => p.Name.Equals("Birthday Present"));
 
             if (giftProduct == null)
             {
@@ -304,12 +303,12 @@ public class OrderLogic
         // Save the order to the database
         if (allOrderItems.Count > 0)
         {
-            OrderLogic.AddOrderWithItems(allOrderItems, allProducts);
+            AddOrderWithItems(allOrderItems, allProducts);
         }
 
         //  clean up
-        OrderLogic.UpdateStock();
-        OrderLogic.ClearCartProduct();
+        UpdateStock();
+        ClearCartProduct();
     }
 public static (List<string> OutOfStock, List<string> Unavailable) ReorderPastOrder(int orderHistoryId)
 {

@@ -389,10 +389,8 @@ public class Order
             Console.Clear();
             GiveNewUserCoupon();
 
-            // Title
             Utils.PrintTitle("Order History");
 
-            // Fetch user orders
             var userOrders = OrderLogic.GetAllUserOrders(SessionManager.CurrentUser!.ID);
 
             AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]\n");
