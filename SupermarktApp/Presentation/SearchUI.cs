@@ -27,6 +27,7 @@ public static class SearchUI
             {
                 AnsiConsole.MarkupLine("[blue]Search: [/]");
                 AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
+                
             }
             else
             {
@@ -61,6 +62,7 @@ public static class SearchUI
                 
 
                 AnsiConsole.MarkupLine("[blue]You can find products by name or category.[/]");
+                AnsiConsole.MarkupLine("[Grey]Press enter to select a product.[/]");
                 if (productList.Count == 0)
                 {
                     Console.WriteLine("No products found.");
