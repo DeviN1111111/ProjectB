@@ -14,7 +14,7 @@ public class DatabaseFiller
     public static List<string> allTables = new List<string>()
     {
         "CartProduct", "Users", "Products", "OrderItems", "RewardItems",
-        "Checklist", "OrderHistory",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
+        "Checklist", "OrderHistory", "Orders",  "ShopInfo", "ShopReviews", "Discounts", "Coupon",
         "FavoriteLists", "FavoriteListProducts", "RestockHistory"
     };
 
@@ -68,7 +68,7 @@ public class DatabaseFiller
                 seedOrdersTask.StopTask();
             });
 
-        AnsiConsole.MarkupLine("[bold green]✅ Database setup complete![/]");
+        AnsiConsole.MarkupLine("[bold green] Database setup complete![/]");
         try
         {
             _sharedConnection?.Close();
