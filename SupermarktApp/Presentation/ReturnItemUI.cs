@@ -6,6 +6,9 @@ class ReturnItemUI
     {
         Console.Clear();
         Utils.PrintTitle("Return Products");
+
+        AnsiConsole.MarkupLine("[grey](Press [yellow]ESC[/] to go back or any key to continue)[/]\n");
+        if (Console.ReadKey(true).Key == ConsoleKey.Escape) return;
         
         // ## Get dependencies ##
         var user = SessionManager.CurrentUser!.ID;

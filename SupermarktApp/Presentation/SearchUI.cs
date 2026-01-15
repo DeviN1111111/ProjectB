@@ -11,7 +11,7 @@ public static class SearchUI
         string input = "";
         while (true)
         {
-            var key = Console.ReadKey();
+            var key = Console.ReadKey(true);
             if (key.Key == ConsoleKey.Escape)
                 break;
             if (char.IsLetter(key.KeyChar) || key.Key == ConsoleKey.Spacebar || char.IsDigit(key.KeyChar))
